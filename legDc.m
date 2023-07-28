@@ -1,4 +1,4 @@
-function [x,D]=legDc(N);
+function [z,D]=legDc(N);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % legDc.m
@@ -17,37 +17,37 @@ function [x,D]=legDc(N);
 % Truncation + 1
 N1=N+1;
 % CGL nodes
-xc=cos(pi*(0:N)/N)';
+zc=cos(pi*(0:N)/N)';
 % Uniform nodes
-xu=linspace(-1,1,N1)';
+zu=linspace(-1,1,N1)';
 % Make a close first guess to reduce iterations
 if N<3
-    x=xc;
+    z=zc;
 else
-    x=xc+sin(pi*xu)./(4*N);
+    z=zc+sin(pi*zu)./(4*N);
 end
 % The Legendre Vandermonde Matrix
 P=zeros(N1,N1);
 % Compute P_(N) using the recursion relation
 % Compute its first and second derivatives and 
 % update x using the Newton-Raphson method.
-xold=2;
-while max(abs(x-xold))>eps
-    xold=x;
+zold=2;
+while max(abs(z-zold))>eps
+    zold=z;
         
-    P(:,1)=1;    P(:,2)=x;
+    P(:,1)=1;    P(:,2)=z;
     
     for k=2:N
-        P(:,k+1)=( (2*k-1)*x.*P(:,k)-(k-1)*P(:,k-1) )/k;
+        P(:,k+1)=( (2*k-1)*z.*P(:,k)-(k-1)*P(:,k-1) )/k;
     end
      
-    x=xold-( x.*P(:,N1)-P(:,N) )./( N1*P(:,N1) );
+    z=zold-( z.*P(:,N1)-P(:,N) )./( N1*P(:,N1) );
 end
-X=repmat(x,1,N1);
-Xdiff=X-X'+eye(N1);
-L=repmat(P(:,N1),1,N1)
+Z=repmat(z,1,N1);
+Zdiff=Z-Z'+eye(N1);
+L=repmat(P(:,N1),1,N1);
 L(1:(N1+1):N1*N1)=1;
-D=(L./(Xdiff.*L'));
+D=(L./(Zdiff.*L'));
 D(1:(N1+1):N1*N1)=0;
 D(1)=(N1*N)/4;
-D(N1*N1)=-(N1*N)/4;
+D(N1*N1)=-(N1*N)/4;   
