@@ -1,6 +1,6 @@
 clc; clear all; close all;
 %==============================================================================================%
-N = 50; % Order of the polynomial
+N = 30; % Order of the polynomial
 [nodes,weights] = LGL_nodes(N);  % Legendre_gauss_Lobatto PS Method 
 D = collocD(nodes);              % Differential matrix for LGL                               
 %==============================================================================================%
@@ -59,6 +59,11 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
 
 
+
+
+
+
+
 %========================================================================================================
 % Plotting 
 
@@ -91,6 +96,47 @@ xlabel('Time (s)');
 ylabel('countrol variables (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
+
+%% Polynomial
+z_value = 0.5;
+coeff_P = polyfit(t,x1,N);
+sympref('FloatingPointOutput',true);
+syms z
+polynomial = sym(0);
+for i= 1:N+1
+    polynomial =vpa(polynomial+coeff_P(i)*z^(N-i+1));
+end
+% polynomial = polyval(coeff', z);
+disp(['Position Equation:', char(polynomial)]);
+position = subs(polynomial,z,z_value);
+disp(['Position:', char(position)]);
+
+coeff_V = polyfit(t,x2,N);
+sympref('FloatingPointOutput',true);
+syms z
+polynomial = sym(0);
+for i= 1:N+1
+    polynomial =vpa(polynomial+coeff_V(i)*z^(N-i+1));
+end
+% polynomial = polyval(coeff', z);
+disp(['Velocity Equation:', char(polynomial)]);
+velocity = subs(polynomial,z,z_value);
+disp(['velocity:', char(velocity)]);
+
+coeff_A = polyfit(t,x3,N);
+sympref('FloatingPointOutput',true);
+syms z
+polynomial = sym(0);
+for i= 1:N+1
+    polynomial =vpa(polynomial+coeff_A(i)*z^(N-i+1));
+end
+% polynomial = polyval(coeff', z);
+disp(['Acceleration Equation:', char(polynomial)]);
+accleration = subs(polynomial,z,z_value);
+disp(['Acceleration:', char(accleration)]);
+
+
+
 
 
 
