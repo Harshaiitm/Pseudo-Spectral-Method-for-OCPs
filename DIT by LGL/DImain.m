@@ -98,8 +98,7 @@ legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
 
 %% Polynomial
-clc;
-z_value = 0.5;
+z_value = 0.5;  % at any arbitary time in seconds
 disp(['at time t =',num2str(z_value),'s']);
 coeff_P = polyfit(t,x1,N);
 sympref('FloatingPointOutput',true);
