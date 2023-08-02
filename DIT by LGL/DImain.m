@@ -97,21 +97,28 @@ ylabel('countrol variables (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
 
-%% polynomial
-z = 8;
-disp(['at time t =',num2str(z),'s']);
+% Lagrange interpolation
+z_value = 8;  % at time in seconds
+disp(['at time t =',num2str(z_value),'s']);
 pointx=t';
 pointy=x1;
-position=lagrange(z,pointx,pointy);
-disp(['Position =',num2str(position),'m']);
+syms z
+Position_equation = lagrange_interpolation(pointx,pointy);
+disp(['Position Equation:', char(Position_equation)]);
+position = subs(Position_equation,z,z_value);
+disp(['Position =',char(position),'m']);
 
 pointy=x2;
-velocity=lagrange(z,pointx,pointy);
-disp(['Velocity =',num2str(velocity),'m/s']);
+velocity_equation=lagrange_interpolation(pointx,pointy);
+disp(['Velocity Equation:', char(velocity_equation)]);
+velocity = subs(velocity_equation,z,z_value);
+disp(['Velocity =',char(velocity),'m/s']);
 
 pointy=x3;
-acceleration=lagrange(z,pointx,pointy);
-disp(['Acceleration =',num2str(acceleration),'m/s^2']);
+acceleration_equation=lagrange_interpolation(pointx,pointy);
+disp(['Acceleration =',char(acceleration_equation),'m/s^2']);
+acceleration = subs(acceleration_equation,z,z_value);
+disp(['acceleration =',char(acceleration),'m/s']);
 
 
 
