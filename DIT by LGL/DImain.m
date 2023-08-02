@@ -97,18 +97,21 @@ ylabel('countrol variables (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
 
-%% Polynomial
-z= 1;
-disp(['at time t =',num2str(z_value),'s']);
+%% polynomial
+z = 8;
+disp(['at time t =',num2str(z),'s']);
 pointx=t';
 pointy=x1;
-position=lagrange(z,pointx,pointy)
+position=lagrange(z,pointx,pointy);
+disp(['Position =',num2str(position),'m']);
 
 pointy=x2;
 velocity=lagrange(z,pointx,pointy)
+disp(['Velocity =',num2str(velocity),'m/s']);
 
 pointy=x3;
-accleration=lagrange(z,pointx,pointy)
+acceleration=lagrange(z,pointx,pointy)
+disp(['Acceleration =',num2str(acceleration),'m/s^2']);
 
 
 
