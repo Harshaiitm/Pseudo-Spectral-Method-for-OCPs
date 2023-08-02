@@ -90,6 +90,19 @@ ylabel('countrol variables (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
 
+%%Polynomial
+z= 1;
+disp(['at time t =',num2str(z_value),'s']);
+pointx=t';
+pointy=x1;
+position=lagrange(z,pointx,pointy)
+
+pointy=x2;
+velocity=lagrange(z,pointx,pointy)
+
+pointy=x3;
+accleration=lagrange(z,pointx,pointy)
+
 
 
 
