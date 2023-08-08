@@ -1,7 +1,7 @@
 %--------------------------------------------------------------------------
 % DImain.m
 % - Main script for the Double integrator Tracking problem
-% - Define the mesh and method, then solve and plot solution
+% - Define the Pseudo spectral method and order of the polynomial then solve and plot solution
 %--------------------------------------------------------------------------
 % DImain
 %--------------------------------------------------------------------------
@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGR';   % either LGL or LG or LGR
-N = 40;     % Order of the polynomial
+PS_method = 'LGL';   % either LGL or LG or LGR
+N = 100;     % Order of the polynomial
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -43,12 +43,12 @@ tf = 10;                         % final time
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
 x1 = 5*sin(t);
 x2 = 5*cos(t);
-% i = linspace(1,10,N+1)
-% x1 = 5*sin(i);
-% x2 = 5*cos(i);
+% i = linspace(1,10,N+1);
+% x1 = 0*sin(i);
+% x2 = 1*cos(i);
 x0(1:N+1) = double(x1);
 x0(N+2:2*N+2) = double(x2);
-x0(2*N+3:3*N+3) = 0.1;
+x0(2*N+3:3*N+3) = 0;
 
 
 % linear inequality and equality constraints
@@ -96,33 +96,43 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
 %========================================================================================================
 % Plotting 
-
 x1 = x(1:N+1);
 x2 = x(N+2:2*N+2);
 x3 = x(2*N+3:3*N+3);
-t0 = 0;
-tf = 10;
-t = ((tf-t0)/2).*nodes+(tf+t0)/2;
-% t = linspace(0,10,N+1);
+% tl = linspace(0,10,N+1);
+x1R = 5*sin(t);
+x2R = 5*cos(t);
 
 
 
 figure(1)
 plot(t, x1);
 hold on
-plot(t, x2);
+plot(t, x1R);
 xlabel('Time (s)');
-ylabel('State Variables');
+ylabel('Position (m)');
 title('Double Integrator Tracking Problem');
-legend({'Positon(x1)','Velocity(x2)'},Location="northeast");
+legend({'actual position','reference position'},Location="northeast");
+grid on
+hold off
+
+figure(2)
+plot(t, x2);
+hold on
+plot(t, x2R);
+xlabel('Time (s)');
+ylabel('Velocity (m/s)');
+title('Double Integrator Tracking Problem');
+legend({'actual velocity','reference velocity'},Location="northeast");
 grid on
 hold off
 
 
-figure(2)
+
+figure(3)
 plot(t,x3);
 xlabel('Time (s)');
-ylabel('countrol variables (N)');
+ylabel('countrol variable (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem');
 
@@ -147,7 +157,7 @@ pointy=x3;
 acceleration_equation=lagrange_interpolation(pointx,pointy);
 disp(['Acceleration =',char(acceleration_equation),'m/s^2']);
 acceleration = subs(acceleration_equation,z,z_value);
-disp(['acceleration =',char(acceleration),'m/s']);
+disp(['acceleration =',char(acceleration),'m/s^2']);
 
 
 
