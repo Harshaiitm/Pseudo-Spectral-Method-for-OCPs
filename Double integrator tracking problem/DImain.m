@@ -10,7 +10,7 @@ clc; clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 100;     % Order of the polynomial
+N = 50;     % Order of the polynomial
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -46,9 +46,9 @@ x2 = 5*cos(t);
 % i = linspace(1,10,N+1);
 % x1 = 0*sin(i);
 % x2 = 1*cos(i);
-x0(1:N+1) = double(x1);
-x0(N+2:2*N+2) = double(x2);
-x0(2*N+3:3*N+3) = 0;
+x0(1:N+1) = double(x1);         % position
+x0(N+2:2*N+2) = double(x2);     % velocity
+x0(2*N+3:3*N+3) = 0.1;          % (Force for unit mass)
 
 
 % linear inequality and equality constraints
