@@ -29,6 +29,10 @@ addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods') % add the PS_method 
         nodes(1) = -1;
         weights = flip(weights);
         D(N+1,:) = [];
+    elseif  strcmp(PS_method,'CGL')
+        [nodes] = CGL_nodes(N);     % calculate scaled node locations and weights
+        weights = CGL_weights(nodes);
+        D=collocD(nodes);           % segment differentiation matrix  
     end   
     
 %==============================================================================================%
@@ -76,6 +80,8 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
        [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
        [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
+    elseif strcmp(PS_method,'CGL')
+       [x,fval,ef,output] = fmincon(@(x) Objective_CGL(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,N,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -123,7 +129,7 @@ hold on
 plot(t, x1R);
 xlabel('Time (s)');
 ylabel('Position (m)');
-title('Double Integrator Tracking Problem');
+title('Double Integrator Tracking Problem',PS_method);
 legend({'actual position','reference position'},Location="northeast");
 grid on
 hold off
@@ -134,7 +140,7 @@ hold on
 plot(t, x2R);
 xlabel('Time (s)');
 ylabel('Velocity (m/s)');
-title('Double Integrator Tracking Problem');
+title('Double Integrator Tracking Problem',PS_method);
 legend({'actual velocity','reference velocity'},Location="northeast");
 grid on
 hold off
@@ -146,7 +152,7 @@ plot(t,x3);
 xlabel('Time (s)');
 ylabel('countrol variable (N)');
 legend({'control variable'},Location="northeast");
-title('Double integrator tracking problem');
+title('Double integrator tracking problem',PS_method);
 
 
 

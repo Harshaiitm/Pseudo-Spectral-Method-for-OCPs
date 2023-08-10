@@ -9,7 +9,7 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';   % either LGL or LG or LGR
+PS_method = 'CGL';   % either LGL or LG or LGR or CGL
 N = 50;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods')  % add the PS_method file directory
 
@@ -29,7 +29,12 @@ addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods')  % add the PS_method
         nodes(1) = -1;
         weights = flip(weights);
         D(N+1,:) = [];
-    end 
+    elseif  strcmp(PS_method,'CGL')
+        [nodes] = CGL_nodes(N);     % calculate scaled node locations and weights
+        weights = CGL_weights(nodes);
+        D=collocD(nodes);           % segment differentiation matrix  
+    end       
+   
 
 %==============================================================================================%
 
@@ -81,14 +86,13 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 20000);
     if strcmp(PS_method,'LGL')
-       [c, ceq, dc, dceq] = Nonlinearcon_LGL(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LG') 
-       [c, ceq, dc, dceq] = Nonlinearcon_LG(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
-       [c, ceq, dc, dceq] = Nonlinearcon_LGR(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
+    elseif strcmp(PS_method,'CGL')
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,N,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -140,7 +144,7 @@ hold on
 plot(t, velocity);
 xlabel('Time (s)');
 ylabel('State Variables');
-title('Double Integrator Tracking Problem');
+title('Double Integrator Tracking Problem',PS_method);
 legend({'Positon(x1)','Velocity(x2)'},Location="northeast");
 grid on
 hold off
@@ -151,7 +155,7 @@ plot(t,acceleration);
 xlabel('Time (s)');
 ylabel('countrol variables (N)');
 legend({'control variable'},Location="northeast");
-title('Double integrator tracking problem');
+title('Double integrator tracking problem',PS_method);
 
 
 
