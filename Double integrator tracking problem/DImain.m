@@ -10,7 +10,7 @@ clc; clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 50;     % Order of the polynomial
+N = 20;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -71,13 +71,10 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 20000);
     if strcmp(PS_method,'LGL')
-       [c, ceq, dc, dceq] = Nonlinearcon_LGL(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_LGL(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LG') 
-       [c, ceq, dc, dceq] = Nonlinearcon_LG(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
-       [c, ceq, dc, dceq] = Nonlinearcon_LGR(x,N,D,t0,tf);
        [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
     end 
 

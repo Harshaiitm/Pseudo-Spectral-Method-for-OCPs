@@ -9,7 +9,7 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGR';   % either LGL or LG or LGR
+PS_method = 'LGL';   % either LGL or LG or LGR
 N = 50;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods')  % add the PS_method file directory
 
