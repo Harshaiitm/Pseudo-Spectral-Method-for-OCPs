@@ -11,6 +11,7 @@ clc; clear all; close all;
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
 N = 50;     % Order of the polynomial
+addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -41,14 +42,9 @@ x3 = x(2*N+3:3*N+3);             % accleration
 t0 = 0;                          % initial time   
 tf = 10;                         % final time
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
-x1 = 5*sin(t);
-x2 = 5*cos(t);
-% i = linspace(1,10,N+1);
-% x1 = 0*sin(i);
-% x2 = 1*cos(i);
-x0(1:N+1) = double(x1);         % position
-x0(N+2:2*N+2) = double(x2);     % velocity
-x0(2*N+3:3*N+3) = 0.1;          % (Force for unit mass)
+x0(1:N+1) = 0;         % position
+x0(N+2:2*N+2) = 5;     % velocity
+x0(2*N+3:3*N+3) = 0;          % (Force for unit mass)
 
 
 % linear inequality and equality constraints
@@ -75,17 +71,14 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 20000);
     if strcmp(PS_method,'LGL')
-       Objective = Objectivee_func_LGL(x,N,weights,t);
        [c, ceq, dc, dceq] = Nonlinearcon_LGL(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(Objective,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
-    elseif strcmp(PS_method,'LG')
-       Objective = Objectivee_func_LG(x,N,weights,t); 
+       [x,fval,ef,output] = fmincon(@(x) Objective_LGL(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
+    elseif strcmp(PS_method,'LG') 
        [c, ceq, dc, dceq] = Nonlinearcon_LG(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(Objective,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
-       Objective = Objectivee_func_LGR(x,N,weights,t);
        [c, ceq, dc, dceq] = Nonlinearcon_LGR(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(Objective,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,N,weights,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -99,46 +92,12 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 x1 = x(1:N+1);
 x2 = x(N+2:2*N+2);
 x3 = x(2*N+3:3*N+3);
-% tl = linspace(0,10,N+1);
 x1R = 5*sin(t);
 x2R = 5*cos(t);
 
-
-
-figure(1)
-plot(t, x1);
-hold on
-plot(t, x1R);
-xlabel('Time (s)');
-ylabel('Position (m)');
-title('Double Integrator Tracking Problem');
-legend({'actual position','reference position'},Location="northeast");
-grid on
-hold off
-
-figure(2)
-plot(t, x2);
-hold on
-plot(t, x2R);
-xlabel('Time (s)');
-ylabel('Velocity (m/s)');
-title('Double Integrator Tracking Problem');
-legend({'actual velocity','reference velocity'},Location="northeast");
-grid on
-hold off
-
-
-
-figure(3)
-plot(t,x3);
-xlabel('Time (s)');
-ylabel('countrol variable (N)');
-legend({'control variable'},Location="northeast");
-title('Double integrator tracking problem');
-
+ 
 % Lagrange interpolation
-z_value = 8;  % at time in seconds
-disp(['at time t =',num2str(z_value),'s']);
+z_value = t;  % at time in seconds
 pointx=t';
 pointy=x1;
 syms z
@@ -158,6 +117,41 @@ acceleration_equation=lagrange_interpolation(pointx,pointy);
 disp(['Acceleration =',char(acceleration_equation),'m/s^2']);
 acceleration = subs(acceleration_equation,z,z_value);
 disp(['acceleration =',char(acceleration),'m/s^2']);
+
+
+
+figure(1)
+plot(t, position);
+hold on
+plot(t, x1R);
+xlabel('Time (s)');
+ylabel('Position (m)');
+title('Double Integrator Tracking Problem');
+legend({'actual position','reference position'},Location="northeast");
+grid on
+hold off
+
+figure(2)
+plot(t, velocity);
+hold on
+plot(t, x2R);
+xlabel('Time (s)');
+ylabel('Velocity (m/s)');
+title('Double Integrator Tracking Problem');
+legend({'actual velocity','reference velocity'},Location="northeast");
+grid on
+hold off
+
+
+
+figure(3)
+plot(t,x3);
+xlabel('Time (s)');
+ylabel('countrol variable (N)');
+legend({'control variable'},Location="northeast");
+title('Double integrator tracking problem');
+
+
 
 
 

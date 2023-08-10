@@ -9,8 +9,9 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LG';   % either LGL or LG or LGR
+PS_method = 'LGR';   % either LGL or LG or LGR
 N = 50;     % Order of the polynomial
+addpath('C:\Users\Harshad\OneDrive\Desktop\DIT\PS_methods')  % add the PS_method file directory
 
      if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -53,8 +54,9 @@ j =linspace(0,200,N-1);
 % x0(N+3:2*N+1) = double(j);
 x0(2:N) = t(2:N)*1.5;
 x0(2*N+2) = 0;
-x0(2*N+3:3*N+3) =0.1;
+x0(2*N+3:3*N+3) =2.5;
 x0(3*N+4) = 20;
+
 
 A = [];
 b = [];
@@ -78,18 +80,15 @@ tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 20000);
- if strcmp(PS_method,'LGL')
-       Objective = Objective_LGL(x,N);
+    if strcmp(PS_method,'LGL')
        [c, ceq, dc, dceq] = Nonlinearcon_LGL(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(@Objective_LGL,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
-    elseif strcmp(PS_method,'LG')
-       Objective = Objective_LG(x,N); 
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
+    elseif strcmp(PS_method,'LG') 
        [c, ceq, dc, dceq] = Nonlinearcon_LG(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(@Objective_LG,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
-       Objective = Objective_LGR(x,N);
        [c, ceq, dc, dceq] = Nonlinearcon_LGR(x,N,D,t0,tf);
-       [x,fval,ef,output] = fmincon(@Objective_LGR,x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,N,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -109,30 +108,8 @@ x4 = x(3*N+4);
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
 % t = linspace(0,40,N+1);
 
-
-
-figure(1)
-plot(t, x1);
-hold on
-plot(t, x2);
-xlabel('Time (s)');
-ylabel('State Variables');
-title('Double Integrator Tracking Problem');
-legend({'Positon(x1)','Velocity(x2)'},Location="northeast");
-grid on
-hold off
-
-
-figure(2)
-plot(t,x3);
-xlabel('Time (s)');
-ylabel('countrol variables (N)');
-legend({'control variable'},Location="northeast");
-title('Double integrator tracking problem');
-
 % Lagrange interpolation
-z_value = 8;  % at time in seconds
-disp(['at time t =',num2str(z_value),'s']);
+z_value = t;  % at time in seconds
 pointx=t';
 pointy=x1;
 syms z
@@ -152,5 +129,30 @@ acceleration_equation=lagrange_interpolation(pointx,pointy);
 disp(['Acceleration =',char(acceleration_equation),'m/s^2']);
 acceleration = subs(acceleration_equation,z,z_value);
 disp(['acceleration =',char(acceleration),'m/s']);
+
+
+
+
+
+figure(1)
+plot(t, position);
+hold on
+plot(t, velocity);
+xlabel('Time (s)');
+ylabel('State Variables');
+title('Double Integrator Tracking Problem');
+legend({'Positon(x1)','Velocity(x2)'},Location="northeast");
+grid on
+hold off
+
+
+figure(2)
+plot(t,acceleration);
+xlabel('Time (s)');
+ylabel('countrol variables (N)');
+legend({'control variable'},Location="northeast");
+title('Double integrator tracking problem');
+
+
 
 
