@@ -8,6 +8,7 @@ etaLT = [0.54 0.54 0.54 0.75 0.79 0.78 0.89 0.93 0.93];
 
 % Fitting of Aerodynamic data with piecewise splines
 Clalpha = pchip(MachLTAero,ClalphaLT,Mach);
+Clalpha = deg2rad(Clalpha);
 CD0 = pchip(MachLTAero,CD0LT,Mach);
 eta = pchip(MachLTAero,etaLT,Mach);
 end

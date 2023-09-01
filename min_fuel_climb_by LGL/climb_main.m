@@ -3,7 +3,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 30;     % Order of the polynomial
+N = 50;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\min_fuel_climb\PS_methods') % add the PS_method file directory
 
 [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -17,52 +17,43 @@ Isp = 1600;
 H = 7254.24;
 rho0 = 1.225;
 t0 = 0;
-tf = 500;
+tf = 400;
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
 
 
-x = zeros(5*N+5);
+x = zeros(5*N+6);
 h = x(1:N+1);
 v = x(N+2:2*N+2);
 gamma = x(2*N+3:3*N+3);
-mass = x(3*N+4:4*N+4);
-alpha = x(4*N+5:5*N+5);
-% time = x(5*N+6);
-
-r = h + Re;
-[rho,sos]=atm_data(h);
-Mach =  v./sos;
+time = x(3*N+4);
+mass = x(3*N+5:4*N+5);
+alpha = x(4*N+6:5*N+6);
 
 
-[Clalpha,CD0,eta] = aero_data(Mach);
-Thrust = thrust_avialble(h,Mach);
-
-CD = CD0 + eta.*(Clalpha.*alpha).^2;
-CL = Clalpha.*alpha;
-q = 0.5.*rho.*v.*v;
-Drag = q.*S.*CD;
-Lift = q.*S.*CL;
 
 
-% Boundary Conditions 
-h0 = 0; 
-hf = 19994.88; 
-v0 = 129.314; 
-vf = 295.092;
-gamma0 = 0; 
-gammaf = 0; 
-mass0 = 19050.864;
+
+
+% % Boundary Conditions 
+% h0 = 0; 
+% hf = 19994.88; 
+% v0 = 129.314; 
+% vf = 295.092;
+% gamma0 = 0; 
+% gammaf = 0; 
+% mass0 = 19050.864;
 
 
 x0(1:N) = 0;   % altitude
 x0(N+1) = 19994.88; 
 x0(N+2:2*N+1) = 129;     % velocity
 x0(2*N+2) = 295.092;
-x0(2*N+3:3*N+2) = 0;   % gamma
-x0(3*N+3) = 0;
-x0(3*N+4:4*N+4) = 22;         % mass
-x0(4*N+5:5*N+5) = -pi/4;      % alpha
-% x0(5*N+6) = 324;
+x0(2*N+3:3*N+2) = 0;     % gamma
+x0(3*N+3) = 0;          % final time
+x0(3*N+4) = 324;
+x0(3*N+5:4*N+5) = 19050.864;    % mass
+x0(4*N+6:5*N+6) = -pi/4;      % alpha
+     
 
 
 % linear inequality and equality constraints
@@ -76,15 +67,17 @@ beq = [];
 lb(1:N+1) = 0;
 lb(N+2:2*N+2) = 5;
 lb(2*N+3:3*N+3) = -40*pi/180 ;
-lb(3*N+4:4*N+4) = 22;
-lb(4*N+5:5*N+5) = -pi/4;
-% lb(5*N+6) = 0;
+lb(3*N+4) = 0;
+lb(3*N+5:4*N+5) = 22;
+lb(4*N+6:5*N+6) = -pi/4;
+
 ub(1:N+1) = 21031.2;
 ub(N+2:2*N+2) = 1000;
 ub(2*N+3:3*N+3) = 40*pi/180 ;
-ub(3*N+4:4*N+4) = 20410;
-ub(4*N+5:5*N+5) = pi/4;
-% ub(5*N+6) = 400;
+ub(3*N+4) = 400;
+ub(3*N+5:4*N+5) = 20410;
+ub(4*N+6:5*N+6) = pi/4;
+
 
 
 %==============================================================================================%
@@ -96,7 +89,7 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 20000,'MaxFunctionEvaluations',...
 200000);
    
-[x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func(x,N,D,mu,Thrust,r,t0,tf,Lift,Drag,g0,Isp),options);
+[x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func(x,N,D,mu,Re,t0,g0,Isp,S),options);
    
 
 % Stop the timer and display the elapsed time
@@ -106,11 +99,13 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 h = x(1:N+1);
 v = x(N+2:2*N+2);
 gamma = x(2*N+3:3*N+3);
-mass = x(3*N+4:4*N+4);
-alpha = x(4*N+5:5*N+5);
-% time = x(5*N+6);
+time = x(3*N+4);
+mass = x(3*N+5:4*N+5);
+alpha = x(4*N+6:5*N+6);
 
-%% figure
+
+
+% figure
 
 figure(1)
 plot(v,h,'k-')
@@ -134,30 +129,22 @@ xlabel('Time [s]')
 ylabel('Altitude [m]')
 grid on
 
-% figure(4)
-% plot(xx,speval(solution,'X',2,xx)/100,'b-' )
-% plot(tv,xv(:,2)/100,'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Velocity [100 m/s]')
-% grid on
-% 
-% figure
-% hold on
-% plot(xx,speval(solution,'X',4,xx),'b-' )
-% plot(tv,xv(:,4),'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Aircraft Mass [kg]')
-% grid on
-% 
-% figure
-% hold on
-% plot(xx,speval(solution,'U',1,xx),'b-' )
-% plot(tv,uv(:,1),'k-.')
-% xlim([0 solution.tf])
-% xlabel('Time [s]')
-% ylabel('Control Input (angle of attack) [deg]')
-% grid on
+figure(4)
+plot(t,v,'b-')
+xlabel('Time [s]')
+ylabel('Velocity [m/s]')
+grid on
+ 
+figure(5)
+plot(t,mass,'b-')
+xlabel('Time [s]')
+ylabel('Aircraft Mass [kg]')
+grid on
+
+figure(6)
+plot(t,alpha,'b-' )
+xlabel('Time [s]')
+ylabel('Control Input (angle of attack) [deg]')
+grid on
 
 
