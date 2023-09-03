@@ -3,7 +3,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 50;     % Order of the polynomial
+N =50;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\min_fuel_climb\PS_methods') % add the PS_method file directory
 
 [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -30,10 +30,6 @@ mass = x(3*N+5:4*N+5);
 alpha = x(4*N+6:5*N+6);
 
 
-
-
-
-
 % % Boundary Conditions 
 % h0 = 0; 
 % hf = 19994.88; 
@@ -44,13 +40,13 @@ alpha = x(4*N+6:5*N+6);
 % mass0 = 19050.864;
 
 
-x0(1:N) = 0;   % altitude
-x0(N+1) = 19994.88; 
+x0(1:N) = 0;             % altitude
+x0(N+1) = 19994.88;      % altitude
 x0(N+2:2*N+1) = 129;     % velocity
 x0(2*N+2) = 295.092;
 x0(2*N+3:3*N+2) = 0;     % gamma
 x0(3*N+3) = 0;          % final time
-x0(3*N+4) = 324; 
+x0(3*N+4) = 0; 
 x0(3*N+5:4*N+5) = 19050.864;    % mass
 x0(4*N+6:5*N+6) = linspace(-20,20,N+1)*pi/180;      % alpha
 % x0(4*N+6:5*N+6) = 20*nodes*pi/180;      % alpha
@@ -108,6 +104,7 @@ alpha = x(4*N+6:5*N+6);
 %%
 % t =linspace(1,1000,N+1);
 % Lagrange interpolation
+t = ((x(3*N+4)-t0)/2).*nodes+(x(3*N+4)+t0)/2;
 z_value = t;  % at time in seconds
 pointx=t';
 pointy=h;
@@ -226,7 +223,6 @@ al2 = alpha_vs_time(:,2);
 plot(al1,al2,'r--','LineWidth',1.5);
 legend("PS Method","ICLOCS2");
 title("Control input(alpha) variation w.r.t time")
-grid on
 hold off
 
 
