@@ -50,9 +50,11 @@ x0(N+2:2*N+1) = 129;     % velocity
 x0(2*N+2) = 295.092;
 x0(2*N+3:3*N+2) = 0;     % gamma
 x0(3*N+3) = 0;          % final time
-x0(3*N+4) = 324;
+x0(3*N+4) = 324; 
 x0(3*N+5:4*N+5) = 19050.864;    % mass
-x0(4*N+6:5*N+6) = -pi/4;      % alpha
+x0(4*N+6:5*N+6) = linspace(-20,20,N+1)*pi/180;      % alpha
+% x0(4*N+6:5*N+6) = 20*nodes*pi/180;      % alpha
+
      
 
 
@@ -103,48 +105,128 @@ time = x(3*N+4);
 mass = x(3*N+5:4*N+5);
 alpha = x(4*N+6:5*N+6);
 
+%%
+% t =linspace(1,1000,N+1);
+% Lagrange interpolation
+z_value = t;  % at time in seconds
+pointx=t';
+pointy=h;
+syms z
+Position_equation = lagrange_interpolation(pointx,pointy);
+% disp(['altitude Equation:', char(Position_equation)]);
+altitude = subs(Position_equation,z,z_value);
+% disp(['altitude =',char(altitude),'m']);
+
+pointy=v;
+velocity_equation=lagrange_interpolation(pointx,pointy);
+% disp(['Velocity Equation:', char(velocity_equation)]);
+velocity = subs(velocity_equation,z,z_value);
+% disp(['Velocity =',char(velocity),'m/s']);
+
+pointy=gamma;
+acceleration_equation=lagrange_interpolation(pointx,pointy);
+% disp(['flight_path_angle =',char(acceleration_equation),'m/s^2']);
+flight_path_angle = subs(acceleration_equation,z,z_value);
+% disp(['flight_path_angle =',char(flight_path_angle),'m/s^2']);
+
 
 
 % figure
-
 figure(1)
-plot(v,h,'k-')
+plot(v/100,altitude,'g-','LineWidth',1.5)
 ylim([0 20000])
 xlabel('Airspeed [m/s]')
 ylabel('Altitude [m]')
+hold on
+load alt_VS_airspeed.csv
+ai1 = alt_VS_airspeed(:,1);
+ai2 = alt_VS_airspeed(:,2);
+plot(ai1,ai2,'r--','LineWidth',1.5)
+legend("PS Method","ICLOCS2");
+title("Altitude variation w.r.t airspeed")
+hold off
 grid on
 
 figure(2)
-plot(t,gamma*180/pi,'k-')
+plot(t,altitude,'g-','LineWidth',1.5 )
+xlim([0 tf])
+ylim([0 20000])
+xlabel('Time [s]')
+ylabel('Altitude [m]')
+hold on
+load alt_vs_time.csv
+al1 = alt_vs_time(:,1);
+al2 = alt_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',1.5);
+grid on
+legend("PS Method","ICLOCS2");
+title("Altitude variation w.r.t time")
+hold off 
+
+figure(3)
+plot(t,gamma*180/pi,'g-','LineWidth',1.5)
 xlim([0 tf])
 xlabel('Time [s]')
 ylabel('Flight Path Angle [deg]')
 grid on
-
-figure(3)
-plot(t,h,'b-' )
-xlim([0 tf])
-ylim([0 20000])
-xlabel('Time [s]')
-ylabel('Altitude [m]')
+hold on
+load gamma_vs_time.csv
+al1 = gamma_vs_time(:,1);
+al2 = gamma_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',1.5);
 grid on
+legend("PS Method","ICLOCS2");
+title("Flight Path angle variation w.r.t time")
+hold off
+
+
 
 figure(4)
-plot(t,v,'b-')
+plot(t,v/100,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('Velocity [m/s]')
 grid on
+hold on
+load velocity_vs_time.csv
+al1 = velocity_vs_time(:,1);
+al2 = velocity_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',1.5);
+grid on
+legend("PS Method","ICLOCS2");
+title("Aircraft velocity variation w.r.t time")
+hold off 
  
 figure(5)
-plot(t,mass,'b-')
+plot(t,mass,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('Aircraft Mass [kg]')
 grid on
+hold on
+load mass_vs_time.csv
+al1 = mass_vs_time(:,1);
+al2 = mass_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',1.5);
+legend("PS Method","ICLOCS2");
+title("Aircraft mass variation w.r.t time")
+grid on
+hold off 
+
+
 
 figure(6)
-plot(t,alpha,'b-' )
+plot(t,alpha/10,'g-','LineWidth',1.5 )
 xlabel('Time [s]')
 ylabel('Control Input (angle of attack) [deg]')
 grid on
+ylim([0 0.1]);
+hold on
+load alpha_vs_time.csv
+al1 = alpha_vs_time(:,1);
+al2 = alpha_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',1.5);
+legend("PS Method","ICLOCS2");
+title("Control input(alpha) variation w.r.t time")
+grid on
+hold off
 
 
