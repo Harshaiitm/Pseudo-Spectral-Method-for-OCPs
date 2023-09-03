@@ -46,10 +46,10 @@ x0(N+2:2*N+1) = 129;     % velocity
 x0(2*N+2) = 295.092;
 x0(2*N+3:3*N+2) = 0;     % gamma
 x0(3*N+3) = 0;          % final time
-x0(3*N+4) = 0; 
+x0(3*N+4) = 324; 
 x0(3*N+5:4*N+5) = 19050.864;    % mass
-x0(4*N+6:5*N+6) = linspace(-20,20,N+1)*pi/180;      % alpha
-% x0(4*N+6:5*N+6) = 20*nodes*pi/180;      % alpha
+% x0(4*N+6:5*N+6) = linspace(-20,20,N+1)*pi/180;      % alpha
+x0(4*N+6:5*N+6) = 20*nodes*pi/180;      % alpha
 
      
 
