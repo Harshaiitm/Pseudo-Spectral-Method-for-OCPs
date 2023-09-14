@@ -3,7 +3,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N =100;     % Order of the polynomial
+N =40;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\min_fuel_climb\PS_methods') % add the PS_method file directory
 
 [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -49,7 +49,7 @@ x0(2*N+4:3*N+2) = 0;
 x0(3*N+3) = 0;           % final gamma
 x0(3*N+4) = 324;         % final time
 x0(3*N+5:4*N+5) = 19050.864;    % mass
-x0(4*N+6:5*N+6) = (linspace(-20,20,N+1))*pi/180;      % alpha
+x0(4*N+6:5*N+6) = 0;      % alpha
 % x0(4*N+6:5*N+6) = 20*pi/180;      % alpha
 
 % linear inequality and equality constraints
@@ -104,27 +104,30 @@ alpha = x(4*N+6:5*N+6);
 % Lagrange interpolation
 t = ((x(3*N+4)-t0)/2).*nodes+(x(3*N+4)+t0)/2;
 z = t;  % at time in seconds
+
+
 collocation_points=t';
 function_value=h;
-% syms z
 altitude = lagrange_interpolation_n(collocation_points, function_value, z);
-% disp(['altitude Equation:', char(Position_equation)]);
-% altitude = subs(Position_equation,z,z_value);
-% disp(['altitude =',char(altitude),'m']);
 
 function_value=v;
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
-% disp(['Velocity Equation:', char(velocity_equation)]);
-% velocity = subs(velocity_equation,z,z_value);
-% disp(['Velocity =',char(velocity),'m/s']);
 
+function_value=gamma;
+gamma=lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = mass;
+mass = lagrange_interpolation_n(collocation_points,function_value,z);
+
+function_value = alpha;
+alpha = lagrange_interpolation_n(collocation_points,function_value,z);
 
 
 % figure
 figure(1)
 plot(velocity/100,altitude,'g-','LineWidth',1.5)
 ylim([0 20000])
-xlabel('Airspeed [m/s]')
+xlabel('Airspeed [100 m/s]')
 ylabel('Altitude [m]')
 hold on
 load alt_VS_airspeed.csv
@@ -173,7 +176,7 @@ hold off
 figure(4)
 plot(t,velocity/100,'g-','LineWidth',1.5)
 xlabel('Time [s]')
-ylabel('Velocity [m/s]')
+ylabel('Velocity [100 m/s]')
 grid on
 hold on
 load velocity_vs_time.csv
@@ -207,7 +210,6 @@ plot(t,rad2deg(alpha),'g-','LineWidth',1.5 )
 xlabel('Time [s]')
 ylabel('Control Input (angle of attack) [deg]')
 grid on
-% ylim([0 0.1]);
 hold on
 load alpha_vs_time.csv
 al1 = alpha_vs_time(:,1);
