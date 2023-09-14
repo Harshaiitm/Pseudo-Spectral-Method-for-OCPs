@@ -28,9 +28,9 @@ Lift = q.*S.*CL;
 
 
 ceq = zeros(4*N+11,1);
-ceq(1:N+1,1) = D*h'-((time-t0)/2)* (v.*sin((gamma)))';
-ceq(N+2:2*N+2,1)=D*v' - ((time-t0)/2)*((Thrust.*cos((alpha))-Drag)./mass - mu.*sin((gamma))./r.^2)';
-ceq(2*N+3:3*N+3,1) = D*gamma' - ((time-t0)/2)*((Thrust.*sin((alpha))+Lift)./(mass.*v)+cos((gamma)).*((v./r)-mu./(v.*r.^2)))';
+ceq(1:N+1,1) = D*h'-((time-t0)/2)* (v.*sin(rad2deg(gamma)))';
+ceq(N+2:2*N+2,1)=D*v' - ((time-t0)/2)*((Thrust.*cos(rad2deg(alpha))-Drag)./mass - mu.*sin(rad2deg(gamma))./r.^2)';
+ceq(2*N+3:3*N+3,1) = D*gamma' - ((time-t0)/2)*((Thrust.*sin(rad2deg(alpha))+Lift)./(mass.*v)+cos(rad2deg(gamma)).*((v./r)-mu./(v.*r.^2)))';
 ceq(3*N+4:4*N+4,1) = D*mass'+((time-t0)/2)*(Thrust./(g0.*Isp))';
 ceq(4*N+5) = 0-h(1);
 ceq(4*N+6) = h(end)-19995;

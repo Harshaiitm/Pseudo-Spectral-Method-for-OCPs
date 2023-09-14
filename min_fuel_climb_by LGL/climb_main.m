@@ -118,17 +118,11 @@ velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 % velocity = subs(velocity_equation,z,z_value);
 % disp(['Velocity =',char(velocity),'m/s']);
 
-function_value=gamma;
-acceleration=lagrange_interpolation_n(collocation_points, function_value, z);
-% disp(['flight_path_angle =',char(acceleration_equation),'m/s^2']);
-% flight_path_angle = subs(acceleration_equation,z,z_value);
-% disp(['flight_path_angle =',char(flight_path_angle),'m/s^2']);
-
 
 
 % figure
 figure(1)
-plot(v/100,altitude,'g-','LineWidth',1.5)
+plot(velocity/100,altitude,'g-','LineWidth',1.5)
 ylim([0 20000])
 xlabel('Airspeed [m/s]')
 ylabel('Altitude [m]')
@@ -177,7 +171,7 @@ hold off
 
 
 figure(4)
-plot(t,v/100,'g-','LineWidth',1.5)
+plot(t,velocity/100,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('Velocity [m/s]')
 grid on
