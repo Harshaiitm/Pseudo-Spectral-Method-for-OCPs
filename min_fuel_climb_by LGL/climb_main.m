@@ -3,7 +3,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N =50;     % Order of the polynomial
+N =100;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\min_fuel_climb\PS_methods') % add the PS_method file directory
 
 [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -41,18 +41,16 @@ alpha = x(4*N+6:5*N+6);
 
 
 x0(1:N) = 0;             % altitude
-x0(N+1) = 19994.88;      % altitude
-x0(N+2:2*N+1) = 129;     % velocity
-x0(2*N+2) = 295.092;
-x0(2*N+3:3*N+2) = 0;     % gamma
-x0(3*N+3) = 0;          % final time
-x0(3*N+4) = 324; 
+x0(N+1) = 19994.88;      %  final altitude
+x0(N+2:2*N+1) = 129.314;     % initial velocity
+x0(2*N+2) = 295.092;     % final velocity
+x0(2*N+3) = 0;           % initial gamma
+x0(2*N+4:3*N+2) = 0;
+x0(3*N+3) = 0;           % final gamma
+x0(3*N+4) = 324;         % final time
 x0(3*N+5:4*N+5) = 19050.864;    % mass
-% x0(4*N+6:5*N+6) = linspace(-20,20,N+1)*pi/180;      % alpha
-x0(4*N+6:5*N+6) = 20*nodes*pi/180;      % alpha
-
-     
-
+x0(4*N+6:5*N+6) = (linspace(-20,20,N+1))*pi/180;      % alpha
+% x0(4*N+6:5*N+6) = 20*pi/180;      % alpha
 
 % linear inequality and equality constraints
 A = [];
@@ -105,25 +103,25 @@ alpha = x(4*N+6:5*N+6);
 % t =linspace(1,1000,N+1);
 % Lagrange interpolation
 t = ((x(3*N+4)-t0)/2).*nodes+(x(3*N+4)+t0)/2;
-z_value = t;  % at time in seconds
-pointx=t';
-pointy=h;
-syms z
-Position_equation = lagrange_interpolation(pointx,pointy);
+z = t;  % at time in seconds
+collocation_points=t';
+function_value=h;
+% syms z
+altitude = lagrange_interpolation_n(collocation_points, function_value, z);
 % disp(['altitude Equation:', char(Position_equation)]);
-altitude = subs(Position_equation,z,z_value);
+% altitude = subs(Position_equation,z,z_value);
 % disp(['altitude =',char(altitude),'m']);
 
-pointy=v;
-velocity_equation=lagrange_interpolation(pointx,pointy);
+function_value=v;
+velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 % disp(['Velocity Equation:', char(velocity_equation)]);
-velocity = subs(velocity_equation,z,z_value);
+% velocity = subs(velocity_equation,z,z_value);
 % disp(['Velocity =',char(velocity),'m/s']);
 
-pointy=gamma;
-acceleration_equation=lagrange_interpolation(pointx,pointy);
+function_value=gamma;
+acceleration=lagrange_interpolation_n(collocation_points, function_value, z);
 % disp(['flight_path_angle =',char(acceleration_equation),'m/s^2']);
-flight_path_angle = subs(acceleration_equation,z,z_value);
+% flight_path_angle = subs(acceleration_equation,z,z_value);
 % disp(['flight_path_angle =',char(flight_path_angle),'m/s^2']);
 
 
@@ -161,7 +159,7 @@ title("Altitude variation w.r.t time")
 hold off 
 
 figure(3)
-plot(t,gamma*180/pi,'g-','LineWidth',1.5)
+plot(t,rad2deg(gamma),'g-','LineWidth',1.5)
 xlim([0 tf])
 xlabel('Time [s]')
 ylabel('Flight Path Angle [deg]')
@@ -211,16 +209,16 @@ hold off
 
 
 figure(6)
-plot(t,alpha/10,'g-','LineWidth',1.5 )
+plot(t,rad2deg(alpha),'g-','LineWidth',1.5 )
 xlabel('Time [s]')
 ylabel('Control Input (angle of attack) [deg]')
 grid on
-ylim([0 0.1]);
+% ylim([0 0.1]);
 hold on
 load alpha_vs_time.csv
 al1 = alpha_vs_time(:,1);
 al2 = alpha_vs_time(:,2);
-plot(al1,al2,'r--','LineWidth',1.5);
+plot(al1,rad2deg(al2),'r--','LineWidth',1.5);
 legend("PS Method","ICLOCS2");
 title("Control input(alpha) variation w.r.t time")
 hold off

@@ -18,8 +18,9 @@ Mach =  v./sos;
 [Clalpha,CD0,eta] = aero_data(Mach);
 Thrust = thrust_avialble(h,Mach);
 
-CD = CD0 + eta.*(Clalpha.*alpha).^2;
+
 CL = Clalpha.*alpha;
+CD = CD0 + eta.*(CL).^2;
 q = 0.5.*rho.*v.*v;
 Drag = q.*S.*CD;
 Lift = q.*S.*CL;
@@ -27,9 +28,9 @@ Lift = q.*S.*CL;
 
 
 ceq = zeros(4*N+11,1);
-ceq(1:N+1,1) = D*h'-((time-t0)/2)* (v.*sin(gamma))';
-ceq(N+2:2*N+2,1)=D*v' - ((time-t0)/2)*((Thrust.*cos(alpha)-Drag)./mass - mu.*sin(gamma)./r.^2)';
-ceq(2*N+3:3*N+3,1) = D*gamma' - ((time-t0)/2)*((Thrust.*sin(alpha)+Lift)./(mass.*v)+cos(gamma).*((v./r)-mu./(v.*r.^2)))';
+ceq(1:N+1,1) = D*h'-((time-t0)/2)* (v.*sin((gamma)))';
+ceq(N+2:2*N+2,1)=D*v' - ((time-t0)/2)*((Thrust.*cos((alpha))-Drag)./mass - mu.*sin((gamma))./r.^2)';
+ceq(2*N+3:3*N+3,1) = D*gamma' - ((time-t0)/2)*((Thrust.*sin((alpha))+Lift)./(mass.*v)+cos((gamma)).*((v./r)-mu./(v.*r.^2)))';
 ceq(3*N+4:4*N+4,1) = D*mass'+((time-t0)/2)*(Thrust./(g0.*Isp))';
 ceq(4*N+5) = 0-h(1);
 ceq(4*N+6) = h(end)-19995;
