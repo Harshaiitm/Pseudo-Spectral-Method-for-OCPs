@@ -2,13 +2,27 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';   % either LGL or LG or LGR
-N = 40;     % Order of the polynomial
-addpath('.........\PS_methods') % add the PS_method file directory
+PS_method = 'CGL';   % either LGL or LG or LGR
+N = 30;     % Order of the polynomial
+addpath('C:\Users\Harshad\OneDrive\Desktop\min_fuel_climb\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
-        D=collocD(nodes); % segment differentiation matrix  
+        D=collocD(nodes); % segment differentiation matrix
+    elseif strcmp(PS_method,'LG')
+        nodes(1) =-1;
+        [nodes(2:N+1,1),weights]=LG_nodes(N,-1,1); % calculate scaled node locations and weights
+        nodes(2:N+1,1) = flip(nodes(2:N+1,1)); 
+        D=collocD(nodes); % segment differentiation matrix
+        D(N+1,:) = [];
+        nodes(N+2) = 1;
+    elseif strcmp(PS_method,'LGR')
+        [nodes,weights] = LGR_nodes(N); % calculate scaled node locations and weights
+        nodes = flip(-nodes);
+        nodes(1) = -1;
+        D = collocD(nodes); % segment differentiation matrix
+        weights = flip(weights);
+        D(N+1,:) = [];    
     else strcmp(PS_method,'CGL')
          [nodes] = CGL_nodes(N);     % calculate scaled node locations and weights
          weights = CGL_weights(nodes);
@@ -87,7 +101,15 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 20000,'MaxFunctionEvaluations',...
 200000);
    
-[x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func(x,N,D,problem),options);
+    if strcmp(PS_method,'LGL')
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LGL(x,N,D,problem),options);
+    elseif strcmp(PS_method,'LG') 
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LG(x,N,D,problem),options);
+    elseif strcmp(PS_method,'LGR')
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LGR(x,N,D,problem),options);
+    elseif strcmp(PS_method,'CGL')
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_CGL(x,N,D,problem),options);
+    end
    
 
 % Stop the timer and display the elapsed time
