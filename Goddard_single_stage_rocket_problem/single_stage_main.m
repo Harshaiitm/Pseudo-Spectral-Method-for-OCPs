@@ -4,8 +4,8 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGR';   % either LGL or LG or LGR
-N = 20;     % Order of the polynomial
+PS_method = 'LGL';   % either LGL or LG or LGR
+N = 50;     % Order of the polynomial
 addpath('..........\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
