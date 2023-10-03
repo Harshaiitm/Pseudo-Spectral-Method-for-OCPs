@@ -51,18 +51,17 @@ ceq(3*N+8) = h_2(1)-h_1(end);
 ceq(3*N+9) = 0-v_1(1);
 ceq(3*N+10) = v_2(1)-v_1(end);
 ceq(3*N+11) = mass_1(1)-5000;
-ceq(3*N+12) = mass_1(end)-2000;
-% ceq(3*N+12) = mass_2(1)-mass_1(end);
+ceq(3*N+12) = mass_1(end)-3800;
 ceq(3*N+13) = Thrust_1(1)-m0*g0*2;
 ceq(3*N+14) = mass_2(1)-2000;
 ceq(3*N+15) = mass_2(end)-800;
 ceq(3*N+16) = Thrust_2(1)-m0_2*g0*2;
  
-% c = [];
+c = [];
 
-c = zeros(2,1);
-c(1) =mass_2(1)-mass_1(end)+0.01;
-c(2) = stage_time-final_time+0.01;
+% c = zeros(2,1);
+% c(1) =mass_2(1)-mass_1(end);
+% c(2) = stage_time-final_time;
  
 end
 
