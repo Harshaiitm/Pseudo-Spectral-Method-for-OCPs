@@ -60,7 +60,7 @@ ceq(6*N+16) = Thrust_2(1)-m0_2*g0*2;
 % c = [];
 
 c = zeros(2,1);
-c(1) =mass_2(1)-mass_1(end)+1200;
+c(1) =mass_2(1)-mass_1(end);
 c(2) = stage_time-final_time+0.100;
  
 end

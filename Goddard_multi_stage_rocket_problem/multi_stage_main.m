@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N  = 20 ;     % Order of the polynomial
+N  = 30 ;     % Order of the polynomial
 addpath('C:\Users\Harshad\OneDrive\Desktop\goddard_rocket_single_stage\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -87,12 +87,12 @@ lb(1:N+1) = 0;
 lb(N+2:2*N+2) = 0;
 lb(2*N+3) = m0_1;
 lb(2*N+4:3*N+3) = m0_1*(0.4)+m0_2;
-lb(3*N+4:4*N+4) = -m0*g0*2;
+lb(3*N+4:4*N+4) = 0;
 lb(4*N+5:5*N+5) = 0;
 lb(5*N+6:6*N+6) = 0;
 lb(6*N+7) = m0_2;
 lb(6*N+8:7*N+7) = m0_2*(0.4);
-lb(7*N+8:8*N+8) = -m0_2*g0*2;
+lb(7*N+8:8*N+8) = 0;
 lb(8*N+9) = 0;      
 lb(8*N+10) = 0;
 
