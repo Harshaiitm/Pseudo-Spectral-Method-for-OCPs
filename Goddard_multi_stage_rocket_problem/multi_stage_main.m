@@ -5,8 +5,8 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N  = 30 ;     % Order of the polynomial
-addpath('C:\Users\Harshad\OneDrive\Desktop\goddard_rocket_single_stage\PS_methods') % add the PS_method file directory
+N  = 50 ;     % Order of the polynomial
+addpath('C:\Users\Harshad\OneDrive\Desktop\goddard_rocket_multi_stage\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -31,7 +31,7 @@ Isp = 300;
 t0 = 0;
 ts = 0;
 tf = 0;
-% t = ((tf-t0)/2).*nodes+(tf+t0)/2;
+
 
 problem.Re = Re;
 problem.h_scale = h_scale;
@@ -70,7 +70,7 @@ x0(3*N+4:4*N+4) = m0*g0*2;
 x0(4*N+5:5*N+5) = 0;
 x0(5*N+6:6*N+6) = 0;
 x0(6*N+7:7*N+7) = m0_2;
-x0(7*N+8:8*N+8) = m0_2*g0*2;
+x0(7*N+8:8*N+8) = m0*g0*2;
 x0(8*N+9) = 0;      
 x0(8*N+10) = 0;
 
@@ -105,7 +105,7 @@ ub(3*N+4:4*N+4) = m0*g0*2;
 ub(4*N+5:5*N+5) = inf;
 ub(5*N+6:6*N+6) = inf;
 ub(6*N+7:7*N+7) = m0_2;
-ub(7*N+8:8*N+8) = m0_2*g0*2;
+ub(7*N+8:8*N+8) = m0*g0*2;
 ub(8*N+9) = inf;      
 ub(8*N+10) = inf;
 
