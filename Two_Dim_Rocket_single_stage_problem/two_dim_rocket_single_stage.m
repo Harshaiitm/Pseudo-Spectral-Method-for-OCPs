@@ -5,8 +5,8 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 20;     % Order of the polynomial
-addpath('........\PS_methods') % add the PS_method file directory
+N = 30;     % Order of the polynomial
+addpath('C:\Users\Harshad\OneDrive\Desktop\2D_rocket_single_stage\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -45,7 +45,7 @@ g0 = 9.80665;
 Isp = 300;
 hf = 400000;
 q_max = 14000;
-a_sen_max = 3 ;
+a_sen_max = 3*g0;
 T_max_by_W = 1.5;
 Thrust_max = T_max_by_W*m0*g0;
 t0 = 0;
@@ -125,12 +125,6 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
    
     if strcmp(PS_method,'LGL')
        [x,fval,ef,output] = fmincon(@(x) two_dim_rocket_single_stage_objective_func(x,N,m0),x0,A,b,Aeq,beq,lb,ub,@(x) two_dim_single_stage_Nonlinear_func_LGL(x,N,D,problem),options);
-    elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) single_stage_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) single_stage_Nonlinear_func_LG(x,N,D,problem),options);
-    elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) single_stage_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) single_stage_Nonlinear_func_LGR(x,N,D,problem),options);
-    elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) single_stage_objective_func(x,N),x0,A,b,Aeq,beq,lb,ub,@(x) single_stage_Nonlinear_func_CGL(x,N,D,problem),options);
     end
     
 % Stop the timer and display the elapsed time
@@ -150,10 +144,13 @@ h = (h_x.^2+h_y.^2).^0.5;
 V = (V_x.^2+V_y.^2).^0.5;
 Thrust = (Thrust_x.^2+Thrust_y.^2).^0.5;
 
-% Lagrange interpolation
+
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
 altitude = h;
 velocity = V;
+
+
+% Lagrange interpolation
 % z = 0:0.1:x(4*N+5);  % at time in seconds
 % 
 % 
