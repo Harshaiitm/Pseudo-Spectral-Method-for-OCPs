@@ -121,14 +121,24 @@ Thrust_x = x(5*N+6:6*N+6);
 Thrust_y = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
-R = (R_x.^2+R_y.^2).^0.5;
-V = (V_x.^2+V_y.^2).^0.5;
-Thrust = (Thrust_x.^2+Thrust_y.^2).^0.5;
+R_mag = (R_x.^2+R_y.^2).^0.5;
+h =  R_mag - Re;
+V_mag = (V_x.^2+V_y.^2).^0.5;
+rho = rho0 * exp(-(1/h_scale).*(h));
+Thrust_mag = (Thrust_x.^2+Thrust_y.^2).^0.5;
+g_x = -mu*(R_x)./((R_x).^2+(R_y).^2).^(3/2);
+g_y = -mu*(R_y)./((R_x).^2+(R_y).^2).^(3/2);
+Drag_x = - 0.5*rho.* V_x.*(V_x.^2+V_y.^2).^0.5 *A_ref *CD;
+Drag_y = - 0.5*rho.* V_y.*(V_x.^2+V_y.^2).^0.5 *A_ref *CD;
+q = 0.5*rho.*(V_x.^2+V_y.^2);
+a_sen_x = (Thrust_x+Drag_x)./mass;
+a_sen_y = (Thrust_y+Drag_y)./mass;
+a_sen_mag = (a_sen_x.^2+a_sen_y.^2).^0.5;
 
 
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
-altitude = R-Re;
-velocity = V;
+altitude = h;
+velocity = V_mag;
 
 
 % Lagrange interpolation
@@ -195,7 +205,7 @@ hold off
 
 
 figure(4)
-plot(t,Thrust/1000,'g-','LineWidth',1.5)
+plot(t,Thrust_mag/1000,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('Thrust [kN]')
 grid on
@@ -209,3 +219,17 @@ hold on
 title("Thrust variation w.r.t time")
 hold off 
  
+figure(5)
+plot(t,a_sen_mag/g0,'g-',"LineWidth",1.5)
+xlabel('Time [s]')
+ylabel('Sensed acceleration[gs]')
+grid on
+hold on
+% load Thrust_vs_time.csv
+% al1 = Thrust_vs_time(:,1);
+% al2 = Thrust_vs_time(:,2);
+% plot(al1,al2,'r--','LineWidth',1.5);
+% grid on
+% legend("PS Method","ICLOCS2");
+title("Sensed acceleration w.r.t time")
+hold off 
