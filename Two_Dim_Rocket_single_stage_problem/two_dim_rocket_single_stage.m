@@ -5,30 +5,12 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 30;     % Order of the polynomial
-addpath('C:\Users\Harshad\OneDrive\Desktop\2D_rocket_single_stage\PS_methods') % add the PS_method file directory
+N = 22;     % Order of the polynomial
+addpath('../PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
-        D=collocD(nodes); % segment differentiation matrix
-    elseif strcmp(PS_method,'LG')
-        nodes(1) =-1;
-        [nodes(2:N+1,1),weights]=LG_nodes(N,-1,1); % calculate scaled node locations and weights
-        nodes(2:N+1,1) = flip(nodes(2:N+1,1)); 
-        D=collocD(nodes); % segment differentiation matrix
-        D(N+1,:) = [];
-        nodes(N+2) = 1;
-    elseif strcmp(PS_method,'LGR')
-        [nodes,weights] = LGR_nodes(N); % calculate scaled node locations and weights
-        nodes = flip(-nodes);
-        nodes(1) = -1;
-        D = collocD(nodes); % segment differentiation matrix
-        weights = flip(weights);
-        D(N+1,:) = [];    
-    else strcmp(PS_method,'CGL')
-         [nodes] = CGL_nodes(N);     % calculate scaled node locations and weights
-         weights = CGL_weights(nodes);
-         D=collocD(nodes);           % segment differentiation matrix  
+        D=collocD(nodes); % segment differentiation matrix 
     end   
 %================================================================================================================%
 % Problem data    
@@ -49,7 +31,7 @@ a_sen_max = 3*g0;
 T_max_by_W = 1.5;
 Thrust_max = T_max_by_W*m0*g0;
 t0 = 0;
-tf = 0;
+
 
 problem.Re = Re;
 problem.h_scale = h_scale;
@@ -61,7 +43,6 @@ problem.CD = CD;
 problem.g0 =g0;
 problem.Isp = Isp;
 problem.t0 = t0;
-problem.tf = tf;
 problem.hf = hf;
 problem.Thrust_max = Thrust_max;
 problem.T_max_by_W = T_max_by_W;
@@ -72,8 +53,8 @@ problem.a_sen_max = a_sen_max;
 
 % Decision veriables
 x = zeros(7*N+8);
-h_x = x(1:N+1);
-h_y = x(N+2:2*N+2);
+R_x = x(1:N+1);
+R_y = x(N+2:2*N+2);
 V_x = x(2*N+3:3*N+3);
 V_y = x(3*N+4:4*N+4);
 mass = x(4*N+5:5*N+5);
@@ -83,7 +64,7 @@ final_time = x(7*N+8);
 
 % Initial guess values for decision variables
 x0(1:N+1) = 0;
-x0(N+2:2*N+2) = 0;
+x0(N+2:2*N+2) = Re;
 x0(2*N+3:3*N+3) = 0;
 x0(3*N+4:4*N+4) = 0;
 x0(4*N+5:5*N+5) = m0;
@@ -131,8 +112,8 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 elapsedTime = toc;
 disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
-h_x = x(1:N+1);
-h_y = x(N+2:2*N+2);
+R_x = x(1:N+1);
+R_y = x(N+2:2*N+2);
 V_x = x(2*N+3:3*N+3);
 V_y = x(3*N+4:4*N+4);
 mass = x(4*N+5:5*N+5);
@@ -140,13 +121,13 @@ Thrust_x = x(5*N+6:6*N+6);
 Thrust_y = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
-h = (h_x.^2+h_y.^2).^0.5;
+R = (R_x.^2+R_y.^2).^0.5;
 V = (V_x.^2+V_y.^2).^0.5;
 Thrust = (Thrust_x.^2+Thrust_y.^2).^0.5;
 
 
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
-altitude = h;
+altitude = R-Re;
 velocity = V;
 
 
@@ -228,4 +209,3 @@ hold on
 title("Thrust variation w.r.t time")
 hold off 
  
-
