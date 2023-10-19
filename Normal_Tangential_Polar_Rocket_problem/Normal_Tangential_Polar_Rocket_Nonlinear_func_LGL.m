@@ -40,26 +40,25 @@ a_sen_v = (Thrust.* cos(alpha) - Drag)./mass;
 a_sen_gamma = (Thrust.* sin(alpha))./mass;
 a_sen_mag = (a_sen_v.^2 + a_sen_gamma.^2).^0.5;
 
-c = zeros(3*N+3,1);
-c(1:N+1,1) = Thrust.^2 - Thrust_max^2;
-c(N+2:2*N+2,1) = a_sen_mag.^2 - a_sen_max^2;
-c(2*N+3:3*N+3,1) = q - q_max;
+c = zeros(2*N+2,1);
+c(1:N+1,1) = a_sen_mag.^2 - a_sen_max^2;
+c(N+2:2*N+2,1) = q - q_max;
 
 ceq = zeros(5*N+14,1);
 ceq(1:N+1,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
 ceq(N+2:2*N+2,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
 ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*(Thrust.*cos(alpha)./mass - Drag./mass - g.*sin(gamma))';
-ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) + (g.*cos(gamma)./V) + (V.*cos(gamma)./R))';
+ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - (g.*cos(gamma)./V) + (V.*cos(theta)./R))';
 ceq(4*N+5:5*N+5,1) = D*mass' + ((final_time-t0)/2)*(Thrust./(g0*Isp))';
-ceq(5*N+6,1) = Re - R(1);
-ceq(5*N+7,1) = (hf+Re) -  R(end);
+ceq(5*N+6,1) = 1 - R(1)/Re;
+ceq(5*N+7,1) = (hf/Re+1) -  R(end)/Re;
 ceq(5*N+8,1) = 0 - theta(1);
-ceq(5*N+9,1) = 10 - V(1);
-ceq(5*N+10,1) = (mu/(hf+Re))^0.5- V(end);
-ceq(5*N+11,1) = 0 - gamma(1);
+ceq(5*N+9,1) = 1 - V(1)/10;
+ceq(5*N+10,1) = 1- V(end)/((mu/(hf+Re))^0.5);
+ceq(5*N+11,1) = pi/2 - gamma(1);
 ceq(5*N+12,1) = 0 - gamma(end);
 ceq(5*N+13,1) = 0 - alpha(1);
-ceq(5*N+14,1) = m0 - mass(1);
+ceq(5*N+14,1) = 1 - mass(1)/m0;
 end
 
 

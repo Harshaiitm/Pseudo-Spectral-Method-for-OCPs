@@ -63,14 +63,14 @@ alpha = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
 % Initial guess values for decision variables
-x0(1:N+1) = Re;
+x0(1:N+1) = linspace(Re,Re+hf,N+1);
 x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = 10;
-x0(3*N+4:4*N+4) = 0;
-x0(4*N+5:5*N+5) = m0;
-x0(5*N+6:6*N+6) = m0*g0*T_max_by_W;
+x0(2*N+3:3*N+3) = linspace(10,sqrt(mu/(Re+hf)),N+1);
+x0(3*N+4:4*N+4) = linspace(pi/2,0,N+1);
+x0(4*N+5:5*N+5) = linspace(m0,m0-mp0,N+1);
+x0(5*N+6:6*N+6) = linspace(Thrust_max,0,N+1);
 x0(6*N+7:7*N+7) = 0;
-x0(7*N+8) = 0;
+x0(7*N+8) = 650;
 
 % linear inequality and equality constraints
 A = [];
@@ -79,27 +79,27 @@ Aeq = [];
 beq = [];
 
 % Lower and Upper bounds for the variables
-lb(1:N+1) = 0;
-lb(N+2:2*N+2) = -inf;
-lb(2*N+3:3*N+3) = 0;
+lb(1:N+1) = Re;
+lb(N+2:2*N+2) = -pi;
+lb(2*N+3:3*N+3) = 10;
 lb(3*N+4:4*N+4) = -pi;
 lb(4*N+5:5*N+5) = m0-mp0;
 lb(5*N+6:6*N+6) = 0;
 lb(6*N+7:7*N+7) = -pi;
 lb(7*N+8) = 0;
 
-ub(1:N+1) = inf;
-ub(N+2:2*N+2) = inf;
-ub(2*N+3:3*N+3) = inf;
+ub(1:N+1) = 2*(Re+hf);
+ub(N+2:2*N+2) = pi;
+ub(2*N+3:3*N+3) = 2*sqrt(mu/(Re+hf));
 ub(3*N+4:4*N+4) = pi;
 ub(4*N+5:5*N+5) = m0;
-ub(5*N+6:6*N+6) = m0*g0*T_max_by_W;
+ub(5*N+6:6*N+6) = Thrust_max;
 ub(6*N+7:7*N+7) = pi;
-ub(7*N+8) = inf;
+ub(7*N+8) = 1000;
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-10, 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 20000);
    
     if strcmp(PS_method,'LGL')
