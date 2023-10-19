@@ -65,7 +65,7 @@ final_time = x(7*N+8);
 % Initial guess values for decision variables
 x0(1:N+1) = Re;
 x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = 1;
+x0(2*N+3:3*N+3) = 10;
 x0(3*N+4:4*N+4) = 0;
 x0(4*N+5:5*N+5) = m0;
 x0(5*N+6:6*N+6) = m0*g0*T_max_by_W;
@@ -79,9 +79,9 @@ Aeq = [];
 beq = [];
 
 % Lower and Upper bounds for the variables
-lb(1:N+1) = Re;
-lb(N+2:2*N+2) = -pi;
-lb(2*N+3:3*N+3) = -inf;
+lb(1:N+1) = 0;
+lb(N+2:2*N+2) = -inf;
+lb(2*N+3:3*N+3) = 0;
 lb(3*N+4:4*N+4) = -pi;
 lb(4*N+5:5*N+5) = m0-mp0;
 lb(5*N+6:6*N+6) = 0;
@@ -89,7 +89,7 @@ lb(6*N+7:7*N+7) = -pi;
 lb(7*N+8) = 0;
 
 ub(1:N+1) = inf;
-ub(N+2:2*N+2) = pi;
+ub(N+2:2*N+2) = inf;
 ub(2*N+3:3*N+3) = inf;
 ub(3*N+4:4*N+4) = pi;
 ub(4*N+5:5*N+5) = m0;
