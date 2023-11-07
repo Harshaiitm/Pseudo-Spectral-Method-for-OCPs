@@ -26,11 +26,7 @@ n_length = 1/Re;
 n_velocity = sqrt(Re/mu);
 n_time = n_length/n_velocity;
 n_mass = 1/m0;
-n_force = n_mass*n_length/n_time^2;
-n_theta = 1/theta_0;
-n_gamma = 1/gamma_0;
-n_alpha = 1/alpha_0;
-% n_accln = n_length/n_time^2;
+
 
 % Decision veriables
 R = x(1:N+1);               
@@ -43,38 +39,37 @@ alpha = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
 t0 = t0*n_time;
-h =  R/n_length - Re;
-rho = rho0 * exp(-(1/h_scale).*(h));
-g = mu./(R/n_length).^2;
-g = g/g0;
-g0 = 1;
+final_time = final_time*n_time;
 Isp = Isp*n_time;
-q = 0.5*rho.*(V/n_velocity.^2);
+
+h =  R/n_length - Re;
+rho = rho0 * exp(-(h./h_scale));
+g = mu./(R./n_length).^2;
+g0 = mu/Re;
+
+q = 0.5*rho.*(V/n_velocity).^2;
 Drag = q.* A_ref *CD;
-a_sen_v = (Thrust/n_force.* cos(alpha/n_alpha) - Drag)./(mass/n_mass);
-a_sen_gamma = (Thrust/n_force.* sin(alpha/n_alpha))./(mass/n_mass);
+Drag_ref = 0.5*rho_0*(mu/Re)*A_ref*CD;
+Drag = Drag./Drag_ref ;
+
+a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
+a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
-Drag = Drag * n_force;
+
+K = 0.5*rho0*Re^3*CD/m0;
+
 
 c = zeros(2*N+2,1);
-c(1:N+1,1) = a_sen_mag.^2 - a_sen_max^2;
-c(N+2:2*N+2,1) = q - q_max;
+c(1:N+1,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
+c(N+2:2*N+2,1) = (q - q_max)* 0.5 * rho0 * (mu/Re);
 
 ceq = zeros(5*N+14,1);
 ceq(1:N+1,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
 ceq(N+2:2*N+2,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
-ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*(Thrust.*cos(alpha)./mass - Drag./mass - g.*sin(gamma))';
-ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - (g.*cos(gamma)./V) + (V.*cos(theta)./R))';
-ceq(4*N+5:5*N+5,1) = D*mass' + ((final_time-t0)/2)*(Thrust./(g0*Isp))';
-ceq(5*N+6,1) = 1 - R(1);
-ceq(5*N+7,1) = (hf/Re+1) -  R(end);
-ceq(5*N+8,1) = 0 - theta(1);
-ceq(5*N+9,1) = 0 - V(1)/10;
-ceq(5*N+10,1) = 1- V(end);
-ceq(5*N+11,1) = 1 - gamma(1);
-ceq(5*N+12,1) = 0 - gamma(end);
-ceq(5*N+13,1) = 0 - alpha(1);
-ceq(5*N+14,1) = 1 - mass(1);
+ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - K*Drag./mass) - (sin(gamma)/R.^2))';
+ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1/R.^2)).*(cos(gamma)./V))';
+ceq(4*N+5:5*N+5,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
+
 end
 
 

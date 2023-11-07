@@ -1,11 +1,11 @@
-% single stage 2Dimensional Rocket Problem
+    % single stage 2Dimensional Rocket Problem
 % two_dimensional_rocket_single_stage_main.m
 clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 20;  % Order of the polynomial
+N = 40;  % Order of the polynomial
 addpath('../PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -31,9 +31,6 @@ a_sen_max = 3*g0;
 T_max_by_W = 1.5;
 Thrust_max = T_max_by_W*m0*g0;
 t0 = 0;
-theta_0 = 0;
-gamma_0 = pi/2;
-alpha_0 = 0;
 
 
 problem.Re = Re;
@@ -51,9 +48,7 @@ problem.Thrust_max = Thrust_max;
 problem.T_max_by_W = T_max_by_W;
 problem.q_max = q_max;
 problem.a_sen_max = a_sen_max;
-problem.theta_0 = theta_0;
-problem.gamma_0 = gamma_0;
-problem.alpha_0 = alpha_0;
+
 
 % Decision veriables
 x = zeros(7*N+8);
@@ -70,30 +65,18 @@ n_length = 1/Re;
 n_velocity = sqrt(Re/mu);
 n_time = n_length/n_velocity;
 n_mass = 1/m0;
-n_force = n_mass*n_length/n_time^2;
-n_theta = 1/theta_0;
-n_gamma = 1/gamma_0;
-n_alpha = 1/alpha_0;
+n_thrust = 1/(m0*g0);
 
-% Non Dimensionlization
-R = R*n_length;
-theta = theta *n_theta;
-V = V*n_velocity;
-gamma = gamma*n_gamma;
-mass = mass*n_mass;
-Thrust = Thrust * n_force;
-alpha = alpha * n_alpha;
-final_time = final_time*n_time;
 
 % Initial guess values for decision variables
 x0(1:N+1) = linspace(1,1+hf*n_length,N+1);
 x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = linspace(1,sqrt(mu/(Re+hf))/10,N+1);
-x0(3*N+4:4*N+4) = linspace(1,0,N+1);
+x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/(1+hf*n_velocity)),N+1);
+x0(3*N+4:4*N+4) = linspace(0,pi/2,N+1);
 x0(4*N+5:5*N+5) = linspace(1,1-mp0*n_mass,N+1);
-x0(5*N+6:6*N+6) = linspace(Thrust_max*n_force,0,N+1);
+x0(5*N+6:6*N+6) = linspace(Thrust_max*n_thrust,0,N+1);
 x0(6*N+7:7*N+7) = 0;
-x0(7*N+8) = 650*n_time;
+x0(7*N+8) = 600*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -102,22 +85,30 @@ Aeq = [];
 beq = [];
 
 % Lower and Upper bounds for the variables
-lb(1:N+1) = 1;
-lb(N+2:2*N+2) = -2;
-lb(2*N+3:3*N+3) = 1;
-lb(3*N+4:4*N+4) = -2;
+lb(1) = Re*n_length;
+lb(2:N) = Re*n_length;
+lb(N+1) = Re*n_length;
+lb(N+2:2*N+2) = -pi/2;
+lb(2*N+3) = 10*n_velocity;
+lb(2*N+4:3*N+2) = (10*n_velocity);
+lb(3*N+3) = sqrt(mu/(1+hf*n_length));
+lb(3*N+4:4*N+4) = -pi/2;
 lb(4*N+5:5*N+5) = 1-mp0*n_mass;
 lb(5*N+6:6*N+6) = 0;
-lb(6*N+7:7*N+7) = -2;
-lb(7*N+8) = 0;
+lb(6*N+7:7*N+7) = -pi/2;
+lb(7*N+8) = 600*n_time;
 
-ub(1:N+1) = inf;
-ub(N+2:2*N+2) = 2;
-ub(2*N+3:3*N+3) = 2*sqrt(mu/(Re+hf))/10;
-ub(3*N+4:4*N+4) = 2;
-ub(4*N+5:5*N+5) = 1;
-ub(5*N+6:6*N+6) = Thrust_max*n_force;
-ub(6*N+7:7*N+7) = 2;
+ub(1) = hf*n_length;
+ub(2:N) = 1.2*(hf*n_length);
+ub(N+1) = hf*n_length;
+ub(N+2:2*N+2) = pi/2;
+ub(2*N+3) = sqrt(mu/(1+hf*n_length));
+ub(2*N+4:3*N+2) = 1.2*sqrt(mu/(1+hf*n_length));
+ub(3*N+3) = sqrt(mu/(1+hf*n_length));
+ub(3*N+4:4*N+4) = pi/2;
+ub(4*N+5:5*N+5) = m0*n_mass;
+ub(5*N+6:6*N+6) = Thrust_max*n_thrust;
+ub(6*N+7:7*N+7) = pi/2;
 ub(7*N+8) = 1000*n_time;
 
 tic;
@@ -143,31 +134,28 @@ alpha = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
 
-h =  R/n_length - Re;
-rho = rho0 * exp(-(1/h_scale).*(h));
-g = mu./(R/n_length).^2;
-g = g/g0;
-g0 = 1;
-Isp = Isp*n_time;
-q = 0.5*rho.*(V/n_velocity.^2);
-Drag = q.* A_ref *CD;
-a_sen_v = (Thrust/n_force.* cos(alpha/n_alpha) - Drag)./(mass/n_mass);
-a_sen_gamma = (Thrust/n_force.* sin(alpha/n_alpha))./(mass/n_mass);
-a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
-Drag = Drag * n_force;
-
 % Dimensionlization
-% Non Dimensionlization
-R = R/n_length;
-theta = theta /n_theta;
-V = V/n_velocity;
-gamma = gamma/n_gamma;
-mass = mass/n_mass;
-Thrust = Thrust / n_force;
-alpha = alpha / n_alpha;
-final_time = final_time/n_time;
+R = R./n_length;               
+V = V./n_velocity;
+mass = mass./n_mass;
+Thrust = Thrust./n_thrust;
+final_time = final_time./n_time;
+t0 = t0/n_time;
+Isp = Isp./n_time;
 
-t = ((final_time/n_time-t0)/2).*nodes+(final_time/n_time+t0)/2;
+h =  R - Re;
+rho = rho0 * exp(-(h./h_scale));
+g = mu./R.^2;
+g0 = mu/Re;
+
+q = 0.5*rho.*(V).^2;
+Drag = q.* A_ref *CD;
+
+a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
+a_sen_gamma = (Thrust.* sin(alpha))./(mass);
+a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
+
+t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
 altitude = R-Re;
 velocity = V;
 
