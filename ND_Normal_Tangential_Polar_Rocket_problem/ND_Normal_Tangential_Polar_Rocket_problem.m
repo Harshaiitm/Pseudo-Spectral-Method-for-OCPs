@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
-N = 40;  % Order of the polynomial
+N = 50;  % Order of the polynomial
 addpath('../PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -69,14 +69,14 @@ n_thrust = 1/(m0*g0);
 
 
 % Initial guess values for decision variables
-x0(1:N+1) = linspace(1,1+hf*n_length,N+1);
+x0(1:N+1) = linspace(Re*n_length,(Re+hf)*n_length,N+1);
 x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/(1+hf*n_length)),N+1);
+x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/((Re+hf)*n_length)),N+1);
 x0(3*N+4:4*N+4) = linspace(0,pi/2,N+1);
-x0(4*N+5:5*N+5) = linspace(1,1-mp0*n_mass,N+1);
+x0(4*N+5:5*N+5) = linspace(m0*n_mass,(m0-mp0)*n_mass,N+1);
 x0(5*N+6:6*N+6) = linspace(Thrust_max*n_thrust,0,N+1);
 x0(6*N+7:7*N+7) = 0;
-x0(7*N+8) = 500*n_time;
+x0(7*N+8) = 650*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -91,21 +91,23 @@ lb(N+1) = Re*n_length;
 lb(N+2:2*N+2) = -pi/2;
 lb(2*N+3) = 10*n_velocity;
 lb(2*N+4:3*N+2) = (10*n_velocity);
-lb(3*N+3) = sqrt(mu/(1+hf*n_length));
+lb(3*N+3) = sqrt(mu/((Re+hf)*n_length));
 lb(3*N+4:4*N+4) = -pi/2;
-lb(4*N+5:5*N+5) = 1-mp0*n_mass;
+lb(4*N+5:5*N+5) = (m0-mp0)*n_mass;
 lb(5*N+6:6*N+6) = 0;
 lb(6*N+7:7*N+7) = -pi/2;
 lb(7*N+8) = 600*n_time;
 
 ub(1) = (Re+hf)*n_length;
-ub(2:N) = 1.2*(Re+hf*n_length);
+ub(2:N) = 1.2*((Re+hf)*n_length);
 ub(N+1) = (Re+hf)*n_length;
 ub(N+2:2*N+2) = pi/2;
-ub(2*N+3) = sqrt(mu/(1+hf*n_length));
-ub(2*N+4:3*N+2) = 1.2*sqrt(mu/(1+hf*n_length));
-ub(3*N+3) = sqrt(mu/(1+hf*n_length));
-ub(3*N+4:4*N+4) = pi/2;
+ub(2*N+3) = sqrt(mu/((Re+hf*n_length)));
+ub(2*N+4:3*N+2) = 1.2*sqrt(mu/((Re+hf)*n_length));
+ub(3*N+3) = sqrt(mu/((Re+hf)*n_length));
+ub(3*N+4) = pi/2;
+ub(3*N+5:4*N+3) = pi/2;
+ub(4*N+4) = 0;
 ub(4*N+5:5*N+5) = m0*n_mass;
 ub(5*N+6:6*N+6) = Thrust_max*n_thrust;
 ub(6*N+7:7*N+7) = pi/2;
