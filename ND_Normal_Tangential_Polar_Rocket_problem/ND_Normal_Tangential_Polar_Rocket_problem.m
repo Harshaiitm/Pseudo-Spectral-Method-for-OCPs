@@ -71,12 +71,12 @@ n_thrust = 1/(m0*g0);
 % Initial guess values for decision variables
 x0(1:N+1) = linspace(1,1+hf*n_length,N+1);
 x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/(1+hf*n_velocity)),N+1);
+x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/(1+hf*n_length)),N+1);
 x0(3*N+4:4*N+4) = linspace(0,pi/2,N+1);
 x0(4*N+5:5*N+5) = linspace(1,1-mp0*n_mass,N+1);
 x0(5*N+6:6*N+6) = linspace(Thrust_max*n_thrust,0,N+1);
 x0(6*N+7:7*N+7) = 0;
-x0(7*N+8) = 600*n_time;
+x0(7*N+8) = 500*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -98,9 +98,9 @@ lb(5*N+6:6*N+6) = 0;
 lb(6*N+7:7*N+7) = -pi/2;
 lb(7*N+8) = 600*n_time;
 
-ub(1) = hf*n_length;
-ub(2:N) = 1.2*(hf*n_length);
-ub(N+1) = hf*n_length;
+ub(1) = (Re+hf)*n_length;
+ub(2:N) = 1.2*(Re+hf*n_length);
+ub(N+1) = (Re+hf)*n_length;
 ub(N+2:2*N+2) = pi/2;
 ub(2*N+3) = sqrt(mu/(1+hf*n_length));
 ub(2*N+4:3*N+2) = 1.2*sqrt(mu/(1+hf*n_length));

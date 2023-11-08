@@ -18,9 +18,7 @@ T_max_by_W = problem.T_max_by_W;
 Thrust_max = problem.Thrust_max;
 q_max = problem.q_max;
 a_sen_max = problem.a_sen_max;
-theta_0 = problem.theta_0;
-gamma_0 = problem.gamma_0;
-alpha_0 = problem.alpha_0;
+
 
 n_length = 1/Re;
 n_velocity = sqrt(Re/mu);
@@ -49,24 +47,27 @@ g0 = mu/Re;
 
 q = 0.5*rho.*(V/n_velocity).^2;
 Drag = q.* A_ref *CD;
-Drag_ref = 0.5*rho_0*(mu/Re)*A_ref*CD;
-Drag = Drag./Drag_ref ;
+Drag_ref = m0*g0;
+Drag = Drag./Drag_ref;
+size(Drag)
 
 a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
 a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 
 K = 0.5*rho0*Re^3*CD/m0;
+size(K)
+
 
 
 c = zeros(2*N+2,1);
 c(1:N+1,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
 c(N+2:2*N+2,1) = (q - q_max)* 0.5 * rho0 * (mu/Re);
 
-ceq = zeros(5*N+14,1);
+ceq = zeros(5*N+5,1);
 ceq(1:N+1,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
 ceq(N+2:2*N+2,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
-ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - K*Drag./mass) - (sin(gamma)/R.^2))';
+ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - K*Drag./mass) - (sin(gamma)./R.^2))';
 ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1/R.^2)).*(cos(gamma)./V))';
 ceq(4*N+5:5*N+5,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
 
