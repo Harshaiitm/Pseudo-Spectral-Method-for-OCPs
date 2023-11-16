@@ -37,7 +37,7 @@ alpha = x(6*N+7:7*N+7);
 final_time = x(7*N+8);
 
 t0 = t0*n_time;
-final_time = final_time*n_time;
+% final_time = final_time*n_time;
 Isp = Isp*n_time;
 
 h =  R/n_length - Re;
