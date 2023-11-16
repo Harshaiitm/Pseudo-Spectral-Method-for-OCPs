@@ -155,7 +155,7 @@ Isp = Isp./n_time;
 h =  R - Re;
 rho = rho0 * exp(-(h./h_scale));
 g = mu./R.^2;
-g0 = mu/Re;
+g0 = mu/Re^2;
 
 q = 0.5*rho.*(V).^2;
 Drag = q.* A_ref *CD;
