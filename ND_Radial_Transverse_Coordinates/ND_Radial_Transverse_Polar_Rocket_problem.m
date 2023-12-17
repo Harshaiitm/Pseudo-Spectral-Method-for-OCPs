@@ -6,7 +6,7 @@ clc;clear all; close all;
 % pseudospectral method
 PS_method = 'LGL';   % either LGL or LG or LGR
 N = 40;  % Order of the polynomial
-addpath('.../PS_methods') % add the PS_method file directory
+addpath('C:\Users\Harshad\OneDrive\Desktop\Optimal Trajectory Transfer\2D_rocket_single_stage\PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
@@ -154,7 +154,7 @@ Isp = Isp./n_time;
 
 h =  R - Re;
 rho = rho0 * exp(-(1/h_scale).*(h));
-Thrust = (Thrust_r.^2 + Thrust_theta.^2).^0.5;
+Thrust_mag = (Thrust_r.^2 + Thrust_theta.^2).^0.5;
 g = mu./(R).^2;
 Drag_r = - 0.5*rho.* V_r.*(V_r.^2 + V_theta.^2).^0.5 *A_ref *CD;
 Drag_theta = - 0.5*rho.* V_theta.*(V_r.^2 + V_theta.^2).^0.5 *A_ref *CD;
@@ -169,17 +169,11 @@ velocity = (V_r.^2 + V_theta.^2).^0.5;
 
 
 % figure
-close all;
 figure(1)
 plot(t,altitude/1000,'g-','LineWidth',1.5)
 xlabel('time [s]')
 ylabel('Altitude [km]')
 hold on
-load alt_VS_time.csv
-ai1 = alt_VS_time(:,1);
-ai2 = alt_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
 title("Altitude variation w.r.t time")
 hold off
 grid on
@@ -189,82 +183,43 @@ plot(t,velocity/1000,'g-','LineWidth',1.5 )
 xlabel('Time [s]')
 ylabel('velocity [km/s]')
 hold on
-load velocity_VS_time.csv
-ai1 = velocity_VS_time(:,1);
-ai2 = velocity_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
 title("Velocity variation w.r.t time")
 hold off 
 
 figure(3)
-plot(t,mass/1000,'g-','LineWidth',1.5)
+plot(t,mass,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('mass [kg]')
 grid on
 hold on
-load mass_VS_time.csv
-ai1 = mass_VS_time(:,1);
-ai2 = mass_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
 title("Vehicle mass variation w.r.t time")
 hold off
 
+
+
 figure(4)
-plot(t,Thrust/1000,'g-','LineWidth',1.5)
+plot(t,Thrust_mag/1000,'g-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('Thrust [kN]')
 grid on
 hold on
-load thrust_VS_time.csv
-ai1 = thrust_VS_time(:,1);
-ai2 = thrust_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
 title("Thrust variation w.r.t time")
 hold off 
-
-figure(6)
-plot(theta*180/pi,altitude/1000,'g-',"LineWidth",1.5)
-xlabel('Downrange angle [degree]')
-ylabel('altiude')
-grid on
-hold on
-load alt_VS_downrange.csv
-ai1 = alt_VS_downrange(:,1);
-ai2 = alt_VS_downrange(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
-title("Downrange angle w.r.t altitude")
-hold off 
-
  
-figure(7)
+figure(5)
 plot(t,q/1000,'g-',"LineWidth",1.5)
 xlabel('Time [s]')
 ylabel('Dynamic Pressure [kPa]')
 grid on
 hold on
-load dynamic_pressure_VS_time.csv
-ai1 = dynamic_pressure_VS_time(:,1);
-ai2 = dynamic_pressure_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
-title("Dynamic Pressure w.r.t time")
+title("Sensed acceleration w.r.t time")
 hold off 
 
-figure(8)
+figure(6)
 plot(t,a_sen_mag/g0,'g-',"LineWidth",1.5)
 xlabel('Time [s]')
 ylabel('Sensed acceleration[gs]')
 grid on
 hold on
-ylim([0 3]);
-load sensedacce_VS_time.csv
-ai1 = sensedacce_VS_time(:,1);
-ai2 = sensedacce_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","NPSOL");
 title("Sensed acceleration w.r.t time")
 hold off 
