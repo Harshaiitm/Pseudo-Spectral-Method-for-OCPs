@@ -76,7 +76,7 @@ x0(3*N+4:4*N+4) = linspace(10*n_velocity,sqrt(mu/(Re+hf))*n_velocity,N+1);
 x0(4*N+5:5*N+5) = linspace(m0*n_mass,(m0-mp0)*n_mass,N+1);
 x0(5*N+6:6*N+6) = linspace(Thrust_max*n_thrust,0,N+1);
 x0(6*N+7:7*N+7) = linspace(Thrust_max*n_thrust,0,N+1);
-x0(7*N+8) = 0;
+x0(7*N+8) = 600*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -125,7 +125,7 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 20000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) ND_Radial_Transverse_Polar_Rocket_objective_func(x,N,m0),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Radial_Transverse_Polar_Rocket_Nonlinear_func_LGL(x,N,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) ND_Radial_Transverse_Polar_Rocket_objective_func(x,N,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Radial_Transverse_Polar_Rocket_Nonlinear_func_LGL(x,N,D,problem),options);
     end
     
 % Stop the timer and display the elapsed time
