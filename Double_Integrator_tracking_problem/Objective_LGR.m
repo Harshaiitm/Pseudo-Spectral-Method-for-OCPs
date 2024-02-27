@@ -1,7 +1,7 @@
 function Objective = Objective_LGR(x,x0,N,weights,t0,tf,t)
 x1 = [x0(1) x(2:N+1)];
 x2 = [x0(N+2) x(N+3:2*N+2)];
-x3 = [x0(2*N+3) x(2*N+4:3*N+3)];
+x3 = [NaN x(2*N+4:3*N+3)];
 xr = 5*sin(t');
 v = 5*cos(t');
 
