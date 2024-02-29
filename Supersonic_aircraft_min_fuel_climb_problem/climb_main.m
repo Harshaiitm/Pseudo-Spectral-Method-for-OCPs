@@ -4,7 +4,7 @@ clc;clear all; close all;
 % pseudospectral method
 PS_method = 'CGL';   % either LGL or LG or LGR
 N = 30;     % Order of the polynomial
-addpath('PS_methods') % add the PS_method file directory
+addpath('../PS_methods') % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
