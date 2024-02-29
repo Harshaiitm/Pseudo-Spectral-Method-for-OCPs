@@ -9,53 +9,56 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGR';   % either LGL or LG or LGR
-N = 8;     % Order of the polynomial
-addpath('PS_methods') % add the PS_method file directory
+PS_method = 'LGR';                          % either LGL or LG or LGR
+M = 10;                                     % Number of collocation points
+addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
-        [nodes,weights,D_LGL] = LGL_computations(N); % calculate scaled node locations and weights
-        % D=collocD(nodes); % segment differentiation matrix
-        D = D_LGL;
+        N = M-1;                            % Order of the polynomial
+        [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
+        D=collocD(nodes);                   % segment differentiation matrix
+    elseif strcmp(PS_method,'LGR')
+        N = M-2;                            % Order of the polynomial
+        [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
+        nodes = flip(-nodes);               % Flipped LGR method
+        nodes = [-1;nodes];                 % Introducing non-collocated point -1 
+        weights = flip(weights);            % weights are flipped
+        D = collocD(nodes);                 % differentiation matrix of size M by M
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
     elseif strcmp(PS_method,'LG')
+        N = M;                              % Order of the polynomial
         nodes(1) =-1;
         [nodes(2:N+1,1),weights]=LG_nodes(N,-1,1); % calculate scaled node locations and weights
         nodes(2:N+1,1) = flip(nodes(2:N+1,1));
-        nodes(N+1) = 1;
-        D=collocD(nodes); % segment differentiation matrix
-        D(N+1,:) = [];
-    elseif strcmp(PS_method,'LGR')
-        [nodes,weights] = LGR_nodes(N-1); % calculate scaled node locations and weights
-        nodes = flip(-nodes);
-        nodes = [-1;nodes];
-        weights = flip(weights);
-        D = collocD(nodes);          % segment differentiation matrix
-        D(1,:) = [];
-        % nodes(1) = []; 
+        % nodes(N+2) = 1;
+        D=collocD(nodes);                    % segment differentiation matrix
+        D(N,:) = [];
     elseif  strcmp(PS_method,'CGL')
-        [nodes] = CGL_nodes(N);     % calculate scaled node locations and weights
+        N = M-1;                             % Order of the polynomial
+        [nodes] = CGL_nodes(N);              % calculate scaled node locations and weights
         weights = CGL_weights(nodes);
-        D=collocD(nodes);           % segment differentiation matrix  
+        D=collocD(nodes);                    % segment differentiation matrix  
     end   
     
 %==============================================================================================%
-x = zeros(1,3*N+3);              % state and control vector assigned       
-x1 = x(1:N+1);                   % position                        
-x2 = x(N+2:2*N+2);               % velocity  
-x3 = x(2*N+3:3*N+3);             % accleration
+x = zeros(1,3*M);                            % state and control vector assigned       
+x1 = x(1:M);                                 % position                        
+x2 = x(M+1:2*M);                             % velocity  
+x3 = x(2*M+1:3*M);                           % accleration
+
 if strcmp(PS_method,'LG')
-    x1(N+1)=x1(1)+weights(1:N)'*(x1(1:N))';
-    x2(N+1)=x2(1)+weights(1:N)'*(x2(1:N))';
-    x3(N+1)=x3(1)+weights(1:N)'*(x3(1:N))';
+    x1(N+2)=x1(1)+weights(1:N)'*(x1(2:N+1))';
+    x2(N+2)=x2(1)+weights(1:N)'*(x2(2:N+1))';
+    x3(N+2)=x3(1)+weights(1:N)'*(x3(2:N+1))';
 end
 
 % initialization of state and control variables
-t0 = 0;                          % initial time   
-tf = 10;                         % final time
+t0 = 0;                                     % initial time   
+tf = 10;                                    % final time
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
-x0(1:N+1) = 0;         % position
-x0(N+2:2*N+2) = 5;     % velocity
-x0(2*N+3:3*N+3) = 0;          % (Force for unit mass)
+x0(1:M) = 0;                                % position
+x0(M+1:2*M) = 5;                            % velocity
+x0(2*M+1:3*M) = 0;                          % (Force for unit mass)
 
 
 % linear inequality and equality constraints
@@ -65,12 +68,12 @@ Aeq = [];
 beq = [];
 
 % Lower and Upper bounds for the variables
-lb(1:N+1) = -6;
-lb(N+2:2*N+2) = -10;
-lb(2*N+3:3*N+3) = -10;
-ub(1:N+1) = 6;
-ub(N+2:2*N+2) = 10;
-ub(2*N+3:3*N+3) = 10;
+lb(1:M) = -6;
+lb(M+1:2*M) = -10;
+lb(2*M+1:3*M) = -10;
+ub(1:M) = 6;
+ub(M+1:2*M) = 10;
+ub(2*M+1:3*M) = 10;
 
 
 %==============================================================================================%
@@ -82,11 +85,11 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 20000,'MaxFunctionEvaluations',...
 500000);
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Objective_LGL(x,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_LGL(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,M,D,t0,tf),options);
+    elseif strcmp(PS_method,'LGR')
+       [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,x0,M,D,t0,tf),options);
     elseif strcmp(PS_method,'LG') 
        [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf,weights),options);
-    elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,x0,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,x0,N,D,t0,tf),options);
     elseif strcmp(PS_method,'CGL')
        [x,fval,ef,output] = fmincon(@(x) Objective_CGL(x,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,N,D,t0,tf),options);
     end 
@@ -98,55 +101,44 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
 
 %========================================================================================================
-% Plotting               % state and control vector assigned       
-x1 = x(1:N+1);                   % position                        
-x2 = x(N+2:2*N+2);               % velocity  
-x3 = x(2*N+3:3*N+3);             % accleration
+% Plotting                                     % state and control vector assigned       
+x1 = x(1:M);                                   % position                        
+x2 = x(M+1:2*M);                               % velocity  
+x3 = x(2*M+1:3*M);                             % accleration
+
 if strcmp(PS_method,'LGR')
-    x1 = [x0(1) x(2:N+1)];                       % position
-    x2 = [x0(N+2) x(N+3:2*N+2)];                 % velocity
-    x3 = [x(2*N+4:3*N+3)];             % accleration
+    x1 = x(1:M);                       % position
+    x2 = x(M+1:2*M);                 % velocity
+    x3 = x(2*M+2:3*M);                       % accleration
 end    
 if strcmp(PS_method,'LG')
-    x1 = x(1:N);                   % position                        
-    x2 = x(N+2:2*N+1);               % velocity  
-    x3 = x(2*N+2:3*N+2);             % accleration
-    x1(N+1)=x1(1)+weights(1:N)'*(x1(1:N))';
-    x2(N+1)=x2(1)+weights(1:N)'*(x2(1:N))';
-    x3(N+1)=x3(1)+weights(1:N)'*(x3(1:N))';
+    x1 = x(1:N+1);                             % position                        
+    x2 = x(N+2:2*N+1);                         % velocity  
+    x3 = x(2*N+2:3*N+2);                       % accleration
+    x1(N+2)=x1(1)+weights(1:N)'*(x1(2:N+1))';
+    x2(N+2)=x2(1)+weights(1:N)'*(x2(2:N+1))';
+    x3(N+2)=x3(1)+weights(1:N)'*(x3(2:N+1))';
 end
 
 % Lagrange interpolation
-% z = linspace(1,1000,length(nodes));  % at time in seconds
 collocation_points=t';
-% z_value =t;
-
 
 tic;
 z = 0:0.01:t(end);
-function_value=x1;
+function_value= x1;
 x1R = 5*sin(z);
 x2R = 5*cos(z);
 position= lagrange_interpolation_n(collocation_points, function_value, z);
-% disp(['Position Equation:', char(Position_equation)]);
-% position = subs(Position_equation,z,z_value);
-% disp(['Position =',char(position),'m']);
 
 function_value=x2;
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
-% % disp(['Velocity Equation:', char(velocity_equation)]);
-% velocity = subs(velocity_equation,z,z_value);
-% % disp(['Velocity =',char(velocity),'m/s']);
 
 if strcmp(PS_method,'LGR')
-   collocation_points = (t(2:N+1))'; 
+   collocation_points = (t(2:M))'; 
 end
 function_value=x3;
 acceleration=lagrange_interpolation_n(collocation_points, function_value, z);
-% % disp(['Acceleration =',char(acceleration_equation),'m/s^2']);
-% acceleration = subs(acceleration_equation,z,z_value);
-% % disp(['acceleration =',char(acceleration),'m/s^2']);
-% 
+
 elapsedTime = toc;
 disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 

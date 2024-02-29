@@ -1,9 +1,9 @@
-function Objective = Objective_LGR(x,x0,N,weights,t0,tf,t)
-x1 = [x0(1) x(2:N+1)];
-x2 = [x0(N+2) x(N+3:2*N+2)];
-x3 = [NaN x(2*N+4:3*N+3)];
-xr = 5*sin(t');
-v = 5*cos(t');
+function Objective = Objective_LGR(x,M,weights,t0,tf,t)
+x1 = x(2:M);
+x2 = x(M+2:2*M);
+x3 = x(2*M+2:3*M);
+xr = 5*sin(t(2:M))';
+vr = 5*cos(t(2:M))';
 
-Objective = ((tf-t0)/2)*(sum(((x1(2:N+1)-xr(2:N+1)).*(x1(2:N+1)-xr(2:N+1)))'.*weights + ((x2(2:N+1)-v(2:N+1)).*(x2(2:N+1)-v(2:N+1)))'.*weights + (x3(2:N+1).*x3(2:N+1))'.*weights*0.0001));
+Objective = ((tf-t0)/2)*(sum(((x1-xr).*(x1-xr))'.*weights + ((x2-vr).*(x2-vr))'.*weights + (x3.*x3)'.*weights*0.0001));
 end
