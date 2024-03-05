@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                          % either LGL or LG or LGR
-M = 11;                                     % Number of collocation points
+PS_method = 'LG';                          % either LGL or LG or LGR
+M = 12;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -129,7 +129,7 @@ if strcmp(PS_method,'LGR')
 end
 if strcmp(PS_method,'LG')
     collocation_points=[t0 t' tf ];
-    function_value= [x0(1) x1 x1(M+1)];
+    function_value= [x0(1) x1];
 end
 x1R = 5*sin(z);
 x2R = 5*cos(z);
@@ -140,7 +140,7 @@ if strcmp(PS_method,'LGR')
     function_value= [x0(M+1) x2];
 end
 if strcmp(PS_method,'LG')
-    function_value= [x0(M+1) x2 x2(M+1)];
+    function_value= [x0(M+1) x2];
 end
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 
