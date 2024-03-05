@@ -1,20 +1,15 @@
-function [c, ceq, dc, dceq] = Nonlinearcon_LG(x,N,D,t0,tf,weights)
+function [c, ceq, dc, dceq] = Nonlinearcon_LG(x,x0,M,D,t0,tf,weights)
 c = [];
 dc = [];
 dceq = [];
-x1 = x(1:N+1);
-x1(N+2)=x1(1)+weights(1:N)'*(x1(2:N+1))';
-x2 = x(N+2:2*N+2);
-x2(N+2)=x2(1)+weights(1:N)'*(x2(2:N+1))';
-x3 = x(2*N+3:3*N+3);
-x3(N+2)=x3(1)+weights(1:N)'*(x3(2:N+1))';
 
-ceq = zeros(2*N+5,1);
-ceq(1:N,1) = D * x1' - ((tf-t0)/2)*(x2(1:N+1))';
-ceq(N+1,1) =x1(N+2)-x1(1)-weights(1:N)'*(x1(2:N+1))';
-ceq(N+2,1) =x2(N+2)-x2(1)-weights(1:N)'*(x2(2:N+1))';
-ceq(N+3:2*N+2,1) = D * x2' -((tf-t0)/2)*(x3(2:N+1))';
-ceq(2*N+3,1) =x3(N+2)-x3(1)-weights(1:N)'*(x3(2:N+1))';
-ceq(2*N+4,1) = x(1)-0;            % starting point
-ceq(2*N+5,1) = x(N+2)-5;
+x1 = x(1:M);
+x2 = x(M+1:2*M);
+x3 = x(2*M+1:3*M);
+
+ceq = zeros(2*M+2,1);
+% x1(M+1)= x0(1) + weights'*x1';
+ceq(1:M,1) = D*[x0(1) x1 x0(M)]' - ((tf-t0)/2) * x2';
+% x2(M+1) =  x0(M+1) + weights'*x2';
+ceq(M+1:2*M,1) = D*[x0(M+1) x2 x0(2*M)]' -((tf-t0)/2) * x3';
 end

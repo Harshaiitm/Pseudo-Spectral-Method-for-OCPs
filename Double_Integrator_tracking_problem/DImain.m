@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';                          % either LGL or LG or LGR
-M = 10;                                     % Number of collocation points
+PS_method = 'CGL';                          % either LGL or LG or LGR
+M = 11;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -22,19 +22,22 @@ addpath('../PS_methods')                    % add the PS_method file directory
         [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
         nodes = flip(-nodes);               % Flipped LGR method
         weights = flip(weights);            % weights are flipped
-
         nodes = [-1;nodes];                 % Introducing non-collocated point -1 
         D = collocD(nodes);                 % differentiation matrix of size M by M
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
         nodes(1) = [];
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
-        nodes(1) =-1;
-        [nodes(2:N+1,1),weights]=LG_nodes(N,-1,1); % calculate scaled node locations and weights
-        nodes(2:N+1,1) = flip(nodes(2:N+1,1));
-        % nodes(N+2) = 1;
-        D=collocD(nodes);                    % segment differentiation matrix
-        D(N,:) = [];
+        [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
+        nodes = flip(nodes);                % Flipped LG method
+        weights = flip(weights);            % weights are flipped
+        nodes = [-1;nodes;1];               % Introducing non-collocated point -1 and 1
+        D=collocD(nodes);                   % segment differentiation matrix
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        D(M+1,:) = [];
+        nodes(1) = [];
+        nodes(M+1) = [];
+    
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
         [nodes] = CGL_nodes(N);              % calculate scaled node locations and weights
@@ -43,17 +46,11 @@ addpath('../PS_methods')                    % add the PS_method file directory
     end   
     
 %==============================================================================================%
-
 x = zeros(1,3*M);                            % state and control vector assigned       
 x1 = x(1:M);                                 % position                        
 x2 = x(M+1:2*M);                             % velocity  
 x3 = x(2*M+1:3*M);                           % accleration
 
-if strcmp(PS_method,'LG')
-    x1(N+2)=x1(1)+weights(1:N)'*(x1(2:N+1))';
-    x2(N+2)=x2(1)+weights(1:N)'*(x2(2:N+1))';
-    x3(N+2)=x3(1)+weights(1:N)'*(x3(2:N+1))';
-end
 
 % initialization of state and control variables
 t0 = 0;                                     % initial time   
@@ -94,9 +91,9 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
     elseif strcmp(PS_method,'LGR')
        [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,x0,M,D,t0,tf),options);
     elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,N,D,t0,tf,weights),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,x0,M,D,t0,tf,weights),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) Objective_CGL(x,N,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,N,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_CGL(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,M,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -113,12 +110,11 @@ x3 = x(2*M+1:3*M);                             % accleration
 
     
 if strcmp(PS_method,'LG')
-    x1 = x(1:N+1);                             % position                        
-    x2 = x(N+2:2*N+1);                         % velocity  
-    x3 = x(2*N+2:3*N+2);                       % accleration
-    x1(N+2)=x1(1)+weights(1:N)'*(x1(2:N+1))';
-    x2(N+2)=x2(1)+weights(1:N)'*(x2(2:N+1))';
-    x3(N+2)=x3(1)+weights(1:N)'*(x3(2:N+1))';
+    x1 = x(1:M);                               % position                        
+    x2 = x(M+1:2*M);                           % velocity  
+    x3 = x(2*M+1:3*M);                         % accleration
+    x1(M+1)=x0(1) + weights'*x1';
+    x2(M+1)=x0(M+1) + weights'*x2';
 end
 
 % Lagrange interpolation
@@ -128,8 +124,12 @@ tic;
 z = t0:0.01:tf;
 function_value= x1;
 if strcmp(PS_method,'LGR')
-    collocation_points=[0 t'];
+    collocation_points=[t0 t'];
     function_value= [x0(1) x1];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t' tf ];
+    function_value= [x0(1) x1 x1(M+1)];
 end
 x1R = 5*sin(z);
 x2R = 5*cos(z);
@@ -139,10 +139,16 @@ function_value=x2;
 if strcmp(PS_method,'LGR')
     function_value= [x0(M+1) x2];
 end
+if strcmp(PS_method,'LG')
+    function_value= [x0(M+1) x2 x2(M+1)];
+end
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 
 if strcmp(PS_method,'LGR')
    collocation_points = t'; 
+end
+if strcmp(PS_method,'LG')
+   collocation_points = t';
 end
 function_value=x3;
 acceleration=lagrange_interpolation_n(collocation_points, function_value, z);
@@ -185,7 +191,6 @@ legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem',PS_method);
 grid on
 set(gca, 'FontSize', 40);
-
 
 
 
