@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LG';                          % either LGL or LG or LGR
-M = 12;                                     % Number of collocation points
+PS_method = 'CGL';                          % either LGL or LG or LGR
+M = 11;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -31,12 +31,10 @@ addpath('../PS_methods')                    % add the PS_method file directory
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
         nodes = flip(nodes);                % Flipped LG method
         weights = flip(weights);            % weights are flipped
-        nodes = [-1;nodes;1];               % Introducing non-collocated point -1 and 1
+        nodes = [-1;nodes];                 % Introducing non-collocated point -1
         D=collocD(nodes);                   % segment differentiation matrix
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
-        D(M+1,:) = [];
         nodes(1) = [];
-        nodes(M+1) = [];
     
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
@@ -87,13 +85,13 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 20000,'MaxFunctionEvaluations',...
 500000);
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Objective_LGL(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGL(x,M,D,t0,tf),options);
     elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) Objective_LGR(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,x0,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LGR(x,x0,M,D,t0,tf),options);
     elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) Objective_LG(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,x0,M,D,t0,tf,weights),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_LG(x,x0,M,D,t0,tf),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) Objective_CGL(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) Nonlinearcon_CGL(x,M,D,t0,tf),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -128,7 +126,7 @@ if strcmp(PS_method,'LGR')
     function_value= [x0(1) x1];
 end
 if strcmp(PS_method,'LG')
-    collocation_points=[t0 t' tf ];
+    collocation_points=[t0 t'];
     function_value= [x0(1) x1];
 end
 x1R = 5*sin(z);
