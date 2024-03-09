@@ -141,7 +141,6 @@ if strcmp(PS_method,'LG')
     mass = x(3*M+1:4*M);                      % aircraft mass
     mass(M+1)= x0(3*M+1) + weights'*mass';
     alpha = x(4*M+1:5*M);                     % angle of attack
-    alpha(M+1)= x0(4*M+1) + weights'*alpha';
     final_time = x(5*M+1);
  end
 
