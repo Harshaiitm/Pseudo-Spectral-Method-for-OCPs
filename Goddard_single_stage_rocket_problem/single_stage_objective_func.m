@@ -1,4 +1,4 @@
-function Objective = single_stage_objective_func(x,N)
-h_f = x(N+1);        
+function Objective = single_stage_objective_func(x,M)
+h_f = x(M);        
 Objective = -h_f;
 end

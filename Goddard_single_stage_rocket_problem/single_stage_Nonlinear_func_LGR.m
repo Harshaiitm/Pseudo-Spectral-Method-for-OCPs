@@ -1,14 +1,14 @@
-function [c,ceq,dc,dceq] = single_stage_Nonlinear_func_LGR(x,N,D,problem)   %inequality constarints                      
+function [c,ceq,dc,dceq] = single_stage_Nonlinear_func_LGR(x,x0,M,D,problem)   %inequality constarints                      
 c = [];
 dc = [];
 dceq = [];
 
 % Decision veriables
-h = x(1:N+1);
-v = x(N+2:2*N+2);
-mass = x(2*N+3:3*N+3);
-Thrust = x(3*N+4:4*N+4);
-final_time = x(4*N+5);
+h = x(1:M);
+v = x(M+1:2*M);
+mass = x(2*M+1:3*M);
+Thrust = x(3*M+1:4*M);
+final_time = x(4*M+1);
 
 Re = problem.Re;
 h_scale = problem.h_scale;
@@ -28,16 +28,16 @@ g = mu./r.^2;
 Drag = 0.5*rho.* v.^2 *A_ref *CD;
 % mp = m0-mass;
 
-ceq = zeros(3*N+5,1);
-ceq(1:N,1) = D*h'-((final_time-t0)/2)* (v(1:N))';
-ceq(N+1:2*N,1)=D*v' - ((final_time-t0)/2)*((Thrust(1:N)-Drag(1:N))./mass(1:N) - mu./r(1:N).^2)';
-ceq(2*N+1:3*N,1) = D*mass'+((final_time-t0)/2)*(Thrust(1:N)./(g0.*Isp))';
-ceq(3*N+1) = 0-h(1);
-ceq(3*N+2) =0-v(1);
-ceq(3*N+3) =m0-mass(1);
-ceq(3*N+4) = mass(end)-2000;
-ceq(3*N+5) = Thrust(1)-m0*g0*2;
 
+ceq = zeros(3*M+5,1);
+ceq(1:M,1) = D*[x0(1) h]'-((final_time-t0)/2)* v';
+ceq(M+1:2*M,1)=D*[x0(M+1) v]' - ((final_time-t0)/2)*((Thrust - Drag)./mass - mu./r.^2)';
+ceq(2*M+1:3*M,1) = D*[x0(2*M+1) mass]'+((final_time-t0)/2)*(Thrust./(g0.*Isp))';
+ceq(3*M+1) = 0-h(1);
+ceq(3*M+2) =0-v(1);
+ceq(3*M+3) =m0-mass(1);
+ceq(3*M+4) = mass(end)-2000;
+ceq(3*M+5) = Thrust(1)-m0*g0*2;
 end
 
 
