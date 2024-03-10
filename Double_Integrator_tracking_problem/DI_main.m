@@ -9,7 +9,7 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                          % either LGL or LG or LGR
+PS_method = 'CGL';                          % either LGL or LG or LGR or CGL
 M = 11;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
