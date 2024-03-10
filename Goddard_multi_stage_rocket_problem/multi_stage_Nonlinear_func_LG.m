@@ -1,4 +1,4 @@
-function [c,ceq,dc,dceq] = multi_stage_Nonlinear_func_LGL(x,M,D,problem)   %inequality constarints                      
+function [c,ceq,dc,dceq] = multi_stage_Nonlinear_func_LG(x,x0,M,D,problem)   %inequality constarints                      
 
 c = [];
 dc = [];
@@ -42,12 +42,12 @@ Drag_2 = 0.5*rho_2.* v_2.^2 *A_ref *CD;
 
 
 ceq = zeros(6*M+8,1);
-ceq(1:M,1) = D*h_1'-((stage_time-t0)/2)* (v_1)';
-ceq(M+1:2*M,1)= D*v_1' - ((stage_time-t0)/2)*((Thrust_1-Drag_1)./mass_1 - mu./r_1.^2)';
-ceq(2*M+1:3*M,1) = D*mass_1'+((stage_time-t0)/2)*(Thrust_1./(g0.*Isp))';
-ceq(3*M+1:4*M,1) = D*h_2'-((final_time-stage_time)/2)* (v_2)';
-ceq(4*M+1:5*M,1)= D*v_2' - ((final_time-stage_time)/2)*((Thrust_2-Drag_2)./mass_2 - mu./r_2.^2)';
-ceq(5*M+1:6*M,1) = D*mass_2'+((final_time-stage_time)/2)*(Thrust_2./(g0.*Isp))';
+ceq(1:M,1) = D*[x0(1) h_1]'-((stage_time-t0)/2)* (v_1)';
+ceq(M+1:2*M,1)= D*[x0(M+1) v_1]' - ((stage_time-t0)/2)*((Thrust_1-Drag_1)./mass_1 - mu./r_1.^2)';
+ceq(2*M+1:3*M,1) = D*[x0(2*M+1) mass_1]'+((stage_time-t0)/2)*(Thrust_1./(g0.*Isp))';
+ceq(3*M+1:4*M,1) = D*[x0(4*M+1) h_2]'-((final_time-stage_time)/2)* (v_2)';
+ceq(4*M+1:5*M,1)= D*[x0(5*M+1) v_2]' - ((final_time-stage_time)/2)*((Thrust_2-Drag_2)./mass_2 - mu./r_2.^2)';
+ceq(5*M+1:6*M,1) = D*[x0(6*M+1) mass_2]'+((final_time-stage_time)/2)*(Thrust_2./(g0.*Isp))';
 ceq(6*M+1) = 0-h_1(1);
 ceq(6*M+2) = h_2(1)-h_1(end);
 ceq(6*M+3) = 0-v_1(1);
@@ -57,12 +57,7 @@ ceq(6*M+6) = mass_1(end)-3200;
 ceq(6*M+7) = mass_2(1)-2000;
 ceq(6*M+8) = mass_2(end)-800;
 
- 
 
-
-% c = zeros(2,1);
-% c(1) =mass_2(1)-mass_1(end)+1200;
-% c(2) = stage_time-final_time-0.10;
  
 end
 
