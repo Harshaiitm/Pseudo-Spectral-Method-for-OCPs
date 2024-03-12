@@ -2,7 +2,7 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LG';                          % either LGL or LG or LGR or CGL
+PS_method = 'LGL';                          % either LGL or LG or LGR or CGL
 M = 30;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
@@ -71,7 +71,7 @@ x0(2*M) = 295.092;                          % final velocity
 x0(2*M+1:3*M) = 0;                          %  gamma
 x0(3*M+1:4*M) = 19050.864;                  % mass
 x0(4*M+1:5*M) = 0;                          % alpha
-x0(5*M+1) = 324;                            % final time
+x0(5*M+1) = 450;                            % final time
 
 
 % linear inequality and equality constraints
@@ -205,7 +205,8 @@ alpha = lagrange_interpolation_n(collocation_points,function_value,z);
 % figure
 figure(1)
 plot(velocity/100,altitude,'g-','LineWidth',1.5)
-ylim([0 20000])
+ylim([-50 20000])
+xlim([1 5])
 xlabel('Airspeed [100 m/s]')
 ylabel('Altitude [m]')
 hold on
