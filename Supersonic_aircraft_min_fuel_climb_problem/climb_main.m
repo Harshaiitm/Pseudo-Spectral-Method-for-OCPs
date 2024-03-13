@@ -2,14 +2,15 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';                          % either LGL or LG or LGR or CGL
-M = 30;                                     % Number of collocation points
+PS_method = 'CGL';                           % either LGL or LG or LGR or CGL
+M = 45;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
         D=collocD(nodes);                   % segment differentiation matrix
+    
     elseif strcmp(PS_method,'LGR')
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
@@ -19,6 +20,7 @@ addpath('../PS_methods')                    % add the PS_method file directory
         D = collocD(nodes);                 % differentiation matrix of size M by M
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
         nodes(1) = [];
+    
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
@@ -46,15 +48,6 @@ t0 = 0;
 tf = 400;
 t = ((tf-t0)/2).*nodes+(tf+t0)/2;
 
-problem.Re = Re;
-problem.mu = mu;
-problem.S = S;
-problem.g0 =g0;
-problem.Isp = Isp;
-problem.t0 = t0;
-problem.weights = weights;
-
-
 x = zeros(5*M+1);
 h = x(1:M);
 v = x(M+1:2*M);
@@ -65,13 +58,39 @@ final_time = x(5*M+1);
 
 % Guess values
 x0(1:M-1) = 0;                              % altitude
-x0(M) = 19994.88;                           %  final altitude
+x0(M) = 19994.88;                           % final altitude
 x0(M+1:2*M-1) = 129.314;                    % initial velocity
 x0(2*M) = 295.092;                          % final velocity
 x0(2*M+1:3*M) = 0;                          %  gamma
 x0(3*M+1:4*M) = 19050.864;                  % mass
 x0(4*M+1:5*M) = 0;                          % alpha
-x0(5*M+1) = 450;                            % final time
+x0(5*M+1) = 400;                            % final time
+
+
+% Intial and Final conditions
+hi = 0;
+hf = 19995;
+vi = 129;
+vf = 295;
+gamma_i = 0;
+gamma_f = 0;
+mass_i = 19050;
+
+problem.Re = Re;
+problem.mu = mu;
+problem.S = S;
+problem.g0 =g0;
+problem.Isp = Isp;
+problem.t0 = t0;
+problem.weights = weights;
+problem.x0 = x0;
+problem.hi = hi;
+problem.hf = hf;
+problem.vi = vi;
+problem.vf = vf;
+problem.gamma_i = gamma_i;
+problem.gamma_f = gamma_f;
+problem.mass_i = mass_i;
 
 
 % linear inequality and equality constraints
@@ -112,9 +131,9 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
     if strcmp(PS_method,'LGL')
        [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LGR(x,x0,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LGR(x,M,D,problem),options);
     elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LG(x,x0,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_LG(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
        [x,fval,ef,output] = fmincon(@(x) climb_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) climb_Nonlinear_func_CGL(x,M,D,problem),options);
     end
@@ -133,18 +152,16 @@ final_time = x(5*M+1);
 
 if strcmp(PS_method,'LG')
     h = x(1:M);                               % altitude
-    h(M+1)= x0(1) + weights'*h';
+    h(M+1)= hi + weights'*h';
     v = x(M+1:2*M);                           % velocity  
-    v(M+1)= x0(M+1) + weights'*v';
+    v(M+1)= vi + weights'*v';
     gamma = x(2*M+1:3*M);                     % flight path angle
-    gamma(M+1)= x0(2*M+1) + weights'*gamma';
+    gamma(M+1)= gamma_i + weights'*gamma';
     mass = x(3*M+1:4*M);                      % aircraft mass
-    mass(M+1)= x0(3*M+1) + weights'*mass';
+    mass(M+1)= mass_i + weights'*mass';
     alpha = x(4*M+1:5*M);                     % angle of attack
     final_time = x(5*M+1);
  end
-
-
 
 
 % Lagrange interpolation
@@ -156,48 +173,48 @@ collocation_points = t';
 function_value = h;
 if strcmp(PS_method,'LGR')
     collocation_points = [t0 t'];
-    function_value = [x0(1) h];
+    function_value = [hi h];
 end
 if strcmp(PS_method,'LG')
     collocation_points = [t0 t'];
-    function_value = [x0(1) h];
+    function_value = [hi h];
 end
 altitude = lagrange_interpolation_n(collocation_points, function_value, z);
 
 
 function_value = v;
 if strcmp(PS_method,'LGR')
-    function_value = [x0(M+1) v];
+    function_value = [vi v];
 end
 if strcmp(PS_method,'LG')
-    function_value = [x0(M+1) v];
+    function_value = [vi v];
 end
 velocity = lagrange_interpolation_n(collocation_points, function_value, z);
 
 function_value = gamma;
 if strcmp(PS_method,'LGR')
-    function_value= [x0(2*M+1) gamma];
+    function_value= [gamma_i gamma];
 end
 if strcmp(PS_method,'LG')
-    function_value= [x0(2*M+1) gamma];
+    function_value= [gamma_i gamma];
 end
 gamma = lagrange_interpolation_n(collocation_points, function_value, z);
 
 function_value = mass;
 if strcmp(PS_method,'LGR')
-    function_value = [x0(3*M+1) mass];
+    function_value = [mass_i mass];
 end
 if strcmp(PS_method,'LG')
-    function_value = [x0(3*M+1) mass];
+    function_value = [mass_i mass];
 end
 mass = lagrange_interpolation_n(collocation_points,function_value,z);
 
 function_value = alpha;
 if strcmp(PS_method,'LGR')
-    function_value= [x0(4*M+1) alpha];
+    collocation_points = t';
 end
 if strcmp(PS_method,'LG')
-    function_value= [x0(4*M+1) alpha];
+    collocation_points = t';
 end
 alpha = lagrange_interpolation_n(collocation_points,function_value,z);
 
