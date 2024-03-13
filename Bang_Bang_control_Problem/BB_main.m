@@ -9,7 +9,7 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';                          % either LGL or LG or LGR or CGL
+PS_method = 'CGL';                          % either LGL or LG or LGR or CGL
 M = 30;                                     % number of collocation points
 
 addpath('../PS_methods')                    % add the PS_method file directory
@@ -27,6 +27,7 @@ addpath('../PS_methods')                    % add the PS_method file directory
         D = collocD(nodes);                 % differentiation matrix of size M by M
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
         nodes(1) = [];
+
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
@@ -51,29 +52,40 @@ x2 = x(M+1:2*M);                    % velocity vector
 x3 = x(2*M+1:3*M);                  % Acceleration vector
 x4 = x(3*M+1);                      % final time
 t0 = 0;
-tf = 35;
-t = ((tf-t0)/2).*nodes+(tf+t0)/2;
+% tf = 35;
+% t = ((tf-t0)/2).*nodes+(tf+t0)/2;
 
 % initialization of state and control variables
-x0(1) = 0;
-x0(2:M) = 0;
-x0(M+1) = 0;
-x0(M+2:2*M) = 0;
+x0(1:M) = 0;
+x0(M+1:2*M) = 0;
 x0(2*M+1) = 0;
-x0(2*M+2:3*M) =1;
-x0(3*M+1) = 5;
+x0(2*M+2:3*M) = 1;
+x0(3*M+1) = 30;
 
+
+xi = 0;
+xf = 300;
+vi = 0;
+vf = 0;
+
+problem.xi = xi;
+problem.xf = xf;
+problem.vi = vi;
+problem.vf = vf;
+problem.x0 = x0;
+problem.t0 = t0;
+problem.weights = weights;
 
 A = [];
 b = [];
 Aeq = [];
 beq = [];
-lb = x;
+
 lb(1:M) = -10;
 lb(M+1:2*M) = -200;
 lb(2*M+1:3*M) = -2;
 lb(3*M+1) = 0;
-ub = x;
+
 ub(1:M) = 300;
 ub(M+1:2*M) = 200;
 ub(2*M+1:3*M) = 1;
@@ -87,13 +99,13 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
 200000);
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LGL(x,M,D,t0),options);
+       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LGR(x,x0,M,D,t0),options);
+       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LGR(x,M,D,problem),options);
     elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LG(x,x0,M,D,t0),options);
+       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LG(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(tf) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_CGL(x,M,D,t0),options);
+       [x,fval,ef,output] = fmincon(@(tf) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_CGL(x,M,D,problem),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -116,8 +128,8 @@ if strcmp(PS_method,'LG')
     x2 = x(M+1:2*M);                           % velocity  
     x3 = x(2*M+1:3*M);                         % accleration
     x4 = x(3*M+1);
-    x1(M+1)=x0(1) + weights'*x1';
-    x2(M+1)=x0(M+1) + weights'*x2';
+    x1(M+1) = xi + weights'*x2';
+    x2(M+1) = vi + weights'*x3';
 end
 
 
@@ -132,11 +144,11 @@ function_value=x1;
 
 if strcmp(PS_method,'LGR')
     collocation_points=[t0 t'];
-    function_value= [x0(1) x1];
+    function_value= [xi x1];
 end
 if strcmp(PS_method,'LG')
     collocation_points=[t0 t'];
-    function_value= [x0(1) x1];
+    function_value= [xi x1];
 end
 position= lagrange_interpolation_n(collocation_points, function_value, z);
 
@@ -144,11 +156,11 @@ position= lagrange_interpolation_n(collocation_points, function_value, z);
 function_value=x2;
 if strcmp(PS_method,'LGR')
     collocation_points=[t0 t'];
-    function_value= [x0(M+1) x2];
+    function_value= [vi x2];
 end
 if strcmp(PS_method,'LG')
     collocation_points=[t0 t'];
-    function_value= [x0(M+1) x2];
+    function_value= [vi x2];
 end
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 
