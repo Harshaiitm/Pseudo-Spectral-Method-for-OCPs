@@ -1,4 +1,10 @@
-function Objective = DI_Objective_func(x,M,weights,t0,tf,t)
+function Objective = DI_Objective_func(x,M,weights,t,problem)
+
+xi = problem.xi;
+vi = problem.vi;
+t0 = problem.t0;
+tf = problem.tf;
+
 x1 = x(1:M);                   % position  
 x2 = x(M+1:2*M);               % velocity 
 x3 = x(2*M+1:3*M);             % accleration

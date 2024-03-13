@@ -59,6 +59,16 @@ x0(1:M) = 0;                                % position
 x0(M+1:2*M) = 5;                            % velocity
 x0(2*M+1:3*M) = 0;                          % (Force for unit mass)
 
+% starting point
+xi = 0;                                     % position                            
+vi = 5;                                     % velocity
+
+problem.xi = xi;
+problem.vi = vi;
+problem.x0 = x0;
+problem.t0 = t0;
+problem.tf = tf;
+
 
 % linear inequality and equality constraints
 A = [];
@@ -85,13 +95,13 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 20000,'MaxFunctionEvaluations',...
 500000);
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LGL(x,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t,problem),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'LGR')
-       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LGR(x,x0,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t,problem),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LGR(x,M,D,problem),options);
     elseif strcmp(PS_method,'LG') 
-       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LG(x,x0,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t,problem),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_LG(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t0,tf,t),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_CGL(x,M,D,t0,tf),options);
+       [x,fval,ef,output] = fmincon(@(x) DI_Objective_func(x,M,weights,t,problem),x0,A,b,Aeq,beq,lb,ub,@(x) DI_Nonlinearcon_CGL(x,M,D,problem),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -111,8 +121,8 @@ if strcmp(PS_method,'LG')
     x1 = x(1:M);                               % position                        
     x2 = x(M+1:2*M);                           % velocity  
     x3 = x(2*M+1:3*M);                         % accleration
-    x1(M+1)=x0(1) + weights'*x1';
-    x2(M+1)=x0(M+1) + weights'*x2';
+    xf = xi + weights'*x2';
+    vf = vi + weights'*x3';
 end
 
 % Lagrange interpolation
@@ -123,11 +133,11 @@ z = t0:0.01:tf;
 function_value= x1;
 if strcmp(PS_method,'LGR')
     collocation_points=[t0 t'];
-    function_value= [x0(1) x1];
+    function_value= [xi x1];
 end
 if strcmp(PS_method,'LG')
     collocation_points=[t0 t'];
-    function_value= [x0(1) x1];
+    function_value= [xi x1 xf];
 end
 x1R = 5*sin(z);
 x2R = 5*cos(z);
@@ -135,10 +145,10 @@ position= lagrange_interpolation_n(collocation_points, function_value, z);
 
 function_value=x2;
 if strcmp(PS_method,'LGR')
-    function_value= [x0(M+1) x2];
+    function_value= [vi x2];
 end
 if strcmp(PS_method,'LG')
-    function_value= [x0(M+1) x2];
+    function_value= [vi x2 vf];
 end
 velocity=lagrange_interpolation_n(collocation_points, function_value, z);
 
@@ -163,7 +173,7 @@ xlabel('Time (s)');
 ylabel('Position (m)');
 title('Double Integrator Tracking Problem',PS_method);
 legend({'actual position','reference position'},Location="northeast");
-set(gca, 'FontSize', 40);
+set(gca, 'FontSize', 20);
 grid on
 hold off
 
@@ -175,7 +185,7 @@ xlabel('Time (s)');
 ylabel('Velocity (m/s)');
 title('Double Integrator Tracking Problem',PS_method);
 legend({'actual velocity','reference velocity'},Location="northeast");
-set(gca, 'FontSize', 40);
+set(gca, 'FontSize', 20);
 grid on
 hold off
 
@@ -188,7 +198,7 @@ ylabel('countrol variable (N)');
 legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem',PS_method);
 grid on
-set(gca, 'FontSize', 40);
+set(gca, 'FontSize', 20);
 
 
 
