@@ -1,0 +1,390 @@
+% single stage Goddard Rocket Problem
+% single_stage_main.m
+clc;clear all; close all;
+%==============================================================================================%
+%--- options ---%
+% pseudospectral method
+PS_method = 'LGR';                          % either LGL or LG or LGR or CGL
+M = 35;                                     % Number of collocation points
+addpath('../PS_methods')                    % add the PS_method file directory
+
+    if  strcmp(PS_method,'LGL')
+        N = M-1;                            % Order of the polynomial
+        [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
+        D=collocD(nodes);                   % segment differentiation matrix
+
+    elseif strcmp(PS_method,'LGR')
+        N = M-1;                            % Order of the polynomial
+        [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
+        nodes = flip(-nodes);               % Flipped LGR method
+        weights = flip(weights);            % weights are flipped
+        nodes = [-1;nodes];                 % Introducing non-collocated point -1 
+        D = collocD(nodes);                 % differentiation matrix of size M by M
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        nodes(1) = [];
+    elseif strcmp(PS_method,'LG')
+        N = M;                              % Order of the polynomial
+        [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
+        nodes = flip(nodes);                % Flipped LG method
+        weights = flip(weights);            % weights are flipped
+        nodes = [-1;nodes];                 % Introducing non-collocated point -1
+        D=collocD(nodes);                   % segment differentiation matrix
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        nodes(1) = [];
+    
+    elseif  strcmp(PS_method,'CGL')
+        N = M-1;                             % Order of the polynomial
+        [nodes] = CGL_nodes(N);              % calculate scaled node locations and weights
+        weights = CGL_weights(nodes);
+        D=collocD(nodes);                    % segment differentiation matrix  
+    end   
+      
+%================================================================================================================%
+% Problem data    
+Re = 6378145;
+h_scale = 8500;
+mu = 3.986e14;
+m0 = 5000;
+m0_1 = 3000;
+m0_2 = 2000;
+A_ref = 10;
+CD = 0.2;
+rho0 = 1.225;
+mp0_1 = 0.6*m0_1;
+mp0_2 = 0.6*m0_2; 
+g0 = 9.80665;
+Isp = 300;
+t0 = 0;
+
+
+% Decision veriables
+x = zeros(8*M+2);
+h_1 = x(1:M);
+v_1 = x(M+1:2*M);
+mass_1 = x(2*M+1:3*M);
+Thrust_1 = x(3*M+1:4*M);
+h_2 = x(4*M+1:5*M);
+v_2 = x(5*M+1:6*M);
+mass_2 = x(6*M+1:7*M);
+Thrust_2 = x(7*M+1:8*M);
+stage_time = x(8*M+1);
+final_time = x(8*M+2);
+
+% Initial guess values for decision variables
+x0(1:M) = 0;
+x0(M+1:2*M) = 0;
+x0(2*M+1:3*M) = m0_1+m0_2;
+x0(3*M+1:4*M) = m0*g0*2;
+x0(4*M+1:5*M) = 0;
+x0(5*M+1:6*M) = 0;
+x0(6*M+1:7*M) = m0_2;
+x0(7*M+1:8*M) = m0*g0*2;
+x0(8*M+1) = 0;      
+x0(8*M+2) = 0;
+
+% Initial and final conditions
+hi_1 = 0;
+vi_1 = 0;
+mass1_i = m0_1 + m0_2;
+mass1_f = m0_1 - mp0_1 + m0_2;
+mass2_i = m0_2;
+mass2_f = m0_2 - mp0_2;
+
+
+problem.Re = Re;
+problem.h_scale = h_scale;
+problem.rho0 = rho0;
+problem.mu = mu; 
+problem.m0 = m0;
+problem.m0_1 = m0_1;
+problem.m0_2 = m0_2;
+problem.A_ref = A_ref;
+problem.CD = CD;
+problem.g0 =g0;
+problem.Isp = Isp;
+problem.t0 = t0;
+problem.hi_1 = hi_1;
+problem.vi_1 = vi_1;
+problem.mass1_i = mass1_i;
+problem.mass1_f = mass1_f;
+problem.mass2_i = mass2_i;
+problem.mass2_f = mass2_f;
+
+% linear inequality and equality constraints
+A = [];
+b = [];
+Aeq = [];
+beq = [];
+
+% Lower and Upper bounds for the variables
+
+lb(1:M) = 0;
+lb(M+1:2*M) = 0;
+lb(2*M+1) = m0_1;
+lb(2*M+2:3*M) = m0_1*(0.4)+m0_2;
+lb(3*M+1:4*M) = 0;
+lb(4*M+1:5*M) = 0;
+lb(5*M+1:6*M) = 0;
+lb(6*M+1) = m0_2;
+lb(6*M+2:7*M) = m0_2*(0.4);
+lb(7*M+1:8*M) = 0;
+lb(8*M+1) = 0;      
+lb(8*M+2) = 0;
+
+ub(1:M) = inf;
+ub(M+1:2*M) = inf;
+ub(2*M+1:3*M) = m0_1+m0_2;
+ub(3*M+1:4*M) = m0*g0*2;
+ub(4*M+1:5*M) = inf;
+ub(5*M+1:6*M) = inf;
+ub(6*M+1:7*M) = m0_2;
+ub(7*M+1:8*M) = m0*g0*2;
+ub(8*M+1) = inf;      
+ub(8*M+2) = inf;
+
+
+tic;
+options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
+1e-10 , 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
+500000);
+   
+    if strcmp(PS_method,'LGL')
+       [x,fval,ef,output] = fmincon(@(x) multi_stage_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) multi_stage_Nonlinear_func_LGL(x,M,D,problem),options);
+    elseif strcmp(PS_method,'LGR')
+       [x,fval,ef,output] = fmincon(@(x) multi_stage_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) multi_stage_Nonlinear_func_LGR(x,M,D,problem),options);
+    elseif strcmp(PS_method,'LG') 
+       [x,fval,ef,output] = fmincon(@(x) multi_stage_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) multi_stage_Nonlinear_func_LG(x,M,D,problem),options);
+    elseif strcmp(PS_method,'CGL')
+       [x,fval,ef,output] = fmincon(@(x) multi_stage_objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) multi_stage_Nonlinear_func_CGL(x,M,D,problem),options);
+    end
+    
+% Stop the timer and display the elapsed time
+elapsedTime = toc;
+disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
+
+h_1 = x(1:M);
+v_1 = x(M+1:2*M);
+mass_1 = x(2*M+1:3*M);
+Thrust_1 = x(3*M+1:4*M);
+h_2 = x(4*M+1:5*M);
+v_2 = x(5*M+1:6*M);
+mass_2 = x(6*M+1:7*M);
+Thrust_2 = x(7*M+1:8*M);
+stage_time = x(8*M+1);
+final_time = x(8*M+2);
+
+if strcmp(PS_method,'LG')
+    h_1 = x(1:M);
+    h_1(M+1) = x0(1) + weights'*h_1';
+    v_1 = x(M+1:2*M);
+    v_1(M+1) = x0(M+1) + weights'*v_1';
+    mass_1 = x(2*M+1:3*M);
+    mass_1(M+1) = x0(2*M+1) + weights'*mass_1';
+    Thrust_1 = x(3*M+1:4*M);
+    h_2 = x(4*M+1:5*M);
+    h_2(M+1) = x0(4*M+1) + weights'*h_2';
+    v_2 = x(5*M+1:6*M);
+    v_2(M+1) = x0(5*M+1) + weights'*v_2';
+    mass_2 = x(6*M+1:7*M);
+    mass_2(M+1) = x0(6*M+1) + weights'*mass_2';
+    Thrust_2 = x(7*M+1:8*M);
+    stage_time = x(8*M+1);
+    final_time = x(8*M+2);
+end
+
+% time span
+t_1= ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
+z_1 = t0:0.1:stage_time;
+t_2= ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
+z_2 = stage_time:0.1:final_time;
+
+% Lagrange interpolation for altitude
+% stage_1
+collocation_points = t_1';
+function_value = h_1;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_1'];
+    function_value= [hi_1 h_1];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_1'];
+    function_value= [x0(1) h_1];
+end
+altitude_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+
+
+% stage_2               
+collocation_points = t_2';
+function_value = h_2;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_2'];
+    function_value= [h_2(1) h_2];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_2'];
+    function_value= [x0(1) h_2];
+end
+altitude_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+
+% adding both stages
+z = [z_1 z_2];
+altitude = [altitude_1 altitude_2]; 
+
+
+% Lagrange interpolation for velocity
+% stage_1
+collocation_points = t_1';
+function_value = v_1;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_1'];
+    function_value= [vi_1 v_1];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_1'];
+    function_value= [x0(1) v_1];
+end
+velocity_1 =lagrange_interpolation_n(collocation_points, function_value, z_1);
+
+% stage_2               
+collocation_points = t_2';
+function_value = v_2;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_2'];
+    function_value= [v_2(1) v_2];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_2'];
+    function_value= [x0(1) v_2];
+end
+velocity_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+
+% adding both stages
+velocity = [velocity_1 velocity_2];
+
+
+
+% Lagrange interpolation for mass
+% stage_1
+collocation_points = t_1';
+function_value = mass_1;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_1'];
+    function_value= [mass1_i mass_1];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_1'];
+    function_value= [x0(1) mass_1];
+end
+mass_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+
+% stage_2               
+collocation_points = t_2';
+function_value = mass_2;
+if strcmp(PS_method,'LGR')
+    collocation_points=[t0 t_2'];
+    function_value= [mass2_i mass_2];
+end
+if strcmp(PS_method,'LG')
+    collocation_points=[t0 t_2'];
+    function_value= [x0(1) mass_2];
+end
+mass_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+
+% adding both stages
+mass = [mass_1 mass_2];
+
+
+% Lagrange exrapolation for control variable thrust
+% stage_1
+collocation_points = t_1';
+function_value = Thrust_1;
+if strcmp(PS_method,'LGR')
+    collocation_points= t_1';
+end
+if strcmp(PS_method,'LG')
+    collocation_points= t_1';
+end
+Thrust_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+
+
+% stage_2               
+collocation_points = t_2';
+function_value = Thrust_2;
+if strcmp(PS_method,'LGR')
+    collocation_points= t_2';
+end
+if strcmp(PS_method,'LG')
+    collocation_points= t_2';
+    function_value= Thrust_2;
+end
+Thrust_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+
+% adding both stages
+Thrust = [Thrust_1 Thrust_2];
+
+% figure
+figure(1)
+plot(z',altitude'/1000,'g-','LineWidth',2)
+xlabel('time [s]')
+ylabel('Altitude [km]')
+hold on
+load alt_VS_time.csv
+ai1 = alt_VS_time(:,1);
+ai2 = alt_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+% title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 40);
+hold off
+grid on
+
+figure(2)
+plot(z',velocity'/1000,'g-','LineWidth',2 )
+xlabel('Time [s]')
+ylabel('velocity [km/s]')
+hold on
+load velocity_vs_time.csv
+al1 = velocity_vs_time(:,1);
+al2 = velocity_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+% title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 40);
+hold off 
+
+figure(3)
+plot(z',mass','g-','LineWidth',2)
+xlabel('Time [s]')
+ylabel('mass [kg]')
+grid on
+hold on
+load mass_vs_time.csv
+al1 = mass_vs_time(:,1);
+al2 = mass_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+% title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 40);
+hold off
+
+
+
+figure(4)
+plot(z',Thrust'/1000,'g-','LineWidth',2)
+xlabel('Time [s]')
+ylabel('Thrust [kN]')
+grid on
+hold on
+load Thrust_vs_time.csv
+al1 = Thrust_vs_time(:,1);
+al2 = Thrust_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+% title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 40);
+hold off 
+ 
+
