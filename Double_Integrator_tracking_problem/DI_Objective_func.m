@@ -1,7 +1,5 @@
 function Objective = DI_Objective_func(x,M,weights,t,problem)
 
-xi = problem.xi;
-vi = problem.vi;
 t0 = problem.t0;
 tf = problem.tf;
 

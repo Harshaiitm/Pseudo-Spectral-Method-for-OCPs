@@ -3,7 +3,6 @@ c = [];
 dc = [];
 dceq = [];
 
-
 xi = problem.xi;
 vi = problem.vi;
 t0 = problem.t0;
@@ -17,3 +16,4 @@ ceq = zeros(2*M,1);
 ceq(1:M,1) = D*[xi x1]' - ((tf-t0)/2) * x2';
 ceq(M+1:2*M,1) = D*[vi x2]' -((tf-t0)/2) * x3';
 end
+

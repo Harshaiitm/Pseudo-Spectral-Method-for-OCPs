@@ -9,14 +9,15 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                          % either LGL or LG or LGR or CGL
-M = 11;                                     % Number of collocation points
+PS_method = 'CGL';                           % either LGL or LG or LGR or CGL
+M = 11;                                     % Number of collocation points 
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
         D=collocD(nodes);                   % segment differentiation matrix
+
     elseif strcmp(PS_method,'LGR')
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
@@ -26,16 +27,17 @@ addpath('../PS_methods')                    % add the PS_method file directory
         D = collocD(nodes);                 % differentiation matrix of size M by M
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
         nodes(1) = [];
+    
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
-        nodes = flip(nodes);                % Flipped LG method
-        weights = flip(weights);            % weights are flipped
-        nodes = [-1;nodes];                 % Introducing non-collocated point -1
+        nodes = [-1;nodes;1];               % Introducing non-collocated point -1 and 1
         D=collocD(nodes);                   % segment differentiation matrix
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        D(end,:) = [];
         nodes(1) = [];
-    
+        nodes(end) = [];
+
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
         [nodes] = CGL_nodes(N);              % calculate scaled node locations and weights
@@ -59,12 +61,16 @@ x0(1:M) = 0;                                % position
 x0(M+1:2*M) = 5;                            % velocity
 x0(2*M+1:3*M) = 0;                          % (Force for unit mass)
 
-% starting point
-xi = 0;                                     % position                            
-vi = 5;                                     % velocity
+% starting and ending points
+xi = 5*sin(t0);                                     % position                            
+vi = 5*cos(t0);                                     % velocity
+xf = 5*sin(tf);
+vf = 5*cos(tf);
 
 problem.xi = xi;
+problem.xf = xf;
 problem.vi = vi;
+problem.vf = vf;
 problem.x0 = x0;
 problem.t0 = t0;
 problem.tf = tf;
@@ -116,27 +122,19 @@ x1 = x(1:M);                                   % position
 x2 = x(M+1:2*M);                               % velocity  
 x3 = x(2*M+1:3*M);                             % accleration
 
-    
-if strcmp(PS_method,'LG')
-    x1 = x(1:M);                               % position                        
-    x2 = x(M+1:2*M);                           % velocity  
-    x3 = x(2*M+1:3*M);                         % accleration
-    xf = xi + weights'*x2';
-    vf = vi + weights'*x3';
-end
-
 % Lagrange interpolation
 collocation_points=t';
 
 tic;
 z = t0:0.01:tf;
 function_value= x1;
+
 if strcmp(PS_method,'LGR')
     collocation_points=[t0 t'];
     function_value= [xi x1];
 end
 if strcmp(PS_method,'LG')
-    collocation_points=[t0 t'];
+    collocation_points=[t0 t' tf];
     function_value= [xi x1 xf];
 end
 x1R = 5*sin(z);
@@ -188,8 +186,6 @@ legend({'actual velocity','reference velocity'},Location="northeast");
 set(gca, 'FontSize', 20);
 grid on
 hold off
-
-
 
 figure(3)
 plot(z,acceleration,'LineWidth', 1.5);
