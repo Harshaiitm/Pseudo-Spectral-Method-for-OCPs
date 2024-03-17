@@ -47,3 +47,5 @@ end
 nodes=(a*(1-y)+b*(1+y))/2;    
 % Compute the weights
 weights=(b-a)./((1-y.^2).*Lp.^2)*(N2/N1)^2;
+nodes = flip(nodes);                % Flipped LG method
+weights = flip(weights);            % weights are flipped
