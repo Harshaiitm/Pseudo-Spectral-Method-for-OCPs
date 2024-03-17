@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                          % either LGL or LG or LGR or CGL
-M = 30;                                     % number of collocation points
+PS_method = 'LGL';                          % either LGL or LG or LGR or CGL
+M = 100;                                     % number of collocation points
 
 addpath('../PS_methods')                    % add the PS_method file directory
 
@@ -18,6 +18,7 @@ addpath('../PS_methods')                    % add the PS_method file directory
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
         D=collocD(nodes);                   % segment differentiation matrix
+    
     elseif strcmp(PS_method,'LGR')
         N = M-1;                            % Order of the polynomial
         [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
@@ -28,15 +29,15 @@ addpath('../PS_methods')                    % add the PS_method file directory
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
         nodes(1) = [];
 
-    elseif strcmp(PS_method,'LG')
+   elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
-        nodes = flip(nodes);                % Flipped LG method
-        weights = flip(weights);            % weights are flipped
-        nodes = [-1;nodes];                 % Introducing non-collocated point -1
+        nodes = [-1;nodes;1];               % Introducing non-collocated point -1
         D=collocD(nodes);                   % segment differentiation matrix
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        D(end,:) = [];                      
         nodes(1) = [];
+        nodes(end) = [];
     
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
@@ -58,9 +59,8 @@ t0 = 0;
 % initialization of state and control variables
 x0(1:M) = 0;
 x0(M+1:2*M) = 0;
-x0(2*M+1) = 0;
-x0(2*M+2:3*M) = 1;
-x0(3*M+1) = 30;
+x0(2*M+1:3*M) = 1;
+x0(3*M+1) = 35;
 
 
 xi = 0;
@@ -74,7 +74,6 @@ problem.vi = vi;
 problem.vf = vf;
 problem.x0 = x0;
 problem.t0 = t0;
-problem.weights = weights;
 
 A = [];
 b = [];
@@ -105,7 +104,7 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
     elseif strcmp(PS_method,'LG') 
        [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_LG(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(tf) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_CGL(x,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) BB_Objective_func(x,M),x0,A,b,Aeq,beq,lb,ub,@(x) BB_Nonlinearcon_CGL(x,M,D,problem),options);
     end 
 
 % Stop the timer and display the elapsed time
@@ -128,8 +127,6 @@ if strcmp(PS_method,'LG')
     x2 = x(M+1:2*M);                           % velocity  
     x3 = x(2*M+1:3*M);                         % accleration
     x4 = x(3*M+1);
-    x1(M+1) = xi + weights'*x2';
-    x2(M+1) = vi + weights'*x3';
 end
 
 
@@ -139,30 +136,30 @@ end
 z = t0:0.1:x4;
 
 collocation_points = t;
-function_value=x1;
+function_value = x1;
 
 
 if strcmp(PS_method,'LGR')
-    collocation_points=[t0 t'];
-    function_value= [xi x1];
+    collocation_points = [t0 t'];
+    function_value = [xi x1];
 end
 if strcmp(PS_method,'LG')
-    collocation_points=[t0 t'];
-    function_value= [xi x1];
+    collocation_points = [t0 t' x4];
+    function_value = [xi x1 xf];
 end
-position= lagrange_interpolation_n(collocation_points, function_value, z);
+position = lagrange_interpolation_n(collocation_points, function_value, z);
 
 
-function_value=x2;
+function_value = x2;
 if strcmp(PS_method,'LGR')
-    collocation_points=[t0 t'];
-    function_value= [vi x2];
+    collocation_points = [t0 t'];
+    function_value = [vi x2];
 end
 if strcmp(PS_method,'LG')
-    collocation_points=[t0 t'];
-    function_value= [vi x2];
+    collocation_points = [t0 t' x4];
+    function_value = [vi x2 vf];
 end
-velocity=lagrange_interpolation_n(collocation_points, function_value, z);
+velocity = lagrange_interpolation_n(collocation_points, function_value, z);
 
 
 if strcmp(PS_method,'LGR')
@@ -171,8 +168,8 @@ end
 if strcmp(PS_method,'LG')
    collocation_points = t';
 end
-function_value=x3;
-acceleration=lagrange_interpolation_n(collocation_points, function_value, z);
+function_value = x3;
+acceleration = lagrange_interpolation_n(collocation_points, function_value, z);
 
 
 
