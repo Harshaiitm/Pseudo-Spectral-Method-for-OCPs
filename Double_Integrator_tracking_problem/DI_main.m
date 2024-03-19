@@ -9,7 +9,7 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                           % either LGL or LG or LGR or CGL
+PS_method = 'LG';                           % either LGL or LG or LGR or CGL
 M = 11;                                     % Number of collocation points 
 addpath('../PS_methods')                    % add the PS_method file directory
 
@@ -31,12 +31,10 @@ addpath('../PS_methods')                    % add the PS_method file directory
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
-        nodes = [-1;nodes;1];               % Introducing non-collocated point -1 and 1
+        nodes = [-1;nodes];               % Introducing non-collocated point -1 and 1
         D=collocD(nodes);                   % segment differentiation matrix
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
-        D(end,:) = [];
         nodes(1) = [];
-        nodes(end) = [];
 
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
@@ -62,18 +60,15 @@ x0(M+1:2*M) = 5;                            % velocity
 x0(2*M+1:3*M) = 0;                          % (Force for unit mass)
 
 % starting and ending points
-xi = 5*sin(t0);                                     % position                            
-vi = 5*cos(t0);                                     % velocity
-xf = 5*sin(tf);
-vf = 5*cos(tf);
+xi = 0;                                     % position                            
+vi = 5;                                     % velocity
 
 problem.xi = xi;
-problem.xf = xf;
 problem.vi = vi;
-problem.vf = vf;
 problem.x0 = x0;
 problem.t0 = t0;
 problem.tf = tf;
+problem.weights = weights;
 
 
 % linear inequality and equality constraints
@@ -122,6 +117,15 @@ x1 = x(1:M);                                   % position
 x2 = x(M+1:2*M);                               % velocity  
 x3 = x(2*M+1:3*M);                             % accleration
 
+if strcmp(PS_method,'LG')
+    x1 = x(1:M);
+    x2 = x(M+1:2*M);
+    x3 = x(2*M+1:3*M); 
+    xf = 5*sin(tf); 
+    vf = 5*cos(tf);
+end
+
+
 % Lagrange interpolation
 collocation_points=t';
 
@@ -143,7 +147,7 @@ position= lagrange_interpolation_n(collocation_points, function_value, z);
 
 function_value=x2;
 if strcmp(PS_method,'LGR')
-    function_value= [vi x2];
+    function_value= [vi x2 vf];
 end
 if strcmp(PS_method,'LG')
     function_value= [vi x2 vf];
