@@ -2,8 +2,8 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'CGL';                           % either LGL or LG or LGR or CGL
-M = 45;                                     % Number of collocation points
+PS_method = 'LG';                           % either LGL or LG or LGR or CGL
+M = 30;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -24,12 +24,12 @@ addpath('../PS_methods')                    % add the PS_method file directory
     elseif strcmp(PS_method,'LG')
         N = M;                              % Order of the polynomial
         [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
-        nodes = flip(nodes);                % Flipped LG method
-        weights = flip(weights);            % weights are flipped
-        nodes = [-1;nodes];                 % Introducing non-collocated point -1
+        nodes = [-1;nodes;1];                 % Introducing non-collocated point -1
         D=collocD(nodes);                   % segment differentiation matrix
         D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        D(end,:) = [];
         nodes(1) = [];
+        nodes(end) = [];
     
     elseif  strcmp(PS_method,'CGL')
         N = M-1;                             % Order of the polynomial
@@ -150,20 +150,6 @@ mass = x(3*M+1:4*M);
 alpha = x(4*M+1:5*M);
 final_time = x(5*M+1);
 
-if strcmp(PS_method,'LG')
-    h = x(1:M);                               % altitude
-    h(M+1)= hi + weights'*h';
-    v = x(M+1:2*M);                           % velocity  
-    v(M+1)= vi + weights'*v';
-    gamma = x(2*M+1:3*M);                     % flight path angle
-    gamma(M+1)= gamma_i + weights'*gamma';
-    mass = x(3*M+1:4*M);                      % aircraft mass
-    mass(M+1)= mass_i + weights'*mass';
-    alpha = x(4*M+1:5*M);                     % angle of attack
-    final_time = x(5*M+1);
- end
-
-
 % Lagrange interpolation
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
 
@@ -171,13 +157,14 @@ z = t0:0.1:final_time;                  % at time in seconds
 
 collocation_points = t';
 function_value = h;
+
 if strcmp(PS_method,'LGR')
     collocation_points = [t0 t'];
     function_value = [hi h];
 end
 if strcmp(PS_method,'LG')
-    collocation_points = [t0 t'];
-    function_value = [hi h];
+    collocation_points = [t0 t' final_time];
+    function_value = [hi h hf];
 end
 altitude = lagrange_interpolation_n(collocation_points, function_value, z);
 
@@ -187,7 +174,7 @@ if strcmp(PS_method,'LGR')
     function_value = [vi v];
 end
 if strcmp(PS_method,'LG')
-    function_value = [vi v];
+    function_value = [vi v vf];
 end
 velocity = lagrange_interpolation_n(collocation_points, function_value, z);
 
@@ -196,7 +183,7 @@ if strcmp(PS_method,'LGR')
     function_value= [gamma_i gamma];
 end
 if strcmp(PS_method,'LG')
-    function_value= [gamma_i gamma];
+    function_value= [gamma_i gamma gamma_f];
 end
 gamma = lagrange_interpolation_n(collocation_points, function_value, z);
 
@@ -205,7 +192,7 @@ if strcmp(PS_method,'LGR')
     function_value = [mass_i mass];
 end
 if strcmp(PS_method,'LG')
-    function_value = [mass_i mass];
+    function_value = [mass_i mass mass(end)];
 end
 mass = lagrange_interpolation_n(collocation_points,function_value,z);
 

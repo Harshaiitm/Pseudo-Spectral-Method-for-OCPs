@@ -47,12 +47,12 @@ ceq(1:M,1) = D*h'-((final_time-t0)/2)* (v.*sin(gamma))';
 ceq(M+1:2*M,1)= D*v' - ((final_time-t0)/2)*((Thrust.*cos(alpha)-Drag)./mass - mu.*sin(gamma)./r.^2)';
 ceq(2*M+1:3*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)+Lift)./(mass.*v)+cos(gamma).*((v./r)-mu./(v.*r.^2)))';
 ceq(3*M+1:4*M,1) = D*mass'+((final_time-t0)/2)*(Thrust./(g0.*Isp))';
-ceq(4*M+1) = hi - h(1);
-ceq(4*M+2) = hf - h(end);
-ceq(4*M+3) = vi - v(1);
-ceq(4*M+4) = vf - v(end);
-ceq(4*M+5) = gamma_i - gamma(1);
-ceq(4*M+6) = gamma_f - gamma(end);
-ceq(4*M+7) = mass_i - mass(1);
+ceq(4*M+1) = h(1) - hi;
+ceq(4*M+2) = h(end) - hf;
+ceq(4*M+3) = v(1) - vi;
+ceq(4*M+4) = v(end) - vf;
+ceq(4*M+5) = gamma(1) - gamma_i ;
+ceq(4*M+6) = gamma(end) - gamma_f;
+ceq(4*M+7) = mass(1) - mass_i;
 
 end
