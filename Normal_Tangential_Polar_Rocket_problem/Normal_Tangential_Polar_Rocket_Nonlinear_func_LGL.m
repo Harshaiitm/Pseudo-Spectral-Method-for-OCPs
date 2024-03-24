@@ -60,15 +60,15 @@ ceq(M+1:2*M,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
 ceq(2*M+1:3*M,1) = D*V' - ((final_time-t0)/2)*(Thrust.*cos(alpha)./mass - Drag./mass - g.*sin(gamma))';
 ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - (g.*cos(gamma)./V) + (V.*cos(theta)./R))';
 ceq(4*M+1:5*M,1) = D*mass' + ((final_time-t0)/2)*(Thrust./(g0*Isp))';
-ceq(5*M+1,1) = Ri - R(1)/Re;
-ceq(5*M+2,1) = (hf/Re+1) -  R(end)/Re;
+ceq(5*M+1,1) = Ri*Re - R(1);
+ceq(5*M+2,1) = (hf/Re+1)*Re -  R(end);
 ceq(5*M+3,1) = theta_i - theta(1);
-ceq(5*M+4,1) = Vi - V(1)/10;
-ceq(5*M+5,1) = Vf - V(end)/((mu/(hf+Re))^0.5);
+ceq(5*M+4,1) = Vi*10 - V(1);
+ceq(5*M+5,1) = Vf*((mu/(hf+Re))^0.5) - V(end);
 ceq(5*M+6,1) = gamma_i - gamma(1);
 ceq(5*M+7,1) = gamma_f - gamma(end);
 ceq(5*M+8,1) = alpha_i - alpha(1);
-ceq(5*M+9,1) = mass_i - mass(1)/m0;
+ceq(5*M+9,1) = mass_i*m0 - mass(1);
 end
 
 
