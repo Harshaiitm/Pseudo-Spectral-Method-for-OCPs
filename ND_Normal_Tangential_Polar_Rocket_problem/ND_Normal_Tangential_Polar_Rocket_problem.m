@@ -237,9 +237,9 @@ plot(z,altitude/1000,'g-','LineWidth',2)
 xlabel('time [s]')
 ylabel('Altitude [km]')
 hold on
-load alt_VS_time.csv
-ai1 = alt_VS_time(:,1);
-ai2 = alt_VS_time(:,2);
+load alt_vs_time.csv
+ai1 = alt_vs_time(:,1);
+ai2 = alt_vs_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
 % title("Altitude variation w.r.t time")
