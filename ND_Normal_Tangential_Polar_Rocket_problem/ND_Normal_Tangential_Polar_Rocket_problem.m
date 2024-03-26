@@ -57,9 +57,15 @@ a_sen_max = 3*g0;
 T_max_by_W = 1.5;
 Thrust_max = T_max_by_W*m0*g0;
 t0 = 0;
+hi = 10;
 hf = 400000;
+vi = 10;
 vf = sqrt(mu/(hf+Re));
+gamma_i = pi/2;
 gamma_f = 0;
+mass_i = m0;
+theta_i = 0;
+
 
 problem.Re = Re;
 problem.h_scale = h_scale;
@@ -71,14 +77,18 @@ problem.CD = CD;
 problem.g0 =g0;
 problem.Isp = Isp;
 problem.t0 = t0;
-problem.hf = hf;
-problem.vf = vf;
-problem.gamma_f = gamma_f;
 problem.Thrust_max = Thrust_max;
 problem.T_max_by_W = T_max_by_W;
 problem.q_max = q_max;
 problem.a_sen_max = a_sen_max;
-
+problem.hi = hi;
+problem.vi = vi;
+problem.gamma_i = gamma_i;
+problem.mass_i = mass_i;
+problem.theta_i = theta_i;
+problem.hf = hf;
+problem.vf = vf;
+problem.gamma_f = gamma_f;
 
 % Decision veriables
 x = zeros(7*M+1);
