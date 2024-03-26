@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                           % either LGL or LG or LGR or CGL
-M = 25;                                     % Number of collocation points
+M = 10;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -102,7 +102,7 @@ x0(3*M+1:4*M) = linspace(pi/2,0,M);
 x0(4*M+1:5*M) = linspace(m0*n_mass,(m0-mp0)*n_mass,M);
 x0(5*M+1:6*M) = linspace(Thrust_max*n_thrust,0,M);
 x0(6*M+1:7*M) = 0;
-x0(7*M+1) = 600*n_time;
+x0(7*M+1) = 800*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -127,7 +127,7 @@ lb(4*M+2:5*M) = (m0-mp0)*n_mass;
 lb(5*M+1:6*M) = 0;
 lb(6*M+1) = 0;
 lb(6*M+2:7*M) = -pi/2;
-lb(7*M+1) = 600*n_time;
+lb(7*M+1) = 650*n_time;
 
 ub(1) = (Re+10)*n_length;
 ub(2:M-1) = 1.2*((Re+hf)*n_length);
@@ -145,15 +145,21 @@ ub(4*M+2:5*M) = m0*n_mass;
 ub(5*M+1:6*M) = Thrust_max*n_thrust;
 ub(6*M+1) = 0;
 ub(6*M+2:7*M) = pi/2;
-ub(7*M+1) = 1000*n_time;
+ub(7*M+1) = 700*n_time;
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
-20000);
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
+200000);
    
     if strcmp(PS_method,'LGL')
        [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,M,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,M,D,problem),options);
+    elseif strcmp(PS_method,'LGR')
+       [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,M,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGR(x,M,D,problem),options);
+    elseif strcmp(PS_method,'LG')
+       [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,M,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LG(x,M,D,problem),options);
+    elseif strcmp(PS_method,'CGL')
+       [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,M,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_CGL(x,M,D,problem),options);  
     end
     
 % Stop the timer and display the elapsed time
@@ -184,7 +190,7 @@ rho = rho0 * exp(-(h./h_scale));
 g = mu./R.^2;
 g0 = mu/Re^2;
 
-q = 0.5*rho.*(V).^2;
+q  = 0.5*rho.*(V).^2;
 Drag = q.* A_ref *CD;
 
 a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
@@ -192,13 +198,42 @@ a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
+z = t0:1:final_time;                  % at time in seconds
+
 altitude = R-Re;
 velocity = V;
+
+% Lagrange interpolation
+collocation_points = t';
+function_value = altitude;
+altitude = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = velocity;
+velocity = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = mass;
+mass = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = Thrust;
+Thrust = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = gamma;
+gamma = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = theta;
+theta = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = q;
+q = lagrange_interpolation_n(collocation_points, function_value, z);
+
+function_value = a_sen_mag;
+a_sen_mag = lagrange_interpolation_n(collocation_points, function_value, z);
+
 
 % figure
 close all;
 figure(1)
-plot(t,altitude/1000,'g-','LineWidth',2)
+plot(z,altitude/1000,'g-','LineWidth',2)
 xlabel('time [s]')
 ylabel('Altitude [km]')
 hold on
@@ -213,7 +248,7 @@ hold off
 grid on
 
 figure(2)
-plot(t,velocity/1000,'g-','LineWidth',2)
+plot(z,velocity/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('velocity [km/s]')
 hold on
@@ -227,7 +262,7 @@ title("Velocity variation w.r.t time")
 hold off 
 
 figure(3)
-plot(t,mass/1000,'g-','LineWidth',2)
+plot(z,mass/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('mass [kg]')
 grid on
@@ -242,7 +277,7 @@ legend("PS Method","NPSOL");
 hold off
 
 figure(4)
-plot(t,Thrust/1000,'g-','LineWidth',2)
+plot(z,Thrust/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('Thrust [kN]')
 grid on
@@ -257,7 +292,7 @@ title("Thrust variation w.r.t time")
 hold off 
 
 figure(5)
-plot(t,gamma*180/pi,'g-',"LineWidth",2)
+plot(z,gamma*180/pi,'g-',"LineWidth",2)
 xlabel('Flight path angle [degree]')
 ylabel('altiude')
 grid on
@@ -288,7 +323,7 @@ hold off
 
  
 figure(7)
-plot(t,q/1000,'g-',"LineWidth",2)
+plot(z,q/1000,'g-',"LineWidth",2)
 xlabel('Time [s]')
 ylabel('Dynamic Pressure [kPa]')
 grid on
@@ -303,12 +338,12 @@ title("Dynamic Pressure w.r.t time")
 hold off 
 
 figure(8)
-plot(t,a_sen_mag/g0,'g-',"LineWidth",2)
+plot(z,a_sen_mag/g0,'g-',"LineWidth",2)
 xlabel('Time [s]')
 ylabel('Sensed acceleration[gs]')
 grid on
 hold on
-ylim([0 3]);
+% ylim([0 3]);
 load sensedacce_VS_time.csv
 ai1 = sensedacce_VS_time(:,1);
 ai2 = sensedacce_VS_time(:,2);

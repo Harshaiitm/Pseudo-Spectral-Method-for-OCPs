@@ -56,19 +56,19 @@ a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 
 c = [];
-% c = zeros(2*N+2,1);
-% c(1:N+1,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
-% c(N+2:2*N+2,1) = (q - q_max)* 0.5 * rho0 * (mu/Re);
+% c = zeros(2*M,1);
+% c(1:M,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
+% c(M+1:2*M,1) = (q - q_max)* rho0 * (mu/Re);
 
-ceq = zeros(4*M+1,1);
+ceq = zeros(5*M+3,1);
 ceq(1:M,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
 ceq(M+1:2*M,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
 ceq(2*M+1:3*M,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - Drag./mass) - (sin(gamma)./R.^2))';
 ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1./R.^2)).*(cos(gamma)./V))';
 ceq(4*M+1:5*M,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
-% ceq(5*N+6) = R(end)-(hf+Re)*n_length;
-% ceq(5*N+7) = V(end)- sqrt(mu/(hf+Re))*n_velocity;
-% ceq(5*N+8) = gamma(end)-0;
+ceq(5*M+1) = R(end)-(hf+Re)*n_length;
+ceq(5*M+2) = V(end)- sqrt(mu/(hf+Re))*n_velocity;
+ceq(5*M+3) = gamma(end)-0;
 
 
 end
