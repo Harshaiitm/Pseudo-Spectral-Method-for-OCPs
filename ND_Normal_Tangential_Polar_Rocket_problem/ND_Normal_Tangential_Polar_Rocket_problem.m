@@ -1,17 +1,44 @@
-    % single stage 2Dimensional Rocket Problem
+% single stage 2Dimensional Rocket Problem
 % two_dimensional_rocket_single_stage_main.m
 clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';   % either LGL or LG or LGR
-N = 20;  % Order of the polynomial
-addpath('../PS_methods') % add the PS_method file directory
+PS_method = 'LGL';                           % either LGL or LG or LGR or CGL
+M = 25;                                     % Number of collocation points
+addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
-        [nodes,weights] = LGL_nodes(N); % calculate scaled node locations and weights
-        D=collocD(nodes); % segment differentiation matrix 
-    end   
+        N = M-1;                            % Order of the polynomial
+        [nodes,weights] = LGL_nodes(N);     % calculate scaled node locations and weights
+        D=collocD(nodes);                   % segment differentiation matrix
+    
+    elseif strcmp(PS_method,'LGR')
+        N = M-1;                            % Order of the polynomial
+        [nodes,weights] = LGR_nodes(N);     % LGR_nodes gives the N+1 nodes in [-1 1)
+        nodes = flip(-nodes);               % Flipped LGR method
+        weights = flip(weights);            % weights are flipped
+        nodes = [-1;nodes];                 % Introducing non-collocated point -1 
+        D = collocD(nodes);                 % differentiation matrix of size M by M
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        nodes(1) = [];
+    
+    elseif strcmp(PS_method,'LG')
+        N = M;                              % Order of the polynomial
+        [nodes,weights]=LG_nodes(N,-1,1);   % calculate scaled node locations and weights
+        nodes = [-1;nodes;1];               % Introducing non-collocated point -1
+        D=collocD(nodes);                   % segment differentiation matrix
+        D(1,:) = [];                        % deletion of first row associated with non-collocated point
+        D(end,:) = [];
+        nodes(1) = [];
+        nodes(end) = [];
+    
+    elseif  strcmp(PS_method,'CGL')
+        N = M-1;                             % Order of the polynomial
+        [nodes] = CGL_nodes(N);              % calculate scaled node locations and weights
+        weights = CGL_weights(nodes);
+        D=collocD(nodes);                    % segment differentiation matrix  
+    end    
 %================================================================================================================%
 % Problem data    
 Re = 6378145;
@@ -51,31 +78,31 @@ problem.a_sen_max = a_sen_max;
 
 
 % Decision veriables
-x = zeros(7*N+8);
-R = x(1:N+1);               
-theta = x(N+2:2*N+2);
-V = x(2*N+3:3*N+3);
-gamma = x(3*N+4:4*N+4);
-mass = x(4*N+5:5*N+5);
-Thrust = x(5*N+6:6*N+6);
-alpha = x(6*N+7:7*N+7);
-final_time = x(7*N+8);
+x = zeros(7*M+1);
+R = x(1:M);                  % Radial position
+theta = x(M+1:2*M);          % Downrange angle
+V = x(2*M+1:3*M);            % tangential velocity   
+gamma = x(3*M+1:4*M);        % Flight path angle
+mass = x(4*M+1:5*M);         % mass
+Thrust = x(5*M+1:6*M);       % Thrust
+alpha = x(6*M+1:7*M);        % Angle of attack   
+final_time = x(7*M+1);       % Final time
 
 n_length = 1/Re;
-n_velocity = sqrt(Re/mu);
+n_velocity = 1/sqrt(mu/Re);
 n_time = n_length/n_velocity;
 n_mass = 1/m0;
 n_thrust = 1/(m0*g0);
 
 % Initial guess values for decision variables
-x0(1:N+1) = linspace((Re+10)*n_length,(Re+hf)*n_length,N+1);
-x0(N+2:2*N+2) = 0;
-x0(2*N+3:3*N+3) = linspace(10*n_velocity,sqrt(mu/(Re+hf))*n_velocity,N+1);
-x0(3*N+4:4*N+4) = linspace(pi/2,0,N+1);
-x0(4*N+5:5*N+5) = linspace(m0*n_mass,(m0-mp0)*n_mass,N+1);
-x0(5*N+6:6*N+6) = linspace(Thrust_max*n_thrust,0,N+1);
-x0(6*N+7:7*N+7) = 0;
-x0(7*N+8) = 650*n_time;
+x0(1:M) = linspace((Re+10)*n_length,(Re+hf)*n_length,M);
+x0(M+1:2*M) = 0;
+x0(2*M+1:3*M) = linspace(10*n_velocity,sqrt(mu/(Re+hf))*n_velocity,M);
+x0(3*M+1:4*M) = linspace(pi/2,0,M);
+x0(4*M+1:5*M) = linspace(m0*n_mass,(m0-mp0)*n_mass,M);
+x0(5*M+1:6*M) = linspace(Thrust_max*n_thrust,0,M);
+x0(6*M+1:7*M) = 0;
+x0(7*M+1) = 600*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -85,62 +112,62 @@ beq = [];
 
 % Lower and Upper bounds for the variables
 lb(1) = (Re+10)*n_length;
-lb(2:N) = Re*n_length;
-lb(N+1) = (Re+hf)*n_length;
-lb(N+2) = 0;
-lb(N+3:2*N+2) = 0;
-lb(2*N+3) = 10*n_velocity;
-lb(2*N+4:3*N+2) = 1*n_velocity;
-lb(3*N+3) = sqrt(mu/(Re+hf))*n_velocity;
-lb(3*N+4) = pi/2;
-lb(3*N+5:4*N+3) = -pi/2;
-lb(4*N+4) = 0;
-lb(4*N+5) = m0*n_mass;
-lb(4*N+6:5*N+5) = (m0-mp0)*n_mass;
-lb(5*N+6:6*N+6) = 0;
-lb(6*N+7) = 0;
-lb(6*N+8:7*N+7) = -pi/2;
-lb(7*N+8) = 600*n_time;
+lb(2:M-1) = Re*n_length;
+lb(M) = (Re+hf)*n_length;
+lb(M+1) = 0;
+lb(M+2:2*M) = 0;
+lb(2*M+1) = 10*n_velocity;
+lb(2*M+2:3*M-1) = 1*n_velocity;
+lb(3*M) = sqrt(mu/(Re+hf))*n_velocity;
+lb(3*M+1) = pi/2;
+lb(3*M+2:4*M-1) = -pi/2;
+lb(4*M) = 0;
+lb(4*M+1) = m0*n_mass;
+lb(4*M+2:5*M) = (m0-mp0)*n_mass;
+lb(5*M+1:6*M) = 0;
+lb(6*M+1) = 0;
+lb(6*M+2:7*M) = -pi/2;
+lb(7*M+1) = 600*n_time;
 
 ub(1) = (Re+10)*n_length;
-ub(2:N) = 1.2*((Re+hf)*n_length);
-ub(N+1) = (Re+hf)*n_length;
-ub(N+2) = 0;
-ub(N+3:2*N+2) = pi/2;
-ub(2*N+3) = (10*n_velocity);
-ub(2*N+4:3*N+2) = 1.2*sqrt(mu/((Re+hf)))*n_velocity;
-ub(3*N+3) = sqrt(mu/((Re+hf)))*n_velocity;
-ub(3*N+4) = pi/2;
-ub(3*N+5:4*N+3) = pi/2;
-ub(4*N+4) = 0;
-ub(4*N+5) = m0*n_mass;
-ub(4*N+6:5*N+5) = m0*n_mass;
-ub(5*N+6:6*N+6) = Thrust_max*n_thrust;
-ub(6*N+7) = 0;
-ub(6*N+8:7*N+7) = pi/2;
-ub(7*N+8) = 1000*n_time;
+ub(2:M-1) = 1.2*((Re+hf)*n_length);
+ub(M) = (Re+hf)*n_length;
+ub(M+1) = 0;
+ub(M+2:2*M) = pi/2;
+ub(2*M+1) = (10*n_velocity);
+ub(2*M+2:3*M-1) = 1.2*sqrt(mu/((Re+hf)))*n_velocity;
+ub(3*M) = sqrt(mu/((Re+hf)))*n_velocity;
+ub(3*M+1) = pi/2;
+ub(3*M+2:4*M-1) = pi/2;
+ub(4*M) = 0;
+ub(4*M+1) = m0*n_mass;
+ub(4*M+2:5*M) = m0*n_mass;
+ub(5*M+1:6*M) = Thrust_max*n_thrust;
+ub(6*M+1) = 0;
+ub(6*M+2:7*M) = pi/2;
+ub(7*M+1) = 1000*n_time;
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
 1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-5, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
-200000);
+20000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,N,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,N,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) ND_Normal_Tangential_Polar_Rocket_objective_func(x,M,m0,n_mass),x0,A,b,Aeq,beq,lb,ub,@(x) ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,M,D,problem),options);
     end
     
 % Stop the timer and display the elapsed time
 elapsedTime = toc;
 disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
-R = x(1:N+1);               
-theta = x(N+2:2*N+2);
-V = x(2*N+3:3*N+3);
-gamma = x(3*N+4:4*N+4);
-mass = x(4*N+5:5*N+5);
-Thrust = x(5*N+6:6*N+6);
-alpha = x(6*N+7:7*N+7);
-final_time = x(7*N+8);
+R = x(1:M);                  % Radial position
+theta = x(M+1:2*M);          % Downrange angle
+V = x(2*M+1:3*M);            % tangential velocity   
+gamma = x(3*M+1:4*M);        % Flight path angle
+mass = x(4*M+1:5*M);         % mass
+Thrust = x(5*M+1:6*M);       % Thrust
+alpha = x(6*M+1:7*M);        % Angle of attack   
+final_time = x(7*M+1);       % Final time
 
 
 % Dimensionlization
@@ -168,76 +195,126 @@ t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
 altitude = R-Re;
 velocity = V;
 
-%% figure
+% figure
+close all;
 figure(1)
-plot(t,altitude/1000,'g-','LineWidth',1.5)
+plot(t,altitude/1000,'g-','LineWidth',2)
 xlabel('time [s]')
 ylabel('Altitude [km]')
 hold on
-title("Altitude variation w.r.t time")
+load alt_VS_time.csv
+ai1 = alt_VS_time(:,1);
+ai2 = alt_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+% title("Altitude variation w.r.t time")
+% set(gca, 'FontSize', 20);
 hold off
 grid on
 
 figure(2)
-plot(t,velocity/1000,'g-','LineWidth',1.5 )
+plot(t,velocity/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('velocity [km/s]')
 hold on
+load inertial_velocity_VS_time.csv
+ai1 = inertial_velocity_VS_time(:,1);
+ai2 = inertial_velocity_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
 title("Velocity variation w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off 
 
 figure(3)
-plot(t,mass,'g-','LineWidth',1.5)
+plot(t,mass/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('mass [kg]')
 grid on
 hold on
-title("Vehicle mass variation w.r.t time")
+load mass_VS_time.csv
+ai1 = mass_VS_time(:,1);
+ai2 = mass_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+% title("Vehicle mass variation w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off
 
 figure(4)
-plot(t,Thrust/1000,'g-','LineWidth',1.5)
+plot(t,Thrust/1000,'g-','LineWidth',2)
 xlabel('Time [s]')
 ylabel('Thrust [kN]')
 grid on
 hold on
+load thrust_VS_time.csv
+ai1 = thrust_VS_time(:,1);
+ai2 = thrust_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
 title("Thrust variation w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off 
 
 figure(5)
-plot(t,gamma,'g-',"LineWidth",1.5)
+plot(t,gamma*180/pi,'g-',"LineWidth",2)
 xlabel('Flight path angle [degree]')
 ylabel('altiude')
 grid on
 hold on
+load flightpath_VS_time.csv
+ai1 = flightpath_VS_time(:,1);
+ai2 = flightpath_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
 title("Flight path angle w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off 
 
 figure(6)
-plot(theta,altitude/1000,'g-',"LineWidth",1.5)
+plot(theta*180/pi,altitude/1000,'g-',"LineWidth",2)
 xlabel('Downrange angle [degree]')
 ylabel('altiude')
 grid on
 hold on
+load alt_VS_downrange.csv
+ai1 = alt_VS_downrange(:,1);
+ai2 = alt_VS_downrange(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
 title("Downrange angle w.r.t altitude")
+% set(gca, 'FontSize', 40);
 hold off 
 
  
 figure(7)
-plot(t,q/1000,'g-',"LineWidth",1.5)
+plot(t,q/1000,'g-',"LineWidth",2)
 xlabel('Time [s]')
 ylabel('Dynamic Pressure [kPa]')
 grid on
 hold on
-title("Sensed acceleration w.r.t time")
+load dynamic_pressure_VS_time.csv
+ai1 = dynamic_pressure_VS_time(:,1);
+ai2 = dynamic_pressure_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+title("Dynamic Pressure w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off 
 
 figure(8)
-plot(t,a_sen_mag/g0,'g-',"LineWidth",1.5)
+plot(t,a_sen_mag/g0,'g-',"LineWidth",2)
 xlabel('Time [s]')
 ylabel('Sensed acceleration[gs]')
 grid on
 hold on
+ylim([0 3]);
+load sensedacce_VS_time.csv
+ai1 = sensedacce_VS_time(:,1);
+ai2 = sensedacce_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
 title("Sensed acceleration w.r.t time")
+% set(gca, 'FontSize', 40);
 hold off 
 

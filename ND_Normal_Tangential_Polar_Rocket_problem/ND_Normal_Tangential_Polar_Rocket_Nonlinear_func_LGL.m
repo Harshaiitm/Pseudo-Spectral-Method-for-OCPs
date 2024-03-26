@@ -1,4 +1,4 @@
-function [c,ceq,dc,dceq] = ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,N,D,problem)   %inequality constarints                      
+function [c,ceq,dc,dceq] = ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,M,D,problem)   %inequality constarints                      
 % c = [];
 dc = [];
 dceq = [];
@@ -27,14 +27,14 @@ n_mass = 1/m0;
 
 
 % Decision veriables
-R = x(1:N+1);               
-theta = x(N+2:2*N+2);
-V = x(2*N+3:3*N+3);
-gamma = x(3*N+4:4*N+4);
-mass = x(4*N+5:5*N+5);
-Thrust = x(5*N+6:6*N+6);
-alpha = x(6*N+7:7*N+7);
-final_time = x(7*N+8);
+R = x(1:M);                  % Radial position
+theta = x(M+1:2*M);          % Downrange angle
+V = x(2*M+1:3*M);            % tangential velocity   
+gamma = x(3*M+1:4*M);        % Flight path angle
+mass = x(4*M+1:5*M);         % mass
+Thrust = x(5*M+1:6*M);       % Thrust
+alpha = x(6*M+1:7*M);        % Angle of attack   
+final_time = x(7*M+1);       % Final time
 
 t0 = t0*n_time;
 % final_time = final_time*n_time;
@@ -55,17 +55,21 @@ a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
 a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 
+c = [];
+% c = zeros(2*N+2,1);
+% c(1:N+1,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
+% c(N+2:2*N+2,1) = (q - q_max)* 0.5 * rho0 * (mu/Re);
 
-c = zeros(2*N+2,1);
-c(1:N+1,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
-c(N+2:2*N+2,1) = (q - q_max)* 0.5 * rho0 * (mu/Re);
+ceq = zeros(4*M+1,1);
+ceq(1:M,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
+ceq(M+1:2*M,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
+ceq(2*M+1:3*M,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - Drag./mass) - (sin(gamma)./R.^2))';
+ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1./R.^2)).*(cos(gamma)./V))';
+ceq(4*M+1:5*M,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
+% ceq(5*N+6) = R(end)-(hf+Re)*n_length;
+% ceq(5*N+7) = V(end)- sqrt(mu/(hf+Re))*n_velocity;
+% ceq(5*N+8) = gamma(end)-0;
 
-ceq = zeros(5*N+5,1);
-ceq(1:N+1,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
-ceq(N+2:2*N+2,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
-ceq(2*N+3:3*N+3,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - Drag./mass) - (sin(gamma)./R.^2))';
-ceq(3*N+4:4*N+4,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1./R.^2)).*(cos(gamma)./V))';
-ceq(4*N+5:5*N+5,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
 
 end
 
