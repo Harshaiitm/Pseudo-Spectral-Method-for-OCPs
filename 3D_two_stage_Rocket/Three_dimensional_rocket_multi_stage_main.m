@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                     % Number of collocation points
+M = 25;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -43,14 +43,23 @@ problem.g0 = g0;
 m0_1= 248950;                   % 1st stage total mass
 mp1_by_m0_1 = 0.8324;           % 1st stage propellent fraction
 mp1 = mp1_by_m0_1*m0_1;         % 1st stage total propellent
+ 
 m0_2= 134040;                   % 2nd stage total mass
 mp2_by_m0_2 = 0.88217;          % 2nd stage propellent fraction
 mp2 = mp2_by_m0_2*m0_2;         % 2nd stage total propellent
 m0 = m0_1 + m0_2;               % Total Rocket mass
+mass1_i = m0;
+mass1_f = m0-(mp1);
+mass2_i = m0_2;
+mass2_f = m0_2 - mp2;
 
 problem.m0_1 = m0_1;
 problem.m0_2 = m0_2;
 problem.m0 = m0;
+problem.mass1_i = m0;
+problem.mass1_f = mass1_f;
+problem.mass2_i = mass2_i;
+problem.mass2_f = mass2_f;
 
 % Aerodynamic characteristics
 A_ref = 61;                     % surface area

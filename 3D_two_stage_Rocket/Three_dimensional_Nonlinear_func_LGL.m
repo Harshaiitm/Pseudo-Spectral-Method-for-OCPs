@@ -8,7 +8,7 @@ Re = problem.Re;
 h_scale = problem.h_scale;
 mu = problem.mu;
 Omega_x = problem.Omega_x;
-Omega_y = problem.Omega_y;
+Omega_y = problem.Omega_y; 
 Omega_z = problem.Omega_z;
 rho0 = problem.rho0;
 g0 = problem.g0;
@@ -16,6 +16,10 @@ g0 = problem.g0;
 m0_1 = problem.m0_1;
 m0_2 = problem.m0_2;
 m0 = problem.m0;
+mass1_i = problem.mass1_i;
+mass1_f = problem.mass1_f;
+mass2_i = problem.mass2_i;
+mass2_f = problem.mass2_f;
 
 A_ref = problem.A_ref;
 Cbx1 = problem.Cbx1;
@@ -90,16 +94,12 @@ Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
 
 uTx1 = 1; uTy1 = 0; uTz1 = 0;
 Thrust_x1 = Thrust_1.*(Q11*uTx1 + Q12*uTy1 + Q13*uTz1);
-uTx1 = 0; uTy1 = 1; uTz1 = 0;
 Thrust_y1 = Thrust_1.*(Q21*uTx1 + Q22*uTy1 + Q23*uTz1);
-uTx1 = 0; uTy1 = 0; uTz1 = 1;
 Thrust_z1 = Thrust_1.*(Q31*uTx1 + Q32*uTy1 + Q33*uTz1);
 
 uTx2 = 1; uTy2 = 0; uTz2 = 0;
 Thrust_x2 = Thrust_2.*(Q11*uTx2 + Q12*uTy2 + Q13*uTz2);
-uTx2 = 0; uTy2 = 1; uTz2 = 0;
 Thrust_y2 = Thrust_2.*(Q21*uTx2 + Q22*uTy2 + Q23*uTz2);
-uTx2 = 0; uTy2 = 0; uTz2 = 1;
 Thrust_z2 = Thrust_2.*(Q31*uTx2 + Q32*uTy2 + Q33*uTz2);
 
 % Gravity
@@ -190,7 +190,7 @@ A_x2 = q_mag2.* Cx2 * A_ref;
 A_y2 = q_mag2.* Cy2 * A_ref;
 A_z2 = q_mag2.* Cz2 * A_ref;
 
-ceq = zeros(20*M,1);
+ceq = zeros(32*M,1);
 % system dynamics
 ceq(1:M,1) = D*Rx_1' - ((stage_time-t0)/2)*(Vx_1)';
 ceq(M+1:2*M,1) = D*Ry_1' - ((stage_time-t0)/2)*(Vy_1)';
@@ -214,23 +214,47 @@ ceq(14*M+3) = Rz_2(1) - Rz_1(end);
 ceq(14*M+4) = Vx_2(1) - Vx_1(end);
 ceq(14*M+5) = Vy_2(1) - Vy_1(end);
 ceq(14*M+6) = Vz_2(1) - Vz_1(end);
+ceq(14*M+7) = mass_1(1) - mass1_i;
+ceq(14*M+8) = mass_1(end) - mass1_f;
+ceq(14*M+9) = mass_2(1) - mass2_i;
+
 
 % Initial and final constraints
-ceq(14*M+7) = (Rx_1(1)^2 + Ry_1(1)^2 + Rz_1(1)^2) - ((Re + hi)^2);
-ceq(14*M+8) = (Vx_1(1)^2 + Vy_1(1)^2 + Vz_1(1)^2) - (Vi^2);
-ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);
-ceq(14*M+10) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf^2);
-ceq(14*M+11) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf) * Vf * sin(gamma_f));
-ceq(14*M+12) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf) * Vf * cos(gamma_f) * sin(inclin_f));
+ceq(14*M+11) = Rx_1(1) - (Re + hi) * cos(deg2rad(28));
+ceq(14*M+12) = Vx_1(1) - Vi * cos(deg2rad(28));
+ceq(14*M+13) = Ry_1(1) - 0;
+ceq(14*M+14) = Vy_1(1) - 0;
+ceq(14*M+15) = Rz_1(1) - (Re + hi) * sin(deg2rad(28));
+ceq(14*M+16) = Vz_1(1) - 0;
+ceq(14*M+17) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);
+ceq(14*M+18) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf^2);
+ceq(14*M+19) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf) * Vf * sin(gamma_f));
+ceq(14*M+20) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf) * Vf * cos(gamma_f) * sin(inclin_f));
 
 % Normalisation constraint for Quaternion elements 
 ceq(15*M+1:16*M) = (q1.^2 + q2.^2 + q3.^2 + q4.^2) - 1;  
 
-% Quaternion elements
-ceq(16*M+1:17*M) = q1 - (0.5*(1 + Q11 - Q22 -Q33).^0.5);
-ceq(17*M+1:18*M) = q2 - ((Q12 + Q21)./(4*q1));
-ceq(18*M+1:19*M) = q3 - ((Q13 + Q31)./(4*q1));
-ceq(19*M+1:20*M) = q4 - ((Q23 - Q32)./(4*q1));
+% % Quaternion elements
+% q1 = (0.5*(1 + Q11 - Q22 - Q33).^0.5);
+% ceq(17*M+1:18*M) = q2 - ((Q12 + Q21)./(4*q1));
+% ceq(18*M+1:19*M) = q3 - ((Q13 + Q31)./(4*q1));
+% ceq(19*M+1:20*M) = q4 - ((Q23 - Q32)./(4*q1));
+% 
+% ceq(20*M+1:21*M) = q2 - (0.5*(1 - Q11 + Q22 - Q33).^0.5);
+% ceq(21*M+1:22*M) = q1 - ((Q21 + Q12)./(4*q2));
+% ceq(22*M+1:23*M) = q3 - ((Q23 + Q32)./(4*q2));
+% ceq(23*M+1:24*M) = q4 - ((Q31 - Q13)./(4*q2));
+% 
+% ceq(24*M+1:25*M) = q3 - (0.5*(1 - Q11 - Q22 + Q33).^0.5);
+% ceq(25*M+1:26*M) = q1 - ((Q31 + Q13)./(4*q3));
+% ceq(26*M+1:27*M) = q2 - ((Q32 + Q23)./(4*q3));
+% ceq(27*M+1:28*M) = q4 - ((Q12 - Q21)./(4*q3));
+% 
+% ceq(28*M+1:29*M) = q4 - (0.5*(1 + Q11 + Q22 + Q33).^0.5);
+% ceq(29*M+1:30*M) = q1 - ((Q23 - Q32)./(4*q4));
+% ceq(30*M+1:31*M) = q2 - ((Q31 - Q13)./(4*q4));
+% ceq(31*M+1:32*M) = q3 - ((Q12 - Q21)./(4*q4));
+
 
 % Senced acceleration calculation
 a_sen_x1 = D*Vx_1' - g_x1';
