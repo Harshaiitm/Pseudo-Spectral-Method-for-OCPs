@@ -102,12 +102,12 @@ t0 = 0;
 Lat_i = 28;
 Long_i = 0;
 hi = 10;
-vi = 10;
+Vi = 10;
 Elev_i = 90;
 Azum_i = 90;
 
 problem.hi = hi;
-problem.vi = vi;
+problem.Vi = Vi;
 problem.t0 = t0;
 
 % Final state
@@ -183,9 +183,9 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 200000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m02),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
     end
 
 %===========================================================================================================================================================================================%    
