@@ -161,17 +161,17 @@ beta_2 = atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2));
 phi_1 = atan(Vby1./Vbx1);
 phi_2 = atan(Vby2./Vbx2);
 
-% Cbx1 = -Ca;
-Cby1 = -Cn*sin(phi_1);
-Cbz1 = -Cn*cos(phi_1);
-% Cbx2 = -Ca;
-Cby2 = -Cn*sin(phi_2);
-Cbz2 = -Cn*cos(phi_2);
+% % Cbx1 = -Ca;
+% Cby1 = -Cn*sin(phi_1);
+% Cbz1 = -Cn*cos(phi_1);
+% % Cbx2 = -Ca;
+% Cby2 = -Cn*sin(phi_2);
+% Cbz2 = -Cn*cos(phi_2);
 
-% Cby1 = dCby1_by_dbeta*beta_1;
-% Cbz1 = dCbz1_by_dalpha*alpha_1;
-% Cby2 = dCby2_by_dbeta*beta_2;
-% Cbz2 = dCbz2_by_dalpha*alpha_2;
+Cby1 = dCby1_by_dbeta*beta_1;
+Cbz1 = dCbz1_by_dalpha*alpha_1;
+Cby2 = dCby2_by_dbeta*beta_2;
+Cbz2 = dCbz2_by_dalpha*alpha_2;
 
 
 
@@ -216,10 +216,10 @@ ceq(14*M+5) = Rz_1(1) - (Re + hi) * sin(deg2rad(28));
 ceq(14*M+6) = Vz_1(1) - Vi * sin(deg2rad(28));
 ceq(14*M+7) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + 50000)^2);
 ceq(14*M+8) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + 50000));
-ceq(14*M+7) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);
-ceq(14*M+8) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf^2);
-ceq(14*M+9) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf) * Vf * sin(gamma_f));
-ceq(14*M+10) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf) * Vf * cos(gamma_f) * sin(inclin_f));
+ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);
+ceq(14*M+10) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf^2);
+ceq(14*M+11) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf) * Vf * sin(gamma_f));
+ceq(14*M+12) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf) * Vf * cos(gamma_f) * sin(inclin_f));
 
 
 
@@ -233,7 +233,6 @@ ceq(14*M+16) = Vz_2(1) - Vz_1(end);
 ceq(14*M+17) = mass_1(1) - mass1_i;
 ceq(14*M+18) = mass_1(end) - mass1_f;
 ceq(14*M+19) = mass_2(1) - mass2_i;
-% ceq(14*M+10) = Thrust_1(1) - Thrust_max;
 
 
 % Normalisation constraint for Quaternion elements 
@@ -274,19 +273,20 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-c = zeros(10*M,1);
-
+c = [];
+% c = zeros(10*M,1);
+% 
 % c(1:M,1) = q_mag1 - q_max;
 % c(M+1:2*M,1) = q_mag2 - q_max;
 % 
 % c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
 % c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-
+% 
 % c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
 % c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
-
-
-% Mass change constraint
+% 
+% 
+% % Mass change constraint
 % for i = 1:(M-1)
 %     c(7*i) = (mass_1(i+1) - mass_1(i)) - 0;
 %     c(8*i) = (mass_2(i+1) - mass_2(i)) - 0;

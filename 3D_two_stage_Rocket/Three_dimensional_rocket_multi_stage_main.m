@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 25;                                     % Number of collocation points
+M = 5;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -151,22 +151,10 @@ q4 = x(23*M+1:24*M);
 stage_time = x(24*M+1);
 final_time = x(24*M+2);
 
-% Attitude matrix
-Q11 = q1.^2 - q2.^2 - q3.^2 + q4.^2;
-Q12 = 2*(q1.*q2 + q3.*q4);
-Q13 = 2*(q1.*q3 - q2.*q4);
-Q21 = 2*(q1.*q2 - q3.*q4);
-Q22 = -q1.^2 + q2.^2 - q3.^2 + q4.^2;
-Q23 = 2*(q2.*q3 + q1.*q4);
-Q31 = 2*(q1.*q3 + q2.*q4);
-Q32 = 2*(q2.*q3 - q1.*q4);
-Q33 = -q1.^2 - q2.^2 + q3.^2 + q4.^2;
-
-
-Q = [Q11 Q12 Q13; Q21 Q22 Q23; Q31 Q32 Q33];
 
 % Initial guess for decision variables
 x0 = Three_dimensional_initial_guess(M,problem);
+
 
 % Lower and Upper bounds for the variables
 [lb, ub] = Three_dimensional_lower_upper_bounds(M,problem);
@@ -216,3 +204,152 @@ q3 = x(22*M+1:23*M);
 q4 = x(23*M+1:24*M);
 stage_time = x(24*M+1);
 final_time = x(24*M+2);
+
+
+% time span
+t_1= ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
+z_1 = t0:0.1:stage_time;
+t_2= ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
+z_2 = stage_time:0.1:final_time;
+
+
+R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2)-Re;
+R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
+
+% Mach number calculation
+Gamma = 1.4;
+R = 287;
+Temp0 = 288.16;
+Temp_1 = Temp0 - 0.0065*(R_1-Re);
+Temp_2 = Temp0 - 0.0065*(R_2-Re);
+
+Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
+Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
+Vrel_z1 = Vz_1 - Ry_1.*Omega_x + Rx_1.*Omega_y;
+Vrel_x2 = Vx_2 - Rz_2.*Omega_y + Ry_2.*Omega_z;
+Vrel_y2 = Vy_2 - Rx_2.*Omega_z + Rz_2.*Omega_x;
+Vrel_z2 = Vz_2 - Ry_2.*Omega_x + Rx_2.*Omega_y;
+
+Vrel_1 = sqrt(Vrel_x1.^2 + Vrel_y1.^2 + Vrel_z1.^2);
+Vrel_2 = sqrt(Vrel_x2.^2 + Vrel_y2.^2 + Vrel_z2.^2);
+
+Mach_1 = Vrel_1./sqrt(Gamma*R*Temp_1);
+Mach_2 = Vrel_2./sqrt(Gamma*R*Temp_2);
+
+
+
+% Lagrange interpolation for altitude
+% stage_1
+collocation_points = t_1';
+function_value = R_1;
+altitude_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = R_2;
+altitude_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+altitude = [altitude_1 altitude_2];
+z = [z_1 z_2];
+
+% figure
+figure(1)
+plot(z',altitude'/1000,'g-','LineWidth',2)
+xlabel('time [s]')
+ylabel('Altitude [km]')
+hold on
+load alt_VS_time.csv
+ai1 = alt_VS_time(:,1);
+ai2 = alt_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
+hold off
+grid on
+
+% Lagrange interpolation for Vehicle speed(Mach number)
+% stage_1
+collocation_points = t_1';
+function_value = Mach_1;
+Mach_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = Mach_2;
+Mach_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+Mach = [Mach_1 Mach_2];
+
+figure(2)
+plot(z',Mach,'g-','LineWidth',2 )
+xlabel('Time [s]')
+ylabel('Mach number')
+hold on
+load mach_vs_time.csv
+al1 = mach_vs_time(:,1);
+al2 = mach_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+title("Vehicle speed w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
+hold off 
+
+
+% Lagrange interpolation for Vehicle mass 
+% stage_1
+collocation_points = t_1';
+function_value = mass_1;
+mass_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = mass_2;
+mass_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+mass = [mass_1 mass_2];
+
+figure(3)
+plot(z',mass','g-','LineWidth',2)
+xlabel('Time [s]')
+ylabel('mass [kg]')
+grid on
+hold on
+load mass_VS_time.csv
+al1 = mass_VS_time(:,1);
+al2 = mass_VS_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+title("Vehicle mass variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
+hold off
+
+% Lagrange interpolation for Thrust 
+Thrust_1 = sqrt(Thrust_x1.^2 + Thrust_y1.^2 + Thrust_z1.^2);
+Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
+
+% stage_1
+collocation_points = t_1';
+function_value = Thrust_1;
+Thrust_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = Thrust_2;
+Thrust_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+Thrust = [Thrust_1 Thrust_2];
+
+figure(4)
+plot(z',Thrust'/1000,'g-','LineWidth',2)
+xlabel('Time [s]')
+ylabel('Thrust [kN]')
+grid on
+hold on
+load Thrust_vs_time.csv
+al1 = Thrust_vs_time(:,1);
+al2 = Thrust_vs_time(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+title("Thrust variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
+hold off 
