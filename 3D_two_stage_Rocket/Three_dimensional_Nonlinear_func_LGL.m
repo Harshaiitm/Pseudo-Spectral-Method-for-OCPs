@@ -273,24 +273,24 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-c = [];
-% c = zeros(10*M,1);
+% c = [];
+c = zeros(10*M,1);
 % 
-% c(1:M,1) = q_mag1 - q_max;
-% c(M+1:2*M,1) = q_mag2 - q_max;
+c(1:M,1) = q_mag1 - q_max;
+c(M+1:2*M,1) = q_mag2 - q_max;
+
+c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+
+c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
+c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
+
 % 
-% c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-% 
-% c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
-% c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
-% 
-% 
-% % Mass change constraint
-% for i = 1:(M-1)
-%     c(7*i) = (mass_1(i+1) - mass_1(i)) - 0;
-%     c(8*i) = (mass_2(i+1) - mass_2(i)) - 0;
-% end
+% Mass change constraint
+for i = 1:(M-1)
+    c(7*i) = (mass_1(i+1) - mass_1(i)) - 0;
+    c(8*i) = (mass_2(i+1) - mass_2(i)) - 0;
+end
 
 
 
