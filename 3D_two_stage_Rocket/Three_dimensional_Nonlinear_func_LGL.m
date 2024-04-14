@@ -92,15 +92,19 @@ Q = [Q11 Q12 Q13; Q21 Q22 Q23; Q31 Q32 Q33];
 Thrust_1 = sqrt(Thrust_x1.^2 + Thrust_y1.^2 + Thrust_z1.^2);
 Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
 
-uTx1 = 1; uTy1 = 0; uTz1 = 0;
-Thrust_x1 = Thrust_1.*(Q11*uTx1 + Q12*uTy1 + Q13*uTz1);
-Thrust_y1 = Thrust_1.*(Q21*uTx1 + Q22*uTy1 + Q23*uTz1);
-Thrust_z1 = Thrust_1.*(Q31*uTx1 + Q32*uTy1 + Q33*uTz1);
+uTx1 = Thrust_x1./Thrust_1; 
+uTy1 = Thrust_y1./Thrust_1;
+uTz1 = Thrust_z1./Thrust_1;
+Thrust_x1 = Thrust_1.*(Q11.*uTx1 + Q12.*uTy1 + Q13.*uTz1);
+Thrust_y1 = Thrust_1.*(Q21.*uTx1 + Q22.*uTy1 + Q23.*uTz1);
+Thrust_z1 = Thrust_1.*(Q31.*uTx1 + Q32.*uTy1 + Q33.*uTz1);
 
-uTx2 = 1; uTy2 = 0; uTz2 = 0;
-Thrust_x2 = Thrust_2.*(Q11*uTx2 + Q12*uTy2 + Q13*uTz2);
-Thrust_y2 = Thrust_2.*(Q21*uTx2 + Q22*uTy2 + Q23*uTz2);
-Thrust_z2 = Thrust_2.*(Q31*uTx2 + Q32*uTy2 + Q33*uTz2);
+uTx2 = Thrust_x2./Thrust_2;
+uTy2 = Thrust_y2./Thrust_2;
+uTz2 = Thrust_x2./Thrust_2;
+Thrust_x2 = Thrust_2.*(Q11.*uTx2 + Q12.*uTy2 + Q13.*uTz2);
+Thrust_y2 = Thrust_2.*(Q21.*uTx2 + Q22.*uTy2 + Q23.*uTz2);
+Thrust_z2 = Thrust_2.*(Q31.*uTx2 + Q32.*uTy2 + Q33.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
