@@ -123,7 +123,7 @@ problem.gamma_f = gamma_f;
 problem.inclin_f = inclin_f;
 
 % Decision veriables
-x = zeros(24*M+2);
+x = zeros(28*M+2);
 Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
@@ -134,22 +134,26 @@ mass_1 = x(6*M+1:7*M);
 Thrust_x1 = x(7*M+1:8*M);
 Thrust_y1 = x(8*M+1:9*M);
 Thrust_z1 = x(9*M+1:10*M);
-Rx_2 = x(10*M+1:11*M);
-Ry_2 = x(11*M+1:12*M);
-Rz_2 = x(12*M+1:13*M);
-Vx_2 = x(13*M+1:14*M);
-Vy_2 = x(14*M+1:15*M);
-Vz_2 = x(15*M+1:16*M);
-mass_2 = x(16*M+1:17*M);
-Thrust_x2 = x(17*M+1:18*M);
-Thrust_y2 = x(18*M+1:19*M);
-Thrust_z2 = x(19*M+1:20*M);
-q1 = x(20*M+1:21*M);
-q2 = x(21*M+1:22*M);
-q3 = x(22*M+1:23*M);
-q4 = x(23*M+1:24*M);
-stage_time = x(24*M+1);
-final_time = x(24*M+2);
+q11 = x(10*M+1:11*M);
+q12 = x(11*M+1:12*M);
+q13 = x(12*M+1:13*M);
+q14 = x(13*M+1:14*M);
+Rx_2 = x(14*M+1:15*M);
+Ry_2 = x(15*M+1:16*M);
+Rz_2 = x(16*M+1:17*M);
+Vx_2 = x(17*M+1:18*M);
+Vy_2 = x(18*M+1:19*M);
+Vz_2 = x(19*M+1:20*M);
+mass_2 = x(20*M+1:21*M);
+Thrust_x2 = x(21*M+1:22*M);
+Thrust_y2 = x(22*M+1:23*M);
+Thrust_z2 = x(23*M+1:24*M);
+q21 = x(24*M+1:25*M);
+q22 = x(25*M+1:26*M);
+q23 = x(26*M+1:27*M);
+q24 = x(27*M+1:28*M);
+stage_time = x(28*M+1);
+final_time = x(28*M+2);
 
 
 % Initial guess for decision variables
@@ -178,7 +182,7 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 
 %===========================================================================================================================================================================================%    
 % Decision Variables
-Rx_1 = x(1:M);
+Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
 Vx_1 = x(3*M+1:4*M);
@@ -188,22 +192,27 @@ mass_1 = x(6*M+1:7*M);
 Thrust_x1 = x(7*M+1:8*M);
 Thrust_y1 = x(8*M+1:9*M);
 Thrust_z1 = x(9*M+1:10*M);
-Rx_2 = x(10*M+1:11*M);
-Ry_2 = x(11*M+1:12*M);
-Rz_2 = x(12*M+1:13*M);
-Vx_2 = x(13*M+1:14*M);
-Vy_2 = x(14*M+1:15*M);
-Vz_2 = x(15*M+1:16*M);
-mass_2 = x(16*M+1:17*M);
-Thrust_x2 = x(17*M+1:18*M);
-Thrust_y2 = x(18*M+1:19*M);
-Thrust_z2 = x(19*M+1:20*M);
-q1 = x(20*M+1:21*M);
-q2 = x(21*M+1:22*M);
-q3 = x(22*M+1:23*M);
-q4 = x(23*M+1:24*M);
-stage_time = x(24*M+1);
-final_time = x(24*M+2);
+q11 = x(10*M+1:11*M);
+q12 = x(11*M+1:12*M);
+q13 = x(12*M+1:13*M);
+q14 = x(13*M+1:14*M);
+Rx_2 = x(14*M+1:15*M);
+Ry_2 = x(15*M+1:16*M);
+Rz_2 = x(16*M+1:17*M);
+Vx_2 = x(17*M+1:18*M);
+Vy_2 = x(18*M+1:19*M);
+Vz_2 = x(19*M+1:20*M);
+mass_2 = x(20*M+1:21*M);
+Thrust_x2 = x(21*M+1:22*M);
+Thrust_y2 = x(22*M+1:23*M);
+Thrust_z2 = x(23*M+1:24*M);
+q21 = x(24*M+1:25*M);
+q22 = x(25*M+1:26*M);
+q23 = x(26*M+1:27*M);
+q24 = x(27*M+1:28*M);
+stage_time = x(28*M+1);
+final_time = x(28*M+2);
+
 
 
 % time span

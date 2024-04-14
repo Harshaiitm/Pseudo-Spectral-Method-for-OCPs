@@ -46,8 +46,8 @@ gamma_f = problem.gamma_f;
 inclin_f = problem.inclin_f;
 
 % Decision veriables
-Rx_1 = x(1:M);
-Ry_1 = x(M+1:2*M);
+Rx_1 = x(0*M+1:1*M);
+Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
 Vx_1 = x(3*M+1:4*M);
 Vy_1 = x(4*M+1:5*M);
@@ -56,37 +56,56 @@ mass_1 = x(6*M+1:7*M);
 Thrust_x1 = x(7*M+1:8*M);
 Thrust_y1 = x(8*M+1:9*M);
 Thrust_z1 = x(9*M+1:10*M);
-Rx_2 = x(10*M+1:11*M);
-Ry_2 = x(11*M+1:12*M);
-Rz_2 = x(12*M+1:13*M);
-Vx_2 = x(13*M+1:14*M);
-Vy_2 = x(14*M+1:15*M);
-Vz_2 = x(15*M+1:16*M);
-mass_2 = x(16*M+1:17*M);
-Thrust_x2 = x(17*M+1:18*M);
-Thrust_y2 = x(18*M+1:19*M);
-Thrust_z2 = x(19*M+1:20*M);
-q1 = x(20*M+1:21*M);
-q2 = x(21*M+1:22*M);
-q3 = x(22*M+1:23*M);
-q4 = x(23*M+1:24*M);
-stage_time = x(24*M+1);
-final_time = x(24*M+2);
+q11 = x(10*M+1:11*M);
+q12 = x(11*M+1:12*M);
+q13 = x(12*M+1:13*M);
+q14 = x(13*M+1:14*M);
+Rx_2 = x(14*M+1:15*M);
+Ry_2 = x(15*M+1:16*M);
+Rz_2 = x(16*M+1:17*M);
+Vx_2 = x(17*M+1:18*M);
+Vy_2 = x(18*M+1:19*M);
+Vz_2 = x(19*M+1:20*M);
+mass_2 = x(20*M+1:21*M);
+Thrust_x2 = x(21*M+1:22*M);
+Thrust_y2 = x(22*M+1:23*M);
+Thrust_z2 = x(23*M+1:24*M);
+q21 = x(24*M+1:25*M);
+q22 = x(25*M+1:26*M);
+q23 = x(26*M+1:27*M);
+q24 = x(27*M+1:28*M);
+stage_time = x(28*M+1);
+final_time = x(28*M+2);
 
 
-% Attitude matrix
-Q11 = q1.^2 - q2.^2 - q3.^2 + q4.^2;
-Q12 = 2*(q1.*q2 + q3.*q4);
-Q13 = 2*(q1.*q3 - q2.*q4);
-Q21 = 2*(q1.*q2 - q3.*q4);
-Q22 = -q1.^2 + q2.^2 - q3.^2 + q4.^2;
-Q23 = 2*(q2.*q3 + q1.*q4);
-Q31 = 2*(q1.*q3 + q2.*q4);
-Q32 = 2*(q2.*q3 - q1.*q4);
-Q33 = -q1.^2 - q2.^2 + q3.^2 + q4.^2;
+
+% Attitude matrix for stage_1
+Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
+Q112 = 2*(q11.*q12 + q13.*q14);
+Q113 = 2*(q11.*q13 - q12.*q14);
+Q121 = 2*(q11.*q12 - q13.*q14);
+Q122 = -q11.^2 + q12.^2 - q13.^2 + q14.^2;
+Q123 = 2*(q12.*q13 + q11.*q14);
+Q131 = 2*(q11.*q13 + q12.*q14);
+Q132 = 2*(q12.*q13 - q11.*q14);
+Q133 = -q11.^2 - q12.^2 + q13.^2 + q14.^2;
 
 
-Q = [Q11 Q12 Q13; Q21 Q22 Q23; Q31 Q32 Q33];
+Q1 = [Q111 Q112 Q113; Q121 Q122 Q123; Q131 Q132 Q133];
+
+% Attitude matrix for stage_2
+Q211 = q21.^2 - q22.^2 - q23.^2 + q24.^2;
+Q212 = 2*(q21.*q22 + q23.*q24);
+Q213 = 2*(q21.*q23 - q22.*q24);
+Q221 = 2*(q21.*q22 - q23.*q24);
+Q222 = -q21.^2 + q22.^2 - q23.^2 + q24.^2;
+Q223 = 2*(q22.*q23 + q21.*q24);
+Q231 = 2*(q21.*q23 + q22.*q24);
+Q232 = 2*(q22.*q23 - q21.*q24);
+Q233 = -q21.^2 - q22.^2 + q23.^2 + q24.^2;
+
+
+Q2 = [Q211 Q212 Q213; Q221 Q222 Q223; Q231 Q232 Q233];
 
 % Inertial Thrust vector
 Thrust_1 = sqrt(Thrust_x1.^2 + Thrust_y1.^2 + Thrust_z1.^2);
@@ -95,16 +114,16 @@ Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
 uTx1 = Thrust_x1./Thrust_1; 
 uTy1 = Thrust_y1./Thrust_1;
 uTz1 = Thrust_z1./Thrust_1;
-Thrust_x1 = Thrust_1.*(Q11.*uTx1 + Q12.*uTy1 + Q13.*uTz1);
-Thrust_y1 = Thrust_1.*(Q21.*uTx1 + Q22.*uTy1 + Q23.*uTz1);
-Thrust_z1 = Thrust_1.*(Q31.*uTx1 + Q32.*uTy1 + Q33.*uTz1);
+Thrust_x1 = Thrust_1.*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
+Thrust_y1 = Thrust_1.*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
+Thrust_z1 = Thrust_1.*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
 uTx2 = Thrust_x2./Thrust_2;
 uTy2 = Thrust_y2./Thrust_2;
 uTz2 = Thrust_x2./Thrust_2;
-Thrust_x2 = Thrust_2.*(Q11.*uTx2 + Q12.*uTy2 + Q13.*uTz2);
-Thrust_y2 = Thrust_2.*(Q21.*uTx2 + Q22.*uTy2 + Q23.*uTz2);
-Thrust_z2 = Thrust_2.*(Q31.*uTx2 + Q32.*uTy2 + Q33.*uTz2);
+Thrust_x2 = Thrust_2.*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = Thrust_2.*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = Thrust_2.*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
@@ -148,12 +167,12 @@ q_mag1 = 0.5* rho_1.* Vrel_1.^2;
 q_mag2 = 0.5* rho_2.* Vrel_2.^2;
 
 
-Vbx1 = Q11.*Vrel_x1 + Q21.*Vrel_y1 + Q31.*Vrel_z1;
-Vby1 = Q12.*Vrel_x1 + Q22.*Vrel_y1 + Q32.*Vrel_z1;
-Vbz1 = Q13.*Vrel_x1 + Q23.*Vrel_y1 + Q33.*Vrel_z1;
-Vbx2 = Q11.*Vrel_x2 + Q21.*Vrel_y2 + Q31.*Vrel_z2;
-Vby2 = Q12.*Vrel_x2 + Q22.*Vrel_y2 + Q32.*Vrel_z2;
-Vbz2 = Q13.*Vrel_x2 + Q23.*Vrel_y2 + Q33.*Vrel_z2;
+Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
+Vby1 = Q112.*Vrel_x1 + Q122.*Vrel_y1 + Q132.*Vrel_z1;
+Vbz1 = Q113.*Vrel_x1 + Q123.*Vrel_y1 + Q133.*Vrel_z1;
+Vbx2 = Q211.*Vrel_x2 + Q221.*Vrel_y2 + Q231.*Vrel_z2;
+Vby2 = Q212.*Vrel_x2 + Q222.*Vrel_y2 + Q232.*Vrel_z2;
+Vbz2 = Q213.*Vrel_x2 + Q223.*Vrel_y2 + Q233.*Vrel_z2;
 
 
 
@@ -179,12 +198,12 @@ Cbz2 = dCbz2_by_dalpha*alpha_2;
 
 
 
-Cx1 = Q11.*Cbx1 + Q12.*Cby1 + Q13.*Cbz1;
-Cy1 = Q21.*Cbx1 + Q22.*Cby1 + Q23.*Cbz1;
-Cz1 = Q31.*Cbx1 + Q32.*Cby1 + Q33.*Cbz1;
-Cx2 = Q11.*Cbx2 + Q12.*Cby2 + Q13.*Cbz2;
-Cy2 = Q21.*Cbx2 + Q22.*Cby2 + Q23.*Cbz2;
-Cz2 = Q31.*Cbx2 + Q32.*Cby2 + Q33.*Cbz2;
+Cx1 = Q111.*Cbx1 + Q112.*Cby1 + Q113.*Cbz1;
+Cy1 = Q121.*Cbx1 + Q122.*Cby1 + Q123.*Cbz1;
+Cz1 = Q131.*Cbx1 + Q132.*Cby1 + Q133.*Cbz1;
+Cx2 = Q211.*Cbx2 + Q212.*Cby2 + Q213.*Cbz2;
+Cy2 = Q221.*Cbx2 + Q222.*Cby2 + Q223.*Cbz2;
+Cz2 = Q231.*Cbx2 + Q232.*Cby2 + Q233.*Cbz2;
 
 
 A_x1 = q_mag1.* Cx1 * A_ref;
@@ -240,7 +259,8 @@ ceq(14*M+19) = mass_2(1) - mass2_i;
 
 
 % Normalisation constraint for Quaternion elements 
-ceq(16*M+1:17*M) = (q1.^2 + q2.^2 + q3.^2 + q4.^2) - 1;  
+ceq(16*M+1:17*M) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
+ceq(17*M+1:18*M) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
 
 % % Quaternion elements
 % q1 = (0.5*(1 + Q11 - Q22 - Q33).^0.5);
