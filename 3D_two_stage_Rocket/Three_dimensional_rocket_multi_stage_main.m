@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 20;                                      % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -68,7 +68,7 @@ Cbx2 = -0.6;
 dCby1_by_dbeta = -4.0;          
 dCby2_by_dbeta = -4.0;
 dCbz1_by_dalpha = -4.0;
-dCbz2_by_dalpha = -0.4;
+dCbz2_by_dalpha = -4.0;
 
 problem.A_ref = A_ref;
 problem.Cbx1 = Cbx1;
@@ -175,7 +175,7 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 200000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
        [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
     end

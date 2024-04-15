@@ -262,6 +262,7 @@ ceq(14*M+19) = mass_2(1) - mass2_i;
 ceq(16*M+1:17*M) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
 ceq(17*M+1:18*M) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
 
+
 % % Quaternion elements
 % q1 = (0.5*(1 + Q11 - Q22 - Q33).^0.5);
 % ceq(17*M+1:18*M) = q2 - ((Q12 + Q21)./(4*q1));
@@ -297,27 +298,29 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-% c ;= []
-c = zeros(10*M,1);
+c = [];
+% c = zeros(10*M,1);
+% % % 
+% % c(1:M,1) = q_mag1 - q_max;
+% % c(M+1:2*M,1) = q_mag2 - q_max;
 % % 
-% c(1:M,1) = q_mag1 - q_max;
-% c(M+1:2*M,1) = q_mag2 - q_max;
+% % c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+% % c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+% % 
+% c(1:M,1) = Thrust_1 - Thrust_max;
+% c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
+% % c(2*M+1:3*M) = R_1 - Re;
+% % c(3*M+1:4*M) = R_2 - R_1;
 % 
-% c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
 % 
-c(1:M,1) = Thrust_1 - Thrust_max;
-c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
-
-
-% Mass change constraint
-for i = 1:(M-1)
-    c(2*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
-end
-for i = 1:(M-1)  
-    c(2*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
-end
-
+% 
+% % Mass change constraint
+% for i = 1:(M-1)
+%     c(4*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+% end
+% for i = 1:(M-1)  
+%     c(4*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+% end
 
 
 end
