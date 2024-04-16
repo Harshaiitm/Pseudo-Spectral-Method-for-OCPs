@@ -99,22 +99,45 @@ problem.a_sen_max = a_sen_max;
 
 % Initial State
 t0 = 0;
-Lat_i = 28;
-Long_i = 0;
+lat_i = deg2rad(28);
+long_i = deg2rad(0);
 hi = 10;
 Vi = 10;
 Elev_i = 90;
 Azum_i = 90;
 
+
+% Calculate Cartesian coordinates
+Rx_i = (Re + hi) * cos(lat_i) * cos(long_i);
+Ry_i = (Re + hi) * cos(lat_i) * sin(long_i);
+Rz_i = (Re + hi) * sin(lat_i);
+
+Vx_i = Vi * cos(lat_i) * cos(long_i);
+Vy_i = Vi * cos(lat_i) * sin(long_i);
+Vz_i = Vi * sin(lat_i);
+
+PhiTheta = azel2phitheta([Azum_i;Elev_i]);
+phi = PhiTheta(1);
+theta = PhiTheta(2); 
+
+problem.Rx_i = Rx_i;
+problem.Ry_i = Ry_i;
+problem.Rz_i = Rz_i;
+problem.Vx_i = Vx_i;
+problem.Vy_i = Vy_i;
+problem.Vz_i = Vz_i;
+problem.lat_i = lat_i;
+problem.long_i = long_i;
 problem.hi = hi;
 problem.Vi = Vi;
 problem.t0 = t0;
+
 
 % Final state
 hf = 400000;
 Vf = sqrt(mu/(Re+hf));
 gamma_f = 0;
-inclin_f = deg2rad(28);
+inclin_f = 28;
 
 
 problem.hf = hf;

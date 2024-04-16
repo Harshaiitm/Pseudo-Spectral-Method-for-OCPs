@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 5;                                      % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -68,7 +68,7 @@ Cbx2 = -0.6;
 dCby1_by_dbeta = -4.0;          
 dCby2_by_dbeta = -4.0;
 dCbz1_by_dalpha = -4.0;
-dCbz2_by_dalpha = -0.4;
+dCbz2_by_dalpha = -4.0;
 
 problem.A_ref = A_ref;
 problem.Cbx1 = Cbx1;
@@ -99,22 +99,38 @@ problem.a_sen_max = a_sen_max;
 
 % Initial State
 t0 = 0;
-Lat_i = 28;
-Long_i = 0;
+lat_i = deg2rad(28);
+long_i = deg2rad(0);
 hi = 10;
 Vi = 10;
 Elev_i = 90;
 Azum_i = 90;
 
+
+% Calculate Cartesian coordinates
+Rx_i = (Re + hi) * cos(lat_i) * cos(long_i);
+Ry_i = (Re + hi) * cos(lat_i) * sin(long_i);
+Rz_i = (Re + hi) * sin(lat);
+
+Vx_i = Vi * cos(lat_i);
+
+PhiTheta = azel2phitheta([Azum_i;Elev_i]);
+phi = PhiTheta(1);
+theta = PhiTheta(2); 
+
+problem.Rx_i = Rx_i;
+problem.Ry_i = Ry_i;
+problem.Rz_i = Rz_i;
 problem.hi = hi;
 problem.Vi = Vi;
 problem.t0 = t0;
+
 
 % Final state
 hf = 400000;
 Vf = sqrt(mu/(Re+hf));
 gamma_f = 0;
-inclin_f = deg2rad(28);
+inclin_f = 28;
 
 
 problem.hf = hf;
@@ -123,7 +139,7 @@ problem.gamma_f = gamma_f;
 problem.inclin_f = inclin_f;
 
 % Decision veriables
-x = zeros(24*M+2);
+x = zeros(28*M+2);
 Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
@@ -134,22 +150,26 @@ mass_1 = x(6*M+1:7*M);
 Thrust_x1 = x(7*M+1:8*M);
 Thrust_y1 = x(8*M+1:9*M);
 Thrust_z1 = x(9*M+1:10*M);
-Rx_2 = x(10*M+1:11*M);
-Ry_2 = x(11*M+1:12*M);
-Rz_2 = x(12*M+1:13*M);
-Vx_2 = x(13*M+1:14*M);
-Vy_2 = x(14*M+1:15*M);
-Vz_2 = x(15*M+1:16*M);
-mass_2 = x(16*M+1:17*M);
-Thrust_x2 = x(17*M+1:18*M);
-Thrust_y2 = x(18*M+1:19*M);
-Thrust_z2 = x(19*M+1:20*M);
-q1 = x(20*M+1:21*M);
-q2 = x(21*M+1:22*M);
-q3 = x(22*M+1:23*M);
-q4 = x(23*M+1:24*M);
-stage_time = x(24*M+1);
-final_time = x(24*M+2);
+q11 = x(10*M+1:11*M);
+q12 = x(11*M+1:12*M);
+q13 = x(12*M+1:13*M);
+q14 = x(13*M+1:14*M);
+Rx_2 = x(14*M+1:15*M);
+Ry_2 = x(15*M+1:16*M);
+Rz_2 = x(16*M+1:17*M);
+Vx_2 = x(17*M+1:18*M);
+Vy_2 = x(18*M+1:19*M);
+Vz_2 = x(19*M+1:20*M);
+mass_2 = x(20*M+1:21*M);
+Thrust_x2 = x(21*M+1:22*M);
+Thrust_y2 = x(22*M+1:23*M);
+Thrust_z2 = x(23*M+1:24*M);
+q21 = x(24*M+1:25*M);
+q22 = x(25*M+1:26*M);
+q23 = x(26*M+1:27*M);
+q24 = x(27*M+1:28*M);
+stage_time = x(28*M+1);
+final_time = x(28*M+2);
 
 
 % Initial guess for decision variables
@@ -167,18 +187,18 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations', 2000,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',2000,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
        [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
     end
 
 %===========================================================================================================================================================================================%    
 % Decision Variables
-Rx_1 = x(1:M);
+Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
 Vx_1 = x(3*M+1:4*M);
@@ -188,22 +208,27 @@ mass_1 = x(6*M+1:7*M);
 Thrust_x1 = x(7*M+1:8*M);
 Thrust_y1 = x(8*M+1:9*M);
 Thrust_z1 = x(9*M+1:10*M);
-Rx_2 = x(10*M+1:11*M);
-Ry_2 = x(11*M+1:12*M);
-Rz_2 = x(12*M+1:13*M);
-Vx_2 = x(13*M+1:14*M);
-Vy_2 = x(14*M+1:15*M);
-Vz_2 = x(15*M+1:16*M);
-mass_2 = x(16*M+1:17*M);
-Thrust_x2 = x(17*M+1:18*M);
-Thrust_y2 = x(18*M+1:19*M);
-Thrust_z2 = x(19*M+1:20*M);
-q1 = x(20*M+1:21*M);
-q2 = x(21*M+1:22*M);
-q3 = x(22*M+1:23*M);
-q4 = x(23*M+1:24*M);
-stage_time = x(24*M+1);
-final_time = x(24*M+2);
+q11 = x(10*M+1:11*M);
+q12 = x(11*M+1:12*M);
+q13 = x(12*M+1:13*M);
+q14 = x(13*M+1:14*M);
+Rx_2 = x(14*M+1:15*M);
+Ry_2 = x(15*M+1:16*M);
+Rz_2 = x(16*M+1:17*M);
+Vx_2 = x(17*M+1:18*M);
+Vy_2 = x(18*M+1:19*M);
+Vz_2 = x(19*M+1:20*M);
+mass_2 = x(20*M+1:21*M);
+Thrust_x2 = x(21*M+1:22*M);
+Thrust_y2 = x(22*M+1:23*M);
+Thrust_z2 = x(23*M+1:24*M);
+q21 = x(24*M+1:25*M);
+q22 = x(25*M+1:26*M);
+q23 = x(26*M+1:27*M);
+q24 = x(27*M+1:28*M);
+stage_time = x(28*M+1);
+final_time = x(28*M+2);
+
 
 
 % time span

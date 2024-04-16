@@ -39,7 +39,12 @@ a_sen_max = problem.a_sen_max;
 hi = problem.hi;
 Vi = problem.Vi;
 t0 = problem.t0;
-
+Rx_i = problem.Rx_i;
+Ry_i = problem.Ry_i;
+Rz_i = problem.Rz_i;
+Vx_i = problem.Vx_i;
+Vy_i = problem.Vy_i;
+Vz_i = problem.Vz_i;
 hf = problem.hf;
 Vf = problem.Vf;
 gamma_f = problem.gamma_f;
@@ -231,12 +236,12 @@ ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
 
 % Initial and final constraints
-ceq(14*M+1) = Rx_1(1) - (Re + hi) * cos(deg2rad(28));
-ceq(14*M+2) = Vx_1(1) - Vi * cos(deg2rad(28));
-ceq(14*M+3) = Ry_1(1) - 0;
-ceq(14*M+4) = Vy_1(1) - 0;
-ceq(14*M+5) = Rz_1(1) - (Re + hi) * sin(deg2rad(28));
-ceq(14*M+6) = Vz_1(1) - Vi * sin(deg2rad(28));
+ceq(14*M+1) = Rx_1(1) - Rx_i;
+ceq(14*M+2) = Vx_1(1) - Vx_i;
+ceq(14*M+3) = Ry_1(1) - Ry_i;
+ceq(14*M+4) = Vy_1(1) - Vy_i;
+ceq(14*M+5) = Rz_1(1) - Rz_i;
+ceq(14*M+6) = Vz_1(1) - Vz_i;
 ceq(14*M+7) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + 50000)^2);
 ceq(14*M+8) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + 50000));
 ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);

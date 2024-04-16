@@ -41,8 +41,8 @@ lb(27*M+1:28*M) = -1;
 lb(28*M+1) = 0;
 lb(28*M+2) = 0;
 
-ub(1:M) = inf;
-ub(M+1:2*M) = inf;
+ub(0*M+1:1*M) = inf;
+ub(1*M+1:2*M) = inf;
 ub(2*M+1:3*M) = inf;
 ub(3*M+1:4*M) = inf;
 ub(4*M+1:5*M) = inf;
