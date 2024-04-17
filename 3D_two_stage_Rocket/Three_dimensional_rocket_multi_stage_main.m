@@ -111,6 +111,7 @@ Azum_i = 90;
 Rx_i = (Re + hi) * cos(lat_i) * cos(long_i);
 Ry_i = (Re + hi) * cos(lat_i) * sin(long_i);
 Rz_i = (Re + hi) * sin(lat_i);
+R_i = sqrt(Rx_i.^2+Ry_i.^2+Rz_i.^2);
 
 Vx_i = Vi * cos(lat_i) * cos(long_i);
 Vy_i = Vi * cos(lat_i) * sin(long_i);
@@ -119,6 +120,59 @@ Vz_i = Vi * sin(lat_i);
 PhiTheta = azel2phitheta([Azum_i;Elev_i]);
 phi = PhiTheta(1);
 theta = PhiTheta(2); 
+
+Thrust_xi = Thrust_max * sin(Elev_i) * cos(Azum_i);
+Thrust_yi = Thrust_max * sin(Elev_i) * sin(Azum_i);
+Thrust_zi = Thrust_max * cos(Elev_i);
+
+
+
+% Stage State
+lat_s = deg2rad(28);
+long_s = deg2rad(0);
+hf_s = 50000;
+Vf_s = sqrt(mu/(Re+hf_s));
+Elev_s = 90;
+Azum_s = 90;
+
+% Calculate Cartesian coordinates
+Rx_s = (Re + hf_s) * cos(lat_s) * cos(long_s);
+Ry_s = (Re + hf_s) * cos(lat_s) * sin(long_s);
+Rz_s = (Re + hf_s) * sin(lat_s);
+R_s = sqrt(Rx_s.^2 + Ry_s.^2 + Rz_s.^2);
+
+Vx_s = Vf_s * cos(lat_s) * cos(long_s);
+Vy_s = Vf_s * cos(lat_s) * sin(long_s);
+Vz_s = Vf_s * sin(lat_s);
+
+
+Thrust_xs = Thrust_max_2 * sin(Elev_s) * cos(Azum_s);
+Thrust_ys = Thrust_max_2 * sin(Elev_s) * sin(Azum_s);
+Thrust_zs = Thrust_max_2 * cos(Elev_s);
+
+% Final State
+lat_f = deg2rad(28);
+long_f = deg2rad(0);
+hf_f = 400000;
+Vf_f = sqrt(mu/(Re+hf_f));
+Elev_f = 90;
+Azum_f = 90;
+
+% Calculate Cartesian coordinates
+Rx_f = (Re + hf_f) * cos(lat_f) * cos(long_f);
+Ry_f = (Re + hf_f) * cos(lat_f) * sin(long_f);
+Rz_f = (Re + hf_f) * sin(lat_f);
+R_f = sqrt(Rx_f.^2 + Ry_f.^2 + Rz_f.^2);
+
+Vx_f = Vf_f * cos(lat_f) * cos(long_f);
+Vy_f = Vf_f * cos(lat_f) * sin(long_f);
+Vz_f = Vf_f * sin(lat_f);
+
+Thrust_max_f = 10;
+Thrust_xf = Thrust_max_f * sin(Elev_f) * cos(Azum_f);
+Thrust_yf = Thrust_max_f * sin(Elev_f) * sin(Azum_f);
+Thrust_zf = Thrust_max_f * cos(Elev_f);
+
 
 problem.Rx_i = Rx_i;
 problem.Ry_i = Ry_i;
@@ -131,7 +185,37 @@ problem.long_i = long_i;
 problem.hi = hi;
 problem.Vi = Vi;
 problem.t0 = t0;
+problem.Thrust_xi = Thrust_xi; 
+problem.Thrust_yi = Thrust_yi;
+problem.Thrust_zi = Thrust_zi;
 
+problem.Rx_s = Rx_s;
+problem.Ry_s = Ry_s;
+problem.Rz_s = Rz_s;
+problem.Vx_s = Vx_s;
+problem.Vy_s = Vy_s;
+problem.Vz_s = Vz_s;
+problem.lat_s = lat_s;
+problem.long_s = long_s;
+problem.hf_s = hf_s;
+problem.Vf_s = Vf_s;
+problem.Thrust_xs = Thrust_xs; 
+problem.Thrust_ys = Thrust_ys;
+problem.Thrust_zs = Thrust_zs;
+
+problem.Rx_f = Rx_f;
+problem.Ry_f = Ry_f;
+problem.Rz_f = Rz_f;
+problem.Vx_f = Vx_f;
+problem.Vy_f = Vy_f;
+problem.Vz_f = Vz_f;
+problem.lat_f = lat_f;
+problem.long_f = long_f;
+problem.hf_f = hf_f;
+problem.Vf_f = Vf_f;
+problem.Thrust_xf = Thrust_xf; 
+problem.Thrust_yf = Thrust_yf;
+problem.Thrust_zf = Thrust_zf;
 
 % Final state
 hf = 400000;
