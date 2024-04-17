@@ -74,13 +74,13 @@ x0(18*M+1:19*M) = linspace(Vy_s,Vx_f,M);                        % Vy_2
 x0(19*M+1:20*M) = linspace(Vz_s,Vx_f,M);                        % Vz_2
 x0(20*M+1:21*M) = linspace(m0_2,mass2_f,M);                     % mass_2
 x0(21*M+1:22*M) = linspace(Thrust_xs,Thrust_xf,M);              % Thrust_x2
-x0(22*M+1:23*M) = linspace(Thrust_yf,Thrust_yf,M);              % Thrust_y2
-x0(23*M+1:24*M) = linspace(Thrust_zf,Thrust_zf,M);              % Thrust_z2
-x0(24*M+1:25*M) = 0.5;                 % q21
-x0(25*M+1:26*M) = 0.5;                 % q22
-x0(26*M+1:27*M) = 0.5;                 % q23
-x0(27*M+1:28*M) = 0.5;                 % q24
-x0(28*M+1) = 137;                      % stage_time
-x0(28*M+2) = 1750;                    % final_time
+x0(22*M+1:23*M) = linspace(Thrust_ys,Thrust_yf,M);              % Thrust_y2
+x0(23*M+1:24*M) = linspace(Thrust_zs,Thrust_zf,M);              % Thrust_z2
+x0(24*M+1:25*M) = 0.5;                                          % q21
+x0(25*M+1:26*M) = 0.5;                                          % q22
+x0(26*M+1:27*M) = 0.5;                                          % q23
+x0(27*M+1:28*M) = 0.5;                                          % q24
+x0(28*M+1) = 137;                                               % stage_time
+x0(28*M+2) = 1750;                                              % final_time
 
 end
