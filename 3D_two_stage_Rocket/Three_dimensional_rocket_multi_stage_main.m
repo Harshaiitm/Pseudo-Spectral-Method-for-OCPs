@@ -103,8 +103,8 @@ lat_i = deg2rad(28);
 long_i = deg2rad(0);
 hi = 10;
 Vi = 10;
-Elev_i = 90;
-Azum_i = 90;
+Elev_i = deg2rad(90);
+Azim_i = deg2rad(90);
 
 
 % Calculate Cartesian coordinates
@@ -117,13 +117,13 @@ Vx_i = Vi * cos(lat_i) * cos(long_i);
 Vy_i = Vi * cos(lat_i) * sin(long_i);
 Vz_i = Vi * sin(lat_i);
 
-PhiTheta = azel2phitheta([Azum_i;Elev_i]);
+PhiTheta = azel2phitheta([Azim_i;Elev_i]);
 phi = PhiTheta(1);
 theta = PhiTheta(2); 
 
-Thrust_xi = Thrust_max * sin(Elev_i) * cos(Azum_i);
-Thrust_yi = Thrust_max * sin(Elev_i) * sin(Azum_i);
-Thrust_zi = Thrust_max * cos(Elev_i);
+Thrust_xi = Thrust_max *  sin(Elev_i) * cos(Azim_i);
+Thrust_yi = Thrust_max *  sin(Elev_i) * sin(Azim_i);
+Thrust_zi = Thrust_max *  cos(Elev_i);
 
 
 
@@ -132,8 +132,8 @@ lat_s = deg2rad(28);
 long_s = deg2rad(0);
 hf_s = 50000;
 Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = 90;
-Azum_s = 90;
+Elev_s = deg2rad(90);
+Azim_s = deg2rad(90);
 
 % Calculate Cartesian coordinates
 Rx_s = (Re + hf_s) * cos(lat_s) * cos(long_s);
@@ -146,8 +146,8 @@ Vy_s = Vf_s * cos(lat_s) * sin(long_s);
 Vz_s = Vf_s * sin(lat_s);
 
 
-Thrust_xs = Thrust_max_2 * sin(Elev_s) * cos(Azum_s);
-Thrust_ys = Thrust_max_2 * sin(Elev_s) * sin(Azum_s);
+Thrust_xs = Thrust_max_2 * sin(Elev_s) * cos(Azim_s);
+Thrust_ys = Thrust_max_2 * sin(Elev_s) * sin(Azim_s);
 Thrust_zs = Thrust_max_2 * cos(Elev_s);
 
 % Final State
@@ -155,8 +155,8 @@ lat_f = deg2rad(28);
 long_f = deg2rad(0);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
-Elev_f = 90;
-Azum_f = 90;
+Elev_f = deg2rad(90);
+Azim_f = deg2rad(90);
 
 % Calculate Cartesian coordinates
 Rx_f = (Re + hf_f) * cos(lat_f) * cos(long_f);
@@ -169,8 +169,8 @@ Vy_f = Vf_f * cos(lat_f) * sin(long_f);
 Vz_f = Vf_f * sin(lat_f);
 
 Thrust_max_f = 10;
-Thrust_xf = Thrust_max_f * sin(Elev_f) * cos(Azum_f);
-Thrust_yf = Thrust_max_f * sin(Elev_f) * sin(Azum_f);
+Thrust_xf = Thrust_max_f * sin(Elev_f) * cos(Azim_f);
+Thrust_yf = Thrust_max_f * sin(Elev_f) * sin(Azim_f);
 Thrust_zf = Thrust_max_f * cos(Elev_f);
 
 

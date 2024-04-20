@@ -45,8 +45,10 @@ Rz_i = problem.Rz_i;
 Vx_i = problem.Vx_i;
 Vy_i = problem.Vy_i;
 Vz_i = problem.Vz_i;
-hf = problem.hf;
-Vf = problem.Vf;
+hf_s = problem.hf_s;
+hf_f = problem.hf_f;
+Vf_s = problem.Vf_s;
+Vf_f = problem.Vf_f;
 gamma_f = problem.gamma_f;
 inclin_f = problem.inclin_f;
 
@@ -242,12 +244,12 @@ ceq(14*M+3) = Ry_1(1) - Ry_i;
 ceq(14*M+4) = Vy_1(1) - Vy_i;
 ceq(14*M+5) = Rz_1(1) - Rz_i;
 ceq(14*M+6) = Vz_1(1) - Vz_i;
-ceq(14*M+7) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + 50000)^2);
-ceq(14*M+8) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + 50000));
-ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf)^2);
-ceq(14*M+10) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf^2);
-ceq(14*M+11) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf) * Vf * sin(gamma_f));
-ceq(14*M+12) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf) * Vf * cos(gamma_f) * sin(inclin_f));
+ceq(14*M+7) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + hf_s)^2);
+ceq(14*M+8) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + hf_s));
+ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
+ceq(14*M+10) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
+ceq(14*M+11) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
+ceq(14*M+12) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * sin(inclin_f));
 
 
 
@@ -304,27 +306,23 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Inequality_constraints
 c = [];
-% c = zeros(10*M,1);
+% c = zeros(3*M,1);
+% % % % 
+% % % c(1:M,1) = q_mag1 - q_max;
+% % % c(M+1:2*M,1) = q_mag2 - q_max;
 % % % 
-% % c(1:M,1) = q_mag1 - q_max;
-% % c(M+1:2*M,1) = q_mag2 - q_max;
-% % 
-% % c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% % c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-% % 
+% % % c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+% % % c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+% % % 
 % c(1:M,1) = Thrust_1 - Thrust_max;
 % c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
-% % c(2*M+1:3*M) = R_1 - Re;
-% % c(3*M+1:4*M) = R_2 - R_1;
-% 
-% 
 % 
 % % Mass change constraint
 % for i = 1:(M-1)
-%     c(4*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+%     c(2*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
 % end
 % for i = 1:(M-1)  
-%     c(4*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+%     c(2*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
 % end
 
 
