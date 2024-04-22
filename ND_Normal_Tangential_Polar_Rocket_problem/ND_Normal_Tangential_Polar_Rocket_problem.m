@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                           % either LGL or LG or LGR or CGL
-M = 10;                                     % Number of collocation points
+M = 22;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -109,13 +109,13 @@ n_thrust = 1/(m0*g0);
 
 % Initial guess values for decision variables
 x0(1:M) = linspace((Re+10)*n_length,(Re+hf)*n_length,M);
-x0(M+1:2*M) = 0;
+x0(M+1:2*M) = linspace(0,0,M);
 x0(2*M+1:3*M) = linspace(10*n_velocity,sqrt(mu/(Re+hf))*n_velocity,M);
 x0(3*M+1:4*M) = linspace(pi/2,0,M);
 x0(4*M+1:5*M) = linspace(m0*n_mass,(m0-mp0)*n_mass,M);
 x0(5*M+1:6*M) = linspace(Thrust_max*n_thrust,0,M);
 x0(6*M+1:7*M) = 0;
-x0(7*M+1) = 800*n_time;
+x0(7*M+1) = 500*n_time;
 
 % linear inequality and equality constraints
 A = [];
@@ -124,41 +124,23 @@ Aeq = [];
 beq = [];
 
 % Lower and Upper bounds for the variables
-lb(1) = (Re+10)*n_length;
-lb(2:M-1) = Re*n_length;
-lb(M) = (Re+hf)*n_length;
-lb(M+1) = 0;
-lb(M+2:2*M) = 0;
-lb(2*M+1) = 10*n_velocity;
-lb(2*M+2:3*M-1) = 1*n_velocity;
-lb(3*M) = sqrt(mu/(Re+hf))*n_velocity;
-lb(3*M+1) = pi/2;
-lb(3*M+2:4*M-1) = -pi/2;
-lb(4*M) = 0;
-lb(4*M+1) = m0*n_mass;
-lb(4*M+2:5*M) = (m0-mp0)*n_mass;
+lb(0*M+1:1*M) = (Re+10)*n_length;
+lb(1*M+1:2*M) = 0;
+lb(2*M+1:3*M) = 10*n_velocity;
+lb(3*M+1:4*M) = -pi/2;
+lb(4*M+1:5*M) = (m0-mp0)*n_mass;
 lb(5*M+1:6*M) = 0;
-lb(6*M+1) = 0;
-lb(6*M+2:7*M) = -pi/2;
-lb(7*M+1) = 650*n_time;
+lb(6*M+1:7*M) = -pi/2;
+lb(7*M+1) = 10*n_time;
 
-ub(1) = (Re+10)*n_length;
-ub(2:M-1) = 1.2*((Re+hf)*n_length);
-ub(M) = (Re+hf)*n_length;
-ub(M+1) = 0;
-ub(M+2:2*M) = pi/2;
-ub(2*M+1) = (10*n_velocity);
-ub(2*M+2:3*M-1) = 1.2*sqrt(mu/((Re+hf)))*n_velocity;
-ub(3*M) = sqrt(mu/((Re+hf)))*n_velocity;
-ub(3*M+1) = pi/2;
-ub(3*M+2:4*M-1) = pi/2;
-ub(4*M) = 0;
-ub(4*M+1) = m0*n_mass;
-ub(4*M+2:5*M) = m0*n_mass;
+ub(0*M+1:1*M) = (Re+hf)*n_length;
+ub(1*M+1:2*M) = pi/2;
+ub(2*M+1:3*M) = sqrt(mu/((Re+hf)))*n_velocity;
+ub(3*M+1:4*M) = pi/2;
+ub(4*M+1:5*M) = m0*n_mass;
 ub(5*M+1:6*M) = Thrust_max*n_thrust;
-ub(6*M+1) = 0;
-ub(6*M+2:7*M) = pi/2;
-ub(7*M+1) = 700*n_time;
+ub(6*M+1:7*M) = pi/2;
+ub(7*M+1) = 1000*n_time;
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
@@ -194,13 +176,13 @@ R = R./n_length;
 V = V./n_velocity;
 mass = mass./n_mass;
 Thrust = Thrust./n_thrust;
-final_time = final_time./n_time;
+final_time = final_time/n_time;
 t0 = t0/n_time;
-Isp = Isp./n_time;
+Isp = Isp/n_time;
 
 h =  R - Re;
 rho = rho0 * exp(-(h./h_scale));
-g = mu./R.^2;
+g = mu./(R.^2);
 g0 = mu/Re^2;
 
 q  = 0.5*rho.*(V).^2;
@@ -211,7 +193,7 @@ a_sen_gamma = (Thrust.* sin(alpha))./(mass);
 a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 
 t = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
-z = t0:1:final_time;                  % at time in seconds
+z = t0:0.1:final_time;                  % at time in seconds
 
 altitude = R-Re;
 velocity = V;

@@ -1,5 +1,5 @@
 function [c,ceq,dc,dceq] = ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,M,D,problem)   %inequality constarints                      
-% c = [];
+c = [];
 dc = [];
 dceq = [];
 
@@ -58,20 +58,12 @@ Drag_ref = m0*g0;
 Drag = Drag./Drag_ref;
 
 
-a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
-a_sen_gamma = (Thrust.* sin(alpha))./(mass);
-a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
-
-c = [];
-% c = zeros(2*M,1);
-% c(1:M,1) = (a_sen_mag.^2 - a_sen_max^2) * (mu/Re^2);
-% c(M+1:2*M,1) = (q - q_max)* rho0 * (mu/Re);
-
 ceq = zeros(5*M+8,1);
 ceq(1:M,1) = D*R' - ((final_time-t0)/2)*(V.*sin(gamma))';
 ceq(M+1:2*M,1) = D*theta' - ((final_time-t0)/2)*(V.*cos(gamma)./R)';
-ceq(2*M+1:3*M,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - Drag./mass) - (sin(gamma)./R.^2))';
-ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1./R.^2)).*(cos(gamma)./V))';
+ceq(2*M+1:3*M,1) = D*V' - ((final_time-t0)/2)*((Thrust.*cos(alpha)./mass - (Drag)./(mass)) - (sin(gamma)./R.^2))';
+% ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - ((V.^2./R)-(1./R.^2)).*(cos(gamma)./V))';
+ceq(3*M+1:4*M,1) = D*gamma' - ((final_time-t0)/2)*((Thrust.*sin(alpha)./(mass.*V)) - (cos(gamma)./(R.^2.*V))+ (V.*cos(gamma)./R))';
 ceq(4*M+1:5*M,1) = D*mass' + ((final_time-t0)/2)*(Thrust./Isp)';
 ceq(5*M+1) = R(1) - (hi+Re)*n_length;
 ceq(5*M+2) = R(end)-(hf+Re)*n_length;
@@ -81,6 +73,24 @@ ceq(5*M+5) = gamma(1) - gamma_i;
 ceq(5*M+6) = gamma(end) - gamma_f;
 ceq(5*M+7) = mass(1) - mass_i/m0;
 ceq(5*M+8) = theta(1) - theta_i;
+
+% n_mass = 1/m0;
+% n_thrust = 1/(m0*g0);
+% 
+% % Dimensionlization
+% mass = mass./n_mass;
+% Thrust = Thrust./n_thrust;
+% Drag = Drag*Drag_ref;
+% 
+% a_sen_v = (Thrust.* cos(alpha) - Drag)./(mass);
+% a_sen_gamma = (Thrust.* sin(alpha))./(mass);
+% a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
+% 
+% % c = [];
+% c = zeros(2*M,1);
+% c(1:M,1) = (a_sen_mag.^2 - a_sen_max.^2) * (mu/Re^2).^2;
+% c(M+1:2*M,1) = (q - q_max)* rho0 * (mu/Re);
+
 
 end
 
