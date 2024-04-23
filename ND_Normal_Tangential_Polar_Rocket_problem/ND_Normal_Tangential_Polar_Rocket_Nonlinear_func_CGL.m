@@ -1,4 +1,4 @@
-function [c,ceq,dc,dceq] = ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_LGL(x,M,D,problem)   %inequality constarints                      
+function [c,ceq,dc,dceq] = ND_Normal_Tangential_Polar_Rocket_Nonlinear_func_CGL(x,M,D,problem)   %inequality constarints                      
 dc = [];
 dceq = [];
 

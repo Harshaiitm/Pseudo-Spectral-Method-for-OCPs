@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                           % either LGL or LG or LGR or CGL
-M = 22;                                     % Number of collocation points
+M = 35;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -109,7 +109,7 @@ n_thrust = 1/(m0*g0);
 
 % Initial guess values for decision variables
 x0(1:M) = linspace((Re+10)*n_length,(Re+hf)*n_length,M);
-x0(M+1:2*M) = linspace(0,0,M);
+x0(M+1:2*M) = 0;
 x0(2*M+1:3*M) = linspace(10*n_velocity,sqrt(mu/(Re+hf))*n_velocity,M);
 x0(3*M+1:4*M) = linspace(pi/2,0,M);
 x0(4*M+1:5*M) = linspace(m0*n_mass,(m0-mp0)*n_mass,M);
@@ -140,7 +140,7 @@ ub(3*M+1:4*M) = pi/2;
 ub(4*M+1:5*M) = m0*n_mass;
 ub(5*M+1:6*M) = Thrust_max*n_thrust;
 ub(6*M+1:7*M) = pi/2;
-ub(7*M+1) = 1000*n_time;
+ub(7*M+1) = 645*n_time;
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
