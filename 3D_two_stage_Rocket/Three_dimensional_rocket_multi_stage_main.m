@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                      % Number of collocation points
+M = 10 ;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -329,15 +329,24 @@ t_2= ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
 z_2 = stage_time:0.1:final_time;
 
 
-R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2)-Re;
-R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
+R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2);
+R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
 
+% Latitude_and_Longitude calculation
+lat_1 = asin(Rz_1./R_1);
+long_1 = acos(Rx_1./(R_1.*cos(lat_1)));
+% Latitude_and_Longitude calculation
+lat_2 = asin(Rz_2./R_2);
+long_2 = acos(Rx_2./(R_2.*cos(lat_2)));
+
+h_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2)-Re;
+h_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
 % Mach number calculation
 Gamma = 1.4;
 R = 287;
 Temp0 = 288.16;
-Temp_1 = Temp0 - 0.0065*(R_1-Re);
-Temp_2 = Temp0 - 0.0065*(R_2-Re);
+Temp_1 = Temp0 - 0.0065*(h_1);
+Temp_2 = Temp0 - 0.0065*(h_2);
 
 Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
@@ -357,11 +366,11 @@ Mach_2 = Vrel_2./sqrt(Gamma*R*Temp_2);
 % Lagrange interpolation for altitude
 % stage_1
 collocation_points = t_1';
-function_value = R_1;
+function_value = h_1;
 altitude_1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
 % stage_2
 collocation_points = t_2';
-function_value = R_2;
+function_value = h_2;
 altitude_2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
 % Multi_stage
 altitude = [altitude_1 altitude_2];
@@ -469,3 +478,35 @@ legend("PS Method","NPSOL");
 title("Thrust variation w.r.t time",PS_method)
 set(gca, 'FontSize', 20);
 hold off 
+
+%
+latitude = [lat_1 lat_2];
+
+figure(5)
+plot(rad2deg(latitude)',[h_1 h_2]'/1000,'g-','LineWidth',2)
+xlabel('Inertual latitude(deg)')
+ylabel('Altitude(Km)')
+grid on
+hold on
+load alt_VS_inertial_lat.csv
+al1 = alt_VS_inertial_lat(:,1);
+al2 = alt_VS_inertial_lat(:,2);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+title("latitude variation w.r.t altitude",PS_method)
+set(gca, 'FontSize', 20);
+
+
+% load alt_VS_inertial_lat.csv
+% al1 = flip(alt_VS_inertial_lat(:,1));
+% al2 = flip(alt_VS_inertial_lat(:,2))+Re/1000;
+% 
+% collocation_points = al2;
+% function_value = al1;
+% lat = lagrange_interpolation(collocation_points, function_value,linspace((Re+hi)/1000,(Re+hf)/1000,M));
+% % stage_2
+% collocation_points = al2(6:end);
+% function_value = al1(6:end);
+% lat_2 = lagrange_interpolation_n(al2(6:end), al1(6:end), h_2/1000);
+
