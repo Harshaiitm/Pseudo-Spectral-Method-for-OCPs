@@ -38,7 +38,7 @@ ceq = zeros(3*M+1,1);
 ceq(1:M,1) = D*[hi h]'-((final_time-t0)/2)* v';
 ceq(M+1:2*M,1)=D*[vi v]' - ((final_time-t0)/2)*((Thrust - Drag)./mass - mu./r.^2)';
 ceq(2*M+1:3*M,1) = D*[mass_i mass]'+((final_time-t0)/2)*(Thrust./(g0.*Isp))';
-ceq(3*M+1) = mass_f - mass(end);
+ceq(3*M+1) = mass(end)-mass_f;
 end
 
 

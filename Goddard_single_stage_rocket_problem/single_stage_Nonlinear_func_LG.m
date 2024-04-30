@@ -21,7 +21,9 @@ g0 = problem.g0;
 Isp = problem.Isp;
 t0 = problem.t0;
 hi = problem.hi;
+hf = problem.hf;
 vi = problem.vi;
+vf = problem.vf;
 mass_i = problem.mass_i;
 mass_f = problem.mass_f;
 Thrust_i = problem.Thrust_i;
@@ -34,11 +36,10 @@ Drag = 0.5*rho.* v.^2 *A_ref *CD;
 % mp = m0-mass;
 
 
-ceq = zeros(3*M+1,1);
-ceq(1:M,1) = D*[hi h]'-((final_time-t0)/2)* v';
-ceq(M+1:2*M,1)=D*[vi v]' - ((final_time-t0)/2)*((Thrust - Drag)./mass - mu./r.^2)';
-ceq(2*M+1:3*M,1) = D*[mass_i mass]'+((final_time-t0)/2)*(Thrust./(g0.*Isp))';
-ceq(3*M+1) = mass_f - mass(end);
+ceq = zeros(3*M,1);
+ceq(1:M,1) = D*[hi h hf]'-((final_time-t0)/2)* v';
+ceq(M+1:2*M,1)=D*[vi v vf]' - ((final_time-t0)/2)*((Thrust - Drag)./mass - mu./r.^2)';
+ceq(2*M+1:3*M,1) = D*[mass_i mass mass_f]'+((final_time-t0)/2)*(Thrust./(g0.*Isp))';
 end
 
 

@@ -110,7 +110,7 @@ lb(1:M) = 0;
 lb(M+1:2*M) = 0;
 lb(2*M+1) = m0;
 lb(2*M+2:3*M) = m0-mp0;
-lb(3*M+1:4*M) = -m0*g0*2;
+lb(3*M+1:4*M) = 0;
 lb(4*M+1) = 0;
 
 ub(1:M) = inf;
@@ -210,21 +210,22 @@ Thrust = lagrange_interpolation_n(collocation_points,function_value,z);
 
 % figure
 figure(1)
-plot(z,altitude/1000,'g-','LineWidth',1.5)
-xlabel('time [s]')
+plot(z,altitude/1000,'k-','LineWidth',1.5)
+xlabel('Time [s]')
 ylabel('Altitude [km]')
 hold on
 load alt_VS_time.csv
 ai1 = alt_VS_time(:,1);
 ai2 = alt_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',1.5)
-legend("PS Method","MIT");
-title("Altitude variation w.r.t time")
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off
 grid on
 
 figure(2)
-plot(z,velocity/1000,'g-','LineWidth',1.5 )
+plot(z,velocity/1000,'k-','LineWidth',1.5)
 xlabel('Time [s]')
 ylabel('velocity [km/s]')
 hold on
@@ -233,29 +234,32 @@ al1 = velocity_vs_time(:,1);
 al2 = velocity_vs_time(:,2);
 plot(al1,al2,'r--','LineWidth',1.5);
 grid on
-legend("PS Method","MIT");
-title("Velocity variation w.r.t time")
+legend("PS Method","NPSOL");
+title("Velocity variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
 figure(3)
-plot(z,mass,'g-','LineWidth',1.5)
+plot(z,mass,'k-','LineWidth',2)
 xlabel('Time [s]')
-ylabel('mass [kg]')
+ylabel('Mass [kg]')
 grid on
 hold on
 load mass_vs_time.csv
 al1 = mass_vs_time(:,1);
 al2 = mass_vs_time(:,2);
-plot(al1,al2,'r--','LineWidth',1.5);
+plot(al1,al2,'r--','LineWidth',2);
 grid on
-legend("PS Method","MIT");
-title("Vehicle mass variation w.r.t time")
+legend("PS Method","NPSOL");
+title("Vehicle mass variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off
 
 
 
 figure(4)
-plot(z,Thrust/1000,'g-','LineWidth',1.5)
+plot(z,Thrust/1000,'k-','LineWidth',1.5)
+ylim([-2,100])
 xlabel('Time [s]')
 ylabel('Thrust [kN]')
 grid on
@@ -263,9 +267,10 @@ hold on
 load Thrust_vs_time.csv
 al1 = Thrust_vs_time(:,1);
 al2 = Thrust_vs_time(:,2);
-plot(al1,al2,'r--','LineWidth',1.5);
+plot(al1,al2,'r--','LineWidth',2);
 grid on
-legend("PS Method","ICLOCS2");
-title("Thrust variation w.r.t time")
+legend("PS Method","NPSOL");
+title("Thrust variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
  

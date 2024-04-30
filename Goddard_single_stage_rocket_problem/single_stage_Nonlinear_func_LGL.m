@@ -1,4 +1,4 @@
-function [c,ceq,dc,dceq] = single_stage_Nonlinear_func_LGL(x,M,D,problem)   %inequality constarints                      
+function [c,ceq,dc,dceq] = single_stage_Nonlinear_func_LGL(x,M,D,problem)                       
 c = [];
 dc = [];
 dceq = [];

@@ -41,9 +41,7 @@ ceq(3*M+1) = hi - h(1);
 ceq(3*M+2) = vi - v(1);
 ceq(3*M+3) = mass_i - mass(1);
 ceq(3*M+4) = mass_f - mass(end);
-ceq(3*M+5) = Thrust_i - Thrust(1);
 
 end
-
 
 
