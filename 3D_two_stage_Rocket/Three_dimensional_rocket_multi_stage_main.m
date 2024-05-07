@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10 ;                                     % Number of collocation points
+M = 30;                                     % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -54,6 +54,7 @@ mass2_i = m0_2;
 mass2_f = m0_2 - mp2;
 
 problem.m0_1 = m0_1;
+problem.mp1 = mp1;
 problem.m0_2 = m0_2;
 problem.m0 = m0;
 problem.mass1_i = m0;
@@ -84,10 +85,14 @@ T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
 Thrust_max_2 = T_max_by_W*m0_2*g0;
+Thrust_max_3 = 100;
+Thrust_s = Thrust_max-Thrust_max_2;
 
 problem.Isp = Isp;
 problem.Thrust_max = Thrust_max;
 problem.Thrust_max_2 = Thrust_max_2;
+problem.Thrust_max_3 = Thrust_max_3;
+problem.Thrust_s = Thrust_s;
 
 
 % Trajectory constraints(loads)
@@ -106,116 +111,43 @@ Vi = 10;
 Elev_i = deg2rad(90);
 Azim_i = deg2rad(90);
 
-
-% Calculate Cartesian coordinates
-Rx_i = (Re + hi) * cos(lat_i) * cos(long_i);
-Ry_i = (Re + hi) * cos(lat_i) * sin(long_i);
-Rz_i = (Re + hi) * sin(lat_i);
-R_i = sqrt(Rx_i.^2+Ry_i.^2+Rz_i.^2);
-
-Vx_i = Vi * cos(lat_i) * cos(long_i);
-Vy_i = Vi * cos(lat_i) * sin(long_i);
-Vz_i = Vi * sin(lat_i);
-
-PhiTheta = azel2phitheta([Azim_i;Elev_i]);
-phi = PhiTheta(1);
-theta = PhiTheta(2); 
-
-Thrust_xi = Thrust_max *  sin(Elev_i) * cos(Azim_i);
-Thrust_yi = Thrust_max *  sin(Elev_i) * sin(Azim_i);
-Thrust_zi = Thrust_max *  cos(Elev_i);
-
-
-
 % Stage State
-lat_s = deg2rad(28);
-long_s = deg2rad(0);
+lat_s = deg2rad(27);
+long_s = deg2rad(1);
 hf_s = 50000;
 Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = deg2rad(90);
-Azim_s = deg2rad(90);
-
-% Calculate Cartesian coordinates
-Rx_s = (Re + hf_s) * cos(lat_s) * cos(long_s);
-Ry_s = (Re + hf_s) * cos(lat_s) * sin(long_s);
-Rz_s = (Re + hf_s) * sin(lat_s);
-R_s = sqrt(Rx_s.^2 + Ry_s.^2 + Rz_s.^2);
-
-Vx_s = Vf_s * cos(lat_s) * cos(long_s);
-Vy_s = Vf_s * cos(lat_s) * sin(long_s);
-Vz_s = Vf_s * sin(lat_s);
-
-
-Thrust_xs = Thrust_max_2 * sin(Elev_s) * cos(Azim_s);
-Thrust_ys = Thrust_max_2 * sin(Elev_s) * sin(Azim_s);
-Thrust_zs = Thrust_max_2 * cos(Elev_s);
+Elev_s = deg2rad(80);
+Azim_s = deg2rad(100);
 
 % Final State
-lat_f = deg2rad(28);
-long_f = deg2rad(0);
+lat_f = deg2rad(0);
+long_f = deg2rad(87);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
-Elev_f = deg2rad(90);
-Azim_f = deg2rad(90);
+Elev_f = deg2rad(70);
+Azim_f = deg2rad(118);
 
-% Calculate Cartesian coordinates
-Rx_f = (Re + hf_f) * cos(lat_f) * cos(long_f);
-Ry_f = (Re + hf_f) * cos(lat_f) * sin(long_f);
-Rz_f = (Re + hf_f) * sin(lat_f);
-R_f = sqrt(Rx_f.^2 + Ry_f.^2 + Rz_f.^2);
-
-Vx_f = Vf_f * cos(lat_f) * cos(long_f);
-Vy_f = Vf_f * cos(lat_f) * sin(long_f);
-Vz_f = Vf_f * sin(lat_f);
-
-Thrust_max_f = 10;
-Thrust_xf = Thrust_max_f * sin(Elev_f) * cos(Azim_f);
-Thrust_yf = Thrust_max_f * sin(Elev_f) * sin(Azim_f);
-Thrust_zf = Thrust_max_f * cos(Elev_f);
-
-
-problem.Rx_i = Rx_i;
-problem.Ry_i = Ry_i;
-problem.Rz_i = Rz_i;
-problem.Vx_i = Vx_i;
-problem.Vy_i = Vy_i;
-problem.Vz_i = Vz_i;
 problem.lat_i = lat_i;
 problem.long_i = long_i;
+problem.Elev_i = Elev_i;
+problem.Azim_i = Azim_i;
 problem.hi = hi;
 problem.Vi = Vi;
 problem.t0 = t0;
-problem.Thrust_xi = Thrust_xi; 
-problem.Thrust_yi = Thrust_yi;
-problem.Thrust_zi = Thrust_zi;
 
-problem.Rx_s = Rx_s;
-problem.Ry_s = Ry_s;
-problem.Rz_s = Rz_s;
-problem.Vx_s = Vx_s;
-problem.Vy_s = Vy_s;
-problem.Vz_s = Vz_s;
 problem.lat_s = lat_s;
 problem.long_s = long_s;
+problem.Elev_s = Elev_s;
+problem.Azim_s = Azim_s;
 problem.hf_s = hf_s;
 problem.Vf_s = Vf_s;
-problem.Thrust_xs = Thrust_xs; 
-problem.Thrust_ys = Thrust_ys;
-problem.Thrust_zs = Thrust_zs;
 
-problem.Rx_f = Rx_f;
-problem.Ry_f = Ry_f;
-problem.Rz_f = Rz_f;
-problem.Vx_f = Vx_f;
-problem.Vy_f = Vy_f;
-problem.Vz_f = Vz_f;
 problem.lat_f = lat_f;
 problem.long_f = long_f;
+problem.Elev_f = Elev_f;
+problem.Azim_f = Azim_f;
 problem.hf_f = hf_f;
 problem.Vf_f = Vf_f;
-problem.Thrust_xf = Thrust_xf; 
-problem.Thrust_yf = Thrust_yf;
-problem.Thrust_zf = Thrust_zf;
 
 % Final state
 hf = 400000;
@@ -264,7 +196,7 @@ final_time = x(28*M+2);
 
 
 % Initial guess for decision variables
-x0 = Three_dimensional_initial_guess(M,problem);
+x0 = Three_dimensional_initial_guess_new_vec(M,problem);
 
 
 % Lower and Upper bounds for the variables
@@ -278,7 +210,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',2000,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',20,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -328,7 +260,6 @@ z_1 = t0:0.1:stage_time;
 t_2= ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
 z_2 = stage_time:0.1:final_time;
 
-
 R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2);
 R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
 
@@ -345,8 +276,19 @@ h_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
 Gamma = 1.4;
 R = 287;
 Temp0 = 288.16;
-Temp_1 = Temp0 - 0.0065*(h_1);
-Temp_2 = Temp0 - 0.0065*(h_2);
+
+% Calculate temperature based on altitude
+% Initialize temperature arrays
+Temp_1 = zeros(size(h_1));
+Temp_2 = zeros(size(h_1));
+Temp_3 = zeros(size(h_1));
+Temp_4 = zeros(size(h_1));
+
+% Calculate temperature based on altitude
+Temp_1(h_1 < 11000) = Temp0 - 0.0065 * h_1(h_1 < 11000);
+Temp_2(h_1 >= 11000 & h_1 < 25000) = 216.66;
+Temp_3(h_1 > 25000 & h_1 < hf_s) = 141.79 + 0.00299 * h_1(h_1 > 25000 & h_1 < hf_s);
+Temp_4(h_2 > hf_s) = 141.79 + 0.00299 * h_2(h_2 > hf_s);
 
 Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
@@ -358,8 +300,8 @@ Vrel_z2 = Vz_2 - Ry_2.*Omega_x + Rx_2.*Omega_y;
 Vrel_1 = sqrt(Vrel_x1.^2 + Vrel_y1.^2 + Vrel_z1.^2);
 Vrel_2 = sqrt(Vrel_x2.^2 + Vrel_y2.^2 + Vrel_z2.^2);
 
-Mach_1 = Vrel_1./sqrt(Gamma*R*Temp_1);
-Mach_2 = Vrel_2./sqrt(Gamma*R*Temp_2);
+Mach_1 = Vrel_1./sqrt(Gamma*R*[Temp_1;Temp_2;Temp_3]);
+Mach_2 = Vrel_2./sqrt(Gamma*R*Temp_4);
 
 
 
@@ -490,23 +432,27 @@ grid on
 hold on
 load alt_VS_inertial_lat.csv
 al1 = alt_VS_inertial_lat(:,1);
-al2 = alt_VS_inertial_lat(:,2);
+al2 = alt_VS_inertial_lat(:,3);
 plot(al1,al2,'r--','LineWidth',2);
 grid on
 legend("PS Method","NPSOL");
 title("latitude variation w.r.t altitude",PS_method)
 set(gca, 'FontSize', 20);
 
+longitude = [long_1 long_2];
+figure(6)
+plot(rad2deg(longitude)',[h_1 h_2]'/1000,'g-','LineWidth',2)
+xlabel('Inertial longitude(deg)')
+ylabel('Altitude(Km)')
+grid on
+hold on
+load alt_VS_inertial_lat.csv
+al1 = alt_VS_inertial_lat(:,2);
+al2 = alt_VS_inertial_lat(:,3);
+plot(al1,al2,'r--','LineWidth',2);
+grid on
+legend("PS Method","NPSOL");
+title("longitude variation w.r.t altitude",PS_method)
+set(gca, 'FontSize', 20);
 
-% load alt_VS_inertial_lat.csv
-% al1 = flip(alt_VS_inertial_lat(:,1));
-% al2 = flip(alt_VS_inertial_lat(:,2))+Re/1000;
-% 
-% collocation_points = al2;
-% function_value = al1;
-% lat = lagrange_interpolation(collocation_points, function_value,linspace((Re+hi)/1000,(Re+hf)/1000,M));
-% % stage_2
-% collocation_points = al2(6:end);
-% function_value = al1(6:end);
-% lat_2 = lagrange_interpolation_n(al2(6:end), al1(6:end), h_2/1000);
 

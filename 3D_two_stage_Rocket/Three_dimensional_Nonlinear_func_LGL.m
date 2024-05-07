@@ -3,7 +3,6 @@ function [c,ceq,dc,dceq]= Three_dimensional_Nonlinear_func_LGL(x,M,D,problem)
 dc = [];
 dceq = [];
 
-
 Re = problem.Re;
 h_scale = problem.h_scale;
 mu = problem.mu;
@@ -39,15 +38,7 @@ a_sen_max = problem.a_sen_max;
 hi = problem.hi;
 Vi = problem.Vi;
 t0 = problem.t0;
-Rx_i = problem.Rx_i;
-Ry_i = problem.Ry_i;
-Rz_i = problem.Rz_i;
-Vx_i = problem.Vx_i;
-Vy_i = problem.Vy_i;
-Vz_i = problem.Vz_i;
-hf_s = problem.hf_s;
 hf_f = problem.hf_f;
-Vf_s = problem.Vf_s;
 Vf_f = problem.Vf_f;
 gamma_f = problem.gamma_f;
 inclin_f = problem.inclin_f;
@@ -83,8 +74,6 @@ q23 = x(26*M+1:27*M);
 q24 = x(27*M+1:28*M);
 stage_time = x(28*M+1);
 final_time = x(28*M+2);
-
-
 
 % Attitude matrix for stage_1
 Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
@@ -140,9 +129,6 @@ g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 
-
-
-
 Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
 Vrel_z1 = Vz_1 - Ry_1.*Omega_x + Rx_1.*Omega_y;
@@ -152,8 +138,6 @@ Vrel_z2 = Vz_2 - Ry_2.*Omega_x + Rx_2.*Omega_y;
 
 Vrel_1 = sqrt(Vrel_x1.^2 + Vrel_y1.^2 + Vrel_z1.^2);
 Vrel_2 = sqrt(Vrel_x2.^2 + Vrel_y2.^2 + Vrel_z2.^2);
-
-
 
 R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2);
 rho_1 = rho0*exp(-(R_1-Re)./h_scale);
@@ -237,21 +221,33 @@ ceq(11*M+1:12*M,1) = D*Vy_2' - ((final_time-stage_time)/2)*((Thrust_y2 + A_y2)./
 ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./mass_2 + g_z2)';
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
 
-% Initial and final constraints
-ceq(14*M+1) = Rx_1(1) - Rx_i;
-ceq(14*M+2) = Vx_1(1) - Vx_i;
-ceq(14*M+3) = Ry_1(1) - Ry_i;
-ceq(14*M+4) = Vy_1(1) - Vy_i;
-ceq(14*M+5) = Rz_1(1) - Rz_i;
-ceq(14*M+6) = Vz_1(1) - Vz_i;
-ceq(14*M+7) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + hf_s)^2);
-ceq(14*M+8) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + hf_s));
-ceq(14*M+9) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
-ceq(14*M+10) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
-ceq(14*M+11) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
-ceq(14*M+12) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * sin(inclin_f));
+% Rx0_1 = problem.Rx0_1;
+% Ry0_1 = problem.Ry0_1;
+% Rz0_1 = problem.Rz0_1;
+% Vx0_1 = problem.Vx0_1;
+% Vy0_1 = problem.Vy0_1;
+% Vz0_1 = problem.Vz0_1;
 
+[R1_I,V1_I,~,~] = lat_long_elev_azi_vec1(M,problem);
+Rx0_1 = R1_I(1,1:M);
+Ry0_1 = R1_I(2,1:M);
+Rz0_1 = R1_I(3,1:M);
+ 
+Vx0_1 = V1_I(1,1:M);
+Vy0_1 = V1_I(2,1:M);
+Vz0_1 = V1_I(3,1:M);
 
+% % Initial and final constraints
+ceq(14*M+1) = Rx_1(1) - Rx0_1(1);
+ceq(14*M+2) = Vx_1(1) - Vx0_1(1);
+ceq(14*M+3) = Ry_1(1) - Ry0_1(1);
+ceq(14*M+4) = Vy_1(1) - Vy0_1(1);
+ceq(14*M+5) = Rz_1(1) - Rz0_1(1);
+ceq(14*M+6) = Vz_1(1) - Vz0_1(1);
+ceq(14*M+7) = (Rx_1(1)^2 + Ry_1(1)^2 + Rz_1(1)^2) - ((Re + 10)^2);
+ceq(14*M+8) = (Vx_1(1)^2 + Vy_1(1)^2 + Vz_1(1)^2) - (mu/(Re + 10));
+ceq(14*M+9) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + 50000)^2);
+ceq(14*M+10) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + 50000));
 
 % Knotting constraints
 ceq(14*M+11) = Rx_2(1) - Rx_1(end);
@@ -263,6 +259,11 @@ ceq(14*M+16) = Vz_2(1) - Vz_1(end);
 ceq(14*M+17) = mass_1(1) - mass1_i;
 ceq(14*M+18) = mass_1(end) - mass1_f;
 ceq(14*M+19) = mass_2(1) - mass2_i;
+
+ceq(14*M+20) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
+ceq(14*M+21) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
+ceq(14*M+22) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
+ceq(14*M+23) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * sin(inclin_f));
 
 
 % Normalisation constraint for Quaternion elements 
@@ -305,25 +306,25 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-c = [];
-% c = zeros(3*M,1);
-% % % % 
-% % % c(1:M,1) = q_mag1 - q_max;
-% % % c(M+1:2*M,1) = q_mag2 - q_max;
-% % % 
-% % % c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% % % c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-% % % 
-% c(1:M,1) = Thrust_1 - Thrust_max;
-% c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
+% c = [];
+c = zeros(3*M,1);
 % 
-% % Mass change constraint
-% for i = 1:(M-1)
-%     c(2*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
-% end
-% for i = 1:(M-1)  
-%     c(2*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
-% end
+c(1:M,1) = q_mag1 - q_max;
+c(M+1:2*M,1) = q_mag2 - q_max;
+
+c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+
+c(1:M,1) = Thrust_1 - Thrust_max;
+c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
+
+% Mass change constraint
+for i = 1:(M-1)
+    c(2*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+end
+for i = 1:(M-1)  
+    c(2*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+end
 
 
 end
