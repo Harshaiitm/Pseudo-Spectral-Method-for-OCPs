@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 30;                                     % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -28,7 +28,13 @@ Omega_z = 2*pi/(24*60*60);      % Sideral Rotation Rate (rad/s)
 Omega_x = 0; Omega_y = 0;
 rho0 = 1.225;                   % air density at Sea level 
 g0 = 9.80665;                   % acceleration due to gravity at sea level
+Gamma = 1.4;
+R = 287;
+Temp0 = 288.16;
 
+problem.Gamma = Gamma;
+problem.R = R;
+problem.Temp0 = Temp0;
 
 problem.Re = Re;
 problem.h_scale = h_scale;
@@ -85,7 +91,7 @@ T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
 Thrust_max_2 = T_max_by_W*m0_2*g0;
-Thrust_max_3 = 10;
+Thrust_max_3 = 1000;
 Thrust_s = Thrust_max-Thrust_max_2;
 
 problem.Isp = Isp;
@@ -116,16 +122,18 @@ lat_s = deg2rad(27);
 long_s = deg2rad(1);
 hf_s = 50000;
 Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = deg2rad(80);
+Elev_s = deg2rad(70);
 Azim_s = deg2rad(90);
 
 % Final State
-lat_f = deg2rad(0);
+lat_f = deg2rad(-3);
 long_f = deg2rad(87);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
-Elev_f = deg2rad(70);
+Elev_f = deg2rad(40);
 Azim_f = deg2rad(90);
+gamma_f = deg2rad(0);
+inclin_f = deg2rad(28);
 
 problem.lat_i = lat_i;
 problem.long_i = long_i;
@@ -148,16 +156,6 @@ problem.Elev_f = Elev_f;
 problem.Azim_f = Azim_f;
 problem.hf_f = hf_f;
 problem.Vf_f = Vf_f;
-
-% Final state
-hf = 400000;
-Vf = sqrt(mu/(Re+hf));
-gamma_f = 0;
-inclin_f = 28;
-
-
-problem.hf = hf;
-problem.Vf = Vf;
 problem.gamma_f = gamma_f;
 problem.inclin_f = inclin_f;
 
@@ -214,12 +212,25 @@ options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','Optimalit
 200000);
    
     if strcmp(PS_method,'LGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,problem),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_LGL(x,M,D,problem),options);
     elseif strcmp(PS_method,'CGL')
-       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,m0,m0_2),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
+       [x,fval,ef,output] = fmincon(@(x) Three_dimensional_objective_func(x,M,problem),x0,A,b,Aeq,beq,lb,ub,@(x) Three_dimensional_Nonlinear_func_CGL(x,M,D,problem),options);  
     end
 
 %===========================================================================================================================================================================================%    
+% Check if x0 is within bounds
+if all(x0 >= lb) && all(x0 <= ub)
+    disp('Initial guess x0 is within the bounds.');
+else
+    disp('Initial guess x0 is not within the bounds.');
+    
+    % Find indices of elements of x0 that are not within bounds
+    indices_outside_bounds = find(x0 < lb | x0 > ub);
+    disp('Indices of elements of x0 not within bounds:');
+    disp(indices_outside_bounds);
+end
+
+
 % Decision Variables
 Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
@@ -252,40 +263,80 @@ q24 = x(27*M+1:28*M);
 stage_time = x(28*M+1);
 final_time = x(28*M+2);
 
-
-
 % time span
 t_1= ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
-z_1 = t0:0.1:stage_time;
+z_1 = t0:1:stage_time;
 t_2= ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
-z_2 = stage_time:0.1:final_time;
+z_2 = stage_time:1:final_time;
 
 R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2);
 R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
 
 % Latitude_and_Longitude calculation
-lat_1 = asin(Rz_1./R_1);
-long_1 = acos(Rx_1./(R_1.*cos(lat_1)));
+lat_1 = rad2deg(asin(Rz_1./R_1));
+long_1 = rad2deg(acos(Rx_1./(R_1.*cos(deg2rad(lat_1)))));
 % Latitude_and_Longitude calculation
-lat_2 = asin(Rz_2./R_2);
-long_2 = acos(Rx_2./(R_2.*cos(lat_2)));
+lat_2 = rad2deg(asin(Rz_2./R_2));
+long_2 = rad2deg(acos(Rx_2./(R_2.*cos(deg2rad(lat_2)))));
 
 h_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2)-Re;
 h_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
-% Mach number calculation
-Gamma = 1.4;
-R = 287;
-Temp0 = 288.16;
+
+
 
 % Calculate temperature based on altitude
 altitude = 0:500000;
 Temp = zeros(size(altitude));
+Press = zeros(size(altitude));
+rho = zeros(size(altitude));
+
+% Troposhere 
 Temp(altitude < 11000) = Temp0 - 0.0065 * altitude(altitude < 11000);
+Temp_Tropo =  Temp(altitude < 11000);
+
+Press(altitude < 11000) = 101.29 * (Temp_Tropo./288.16).^5.256; 
+Press_Tropo = Press(altitude < 11000)*1000;
+
+rho(altitude < 11000) = Press_Tropo./(R*Temp_Tropo);
+rho_Tropo = rho(altitude < 11000);
+
+% Stratosphere
 Temp(altitude >= 11000 & altitude < 25000) = 216.66;
+Temp_Strato = Temp(altitude >= 11000 & altitude < 25000);
+
+Press(altitude >= 11000 & altitude < 25000) = 22.65 * exp(1.73-0.000157*altitude(altitude >= 11000 & altitude < 25000)); 
+Press_Strato = Press(altitude >= 11000 & altitude < 25000)*1000;
+
+rho(altitude >= 11000 & altitude < 25000) = Press_Strato./(R*Temp_Strato);
+rho_Strato = rho(altitude >= 11000 & altitude < 25000);
+
+% Thermosphere_till_hf_s
 Temp(altitude >= 25000 & altitude < hf_s) = 141.79 + 0.00299 * altitude(altitude >= 25000 & altitude < hf_s);
+Temp_Thermo_1 = Temp(altitude >= 25000 & altitude < hf_s);
+
+Press(altitude >= 25000 & altitude < hf_s) = 2.488 * (Temp_Thermo_1/216.16).^(-11.388);
+Press_Thermo_1 = Press(altitude >= 25000 & altitude < hf_s)*1000; 
+
+rho(altitude >= 25000 & altitude < hf_s) = Press_Thermo_1./(R*Temp_Thermo_1);
+rho_Thermo_1 = rho(altitude >= 25000 & altitude < hf_s);
+
+% Thermosphere_above_hf_s and till hf_f
 Temp(altitude >= hf_s) = 141.79 + 0.00299 * hf_s;
+Temp_Thermo_2 = Temp(altitude >= hf_s);
+
+Press(altitude >= hf_s) = 2.488 * (Temp_Thermo_2/216.16).^(-11.388);
+Press_Thermo_2 = Press(altitude >= hf_s)*1000;
+
+rho(altitude >= hf_s) = Press_Thermo_2/(R*Temp_Thermo_2);
+rho_Thermo_2 = rho(altitude >= hf_s);
+
+% Interpolate
 Static_Temp_1 = interp1(altitude, Temp,h_1);
 Static_Temp_2 = interp1(altitude, Temp,h_2);
+Static_Press_1 = interp1(altitude, Press,h_1);
+Static_Press_2 = interp1(altitude, Press,h_2);
+rho_1 = interp1(altitude,rho,h_1);
+rho_2 = interp1(altitude,rho,h_2);
 
 Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
@@ -300,7 +351,33 @@ Vrel_2 = sqrt(Vrel_x2.^2 + Vrel_y2.^2 + Vrel_z2.^2);
 Mach_1 = Vrel_1./sqrt(Gamma*R*Static_Temp_1);
 Mach_2 = Vrel_2./sqrt(Gamma*R*Static_Temp_2);
 
+% rho_1 = rho0.*(Static_Temp_1/Temp0).^(Gamma-1);
+% rho_2 = rho0.*(Static_Temp_2/Temp0).^(Gamma-1);
+% rho_1 = rho0*exp(-(R_1-Re)./h_scale);
+% rho_2 = rho0*exp(-(R_2-Re)./h_scale);
 
+q_mag1 = 0.5* rho_1.* Vrel_1.^2;
+q_mag2 = 0.5* rho_2.* Vrel_2.^2;
+
+ 
+% Gravity
+g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_y1 = (-mu*Ry_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_z1 = (-mu*Rz_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+
+% Senced acceleration calculation
+a_sen_x1 = D*Vx_1' - g_x1';
+a_sen_y1 = D*Vy_1' - g_y1';
+a_sen_z1 = D*Vz_1' - g_z1';
+a_sen_mag1 = sqrt((a_sen_x1).^2 + (a_sen_y1).^2 + (a_sen_z1).^2);
+
+a_sen_x2 = D*Vx_2' - g_x2';
+a_sen_y2 = D*Vy_2' - g_y2';
+a_sen_z2 = D*Vz_2' - g_z2';
+a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Lagrange interpolation for altitude
 % stage_1
@@ -422,7 +499,7 @@ hold off
 latitude = [lat_1 lat_2];
 
 figure(5)
-plot(rad2deg(latitude)',[h_1 h_2]'/1000,'g-','LineWidth',2)
+plot(latitude',[h_1 h_2]'/1000,'g-','LineWidth',2)
 xlabel('Inertual latitude(deg)')
 ylabel('Altitude(Km)')
 grid on
@@ -438,7 +515,7 @@ set(gca, 'FontSize', 20);
 
 longitude = [long_1 long_2];
 figure(6)
-plot(rad2deg(longitude)',[h_1 h_2]'/1000,'g-','LineWidth',2)
+plot(longitude',[h_1 h_2]'/1000,'g-','LineWidth',2)
 xlabel('Inertial longitude(deg)')
 ylabel('Altitude(Km)')
 grid on
@@ -452,4 +529,58 @@ legend("PS Method","NPSOL");
 title("longitude variation w.r.t altitude",PS_method)
 set(gca, 'FontSize', 20);
 
+% stage_1
+collocation_points = t_1';
+function_value = q_mag1;
+q_mag1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = q_mag2;
+q_mag2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+q_mag = [q_mag1 q_mag2];
 
+figure(7)
+plot(z,q_mag/1000,'g-',"LineWidth",2)
+xlabel('Time [s]')
+ylabel('Dynamic Pressure [kPa]')
+grid on
+hold on
+load dynamic_pressure_VS_time.csv
+ai1 = dynamic_pressure_VS_time(:,1);
+ai2 = dynamic_pressure_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+title("Dynamic Pressure w.r.t time")
+% set(gca, 'FontSize', 40);
+hold off 
+
+% stage_1
+collocation_points = t_1';
+function_value = a_sen_mag1;
+a_sen_mag1 = lagrange_interpolation_n(collocation_points, function_value, z_1);
+% stage_2
+collocation_points = t_2';
+function_value = a_sen_mag2;
+a_sen_mag2 = lagrange_interpolation_n(collocation_points, function_value, z_2);
+% Multi_stage
+a_sen_mag = [a_sen_mag1 a_sen_mag2];
+
+figure(8)
+plot(z,a_sen_mag/g0,'g-',"LineWidth",2)
+xlabel('Time [s]')
+ylabel('Sensed acceleration[gs]')
+grid on
+hold on
+% ylim([0 3]);
+load sensedacce_VS_time.csv
+ai1 = sensedacce_VS_time(:,1);
+ai2 = sensedacce_VS_time(:,2);
+plot(ai1,ai2,'r--','LineWidth',2)
+legend("PS Method","NPSOL");
+title("Sensed acceleration w.r.t time")
+% set(gca, 'FontSize', 40);
+hold off
+
+figure(9)
+plot([h_1 h_2], [rho_1 rho_2]);

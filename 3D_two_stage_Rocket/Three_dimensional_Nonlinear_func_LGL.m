@@ -38,10 +38,16 @@ a_sen_max = problem.a_sen_max;
 hi = problem.hi;
 Vi = problem.Vi;
 t0 = problem.t0;
+hf_s = problem.hf_s;
+Vf_s = problem.Vf_s;
 hf_f = problem.hf_f;
 Vf_f = problem.Vf_f;
 gamma_f = problem.gamma_f;
 inclin_f = problem.inclin_f;
+
+Gamma = problem.Gamma;
+R = problem.R;
+Temp0 = problem.Temp0;
 
 % Decision veriables
 Rx_1 = x(0*M+1:1*M);
@@ -140,22 +146,68 @@ Vrel_1 = sqrt(Vrel_x1.^2 + Vrel_y1.^2 + Vrel_z1.^2);
 Vrel_2 = sqrt(Vrel_x2.^2 + Vrel_y2.^2 + Vrel_z2.^2);
 
 R_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2);
-rho_1 = rho0*exp(-(R_1-Re)./h_scale);
-
+h_1 = R_1-Re;
 R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
-rho_2 = rho0*exp(-(R_2-Re)./h_scale);
+h_2 = R_2-Re;
 
-Gamma = 1.4;
-R = 287;
-Temp0 = 288.16;
-Temp_1 = Temp0 - 0.0065*(R_1-Re);
-Temp_2 = Temp0 - 0.0065*(R_2-Re);
 
-Mach_1 = Vrel_1./sqrt(Gamma*R*Temp_1);
-Mach_2 = Vrel_2./sqrt(Gamma*R*Temp_2);
+% Calculate temperature based on altitude
+altitude = 0:500000;
+Temp = zeros(size(altitude));
+Press = zeros(size(altitude));
+rho = zeros(size(altitude));
+
+% Troposhere 
+Temp(altitude < 11000) = Temp0 - 0.0065 * altitude(altitude < 11000);
+Temp_Tropo =  Temp(altitude < 11000);
+
+Press(altitude < 11000) = 101.29 * (Temp_Tropo./288.16).^5.256; 
+Press_Tropo = Press(altitude < 11000)*1000;
+
+rho(altitude < 11000) = Press_Tropo./(R*Temp_Tropo);
+rho_Tropo = rho(altitude < 11000);
+
+% Stratosphere
+Temp(altitude >= 11000 & altitude < 25000) = 216.66;
+Temp_Strato = Temp(altitude >= 11000 & altitude < 25000);
+
+Press(altitude >= 11000 & altitude < 25000) = 22.65 * exp(1.73-0.000157*altitude(altitude >= 11000 & altitude < 25000)); 
+Press_Strato = Press(altitude >= 11000 & altitude < 25000)*1000;
+
+rho(altitude >= 11000 & altitude < 25000) = Press_Strato./(R*Temp_Strato);
+rho_Strato = rho(altitude >= 11000 & altitude < 25000);
+
+% Thermosphere_till_hf_s
+Temp(altitude >= 25000 & altitude < hf_s) = 141.79 + 0.00299 * altitude(altitude >= 25000 & altitude < hf_s);
+Temp_Thermo_1 = Temp(altitude >= 25000 & altitude < hf_s);
+
+Press(altitude >= 25000 & altitude < hf_s) = 2.488 * (Temp_Thermo_1/216.16).^(-11.388);
+Press_Thermo_1 = Press(altitude >= 25000 & altitude < hf_s)*1000; 
+
+rho(altitude >= 25000 & altitude < hf_s) = Press_Thermo_1./(R*Temp_Thermo_1);
+rho_Thermo_1 = rho(altitude >= 25000 & altitude < hf_s);
+
+% Thermosphere_above_hf_s and till hf_f
+Temp(altitude >= hf_s) = 141.79 + 0.00299 * hf_s;
+Temp_Thermo_2 = Temp(altitude >= hf_s);
+
+Press(altitude >= hf_s) = 2.488 * (Temp_Thermo_2/216.16).^(-11.388);
+Press_Thermo_2 = Press(altitude >= hf_s)*1000;
+
+rho(altitude >= hf_s) = Press_Thermo_2/(R*Temp_Thermo_2);
+rho_Thermo_2 = rho(altitude >= hf_s);
+
+% Interpolate
+Static_Temp_1 = interp1(altitude, Temp,h_1);
+Static_Temp_2 = interp1(altitude, Temp,h_2);
+Static_Press_1 = interp1(altitude, Press,h_1);
+Static_Press_2 = interp1(altitude, Press,h_2);
+rho_1 = interp1(altitude,rho,h_1);
+rho_2 = interp1(altitude,rho,h_2);
 
 q_mag1 = 0.5* rho_1.* Vrel_1.^2;
 q_mag2 = 0.5* rho_2.* Vrel_2.^2;
+q_mag = [q_mag1 q_mag2];
 
 
 Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
@@ -182,6 +234,7 @@ phi_2 = atan(Vby2./Vbx2);
 % Cby2 = -Cn*sin(phi_2);
 % Cbz2 = -Cn*cos(phi_2);
 
+
 Cby1 = dCby1_by_dbeta*beta_1;
 Cbz1 = dCbz1_by_dalpha*alpha_1;
 Cby2 = dCby2_by_dbeta*beta_2;
@@ -204,12 +257,12 @@ A_x2 = q_mag2.* Cx2 * A_ref;
 A_y2 = q_mag2.* Cy2 * A_ref;
 A_z2 = q_mag2.* Cz2 * A_ref;
 
-ceq = zeros(32*M,1);
+ceq = zeros(16*M,1);
 % system dynamics
 ceq(1:M,1) = D*Rx_1' - ((stage_time-t0)/2)*(Vx_1)';
 ceq(M+1:2*M,1) = D*Ry_1' - ((stage_time-t0)/2)*(Vy_1)';
 ceq(2*M+1:3*M,1) = D*Rz_1' - ((stage_time-t0)/2)*(Vz_1)';
-ceq(3*M+1:4*M,1) = D*Vx_1' - ((stage_time-t0)/2)*((Thrust_x1 + A_x1)./mass_1 - g_x1)';
+ceq(3*M+1:4*M,1) = D*Vx_1' - ((stage_time-t0)/2)*((Thrust_x1 + A_x1)./mass_1 + g_x1)';
 ceq(4*M+1:5*M,1) = D*Vy_1' - ((stage_time-t0)/2)*((Thrust_y1 + A_y1)./mass_1 + g_y1)';
 ceq(5*M+1:6*M,1) = D*Vz_1' - ((stage_time-t0)/2)*((Thrust_z1 + A_z1)./mass_1 + g_z1)';
 ceq(6*M+1:7*M,1) = D*mass_1' + ((stage_time-t0)/2)*((Thrust_1)./(g0.*Isp))';
@@ -237,10 +290,10 @@ ceq(14*M+3) = Ry_1(1) - Ry0_1(1);
 ceq(14*M+4) = Vy_1(1) - Vy0_1(1);
 ceq(14*M+5) = Rz_1(1) - Rz0_1(1);
 ceq(14*M+6) = Vz_1(1) - Vz0_1(1);
-ceq(14*M+7) = (Rx_1(1)^2 + Ry_1(1)^2 + Rz_1(1)^2) - ((Re + 10)^2);
-ceq(14*M+8) = (Vx_1(1)^2 + Vy_1(1)^2 + Vz_1(1)^2) - (mu/(Re + 10));
-ceq(14*M+9) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + 50000)^2);
-ceq(14*M+10) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - (mu/(Re + 50000));
+ceq(14*M+7) = (Rx_1(1)^2 + Ry_1(1)^2 + Rz_1(1)^2) - ((Re + hi)^2);
+ceq(14*M+8) = (Vx_1(1)^2 + Vy_1(1)^2 + Vz_1(1)^2) - Vi^2;
+% ceq(14*M+9) = (Rx_1(end)^2 + Ry_1(end)^2 + Rz_1(end)^2) - ((Re + hf_s)^2);
+% ceq(14*M+10) = (Vx_1(end)^2 + Vy_1(end)^2 + Vz_1(end)^2) - Vf_s^2;
 
 % Knotting constraints
 ceq(14*M+11) = Rx_2(1) - Rx_1(end);
@@ -300,7 +353,7 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Inequality_constraints
 % c = [];
-c = zeros(4*M,1);
+c = zeros(7*M,1);
 
 c(1:M,1) = q_mag1 - q_max;
 c(M+1:2*M,1) = q_mag2 - q_max;
@@ -308,15 +361,15 @@ c(M+1:2*M,1) = q_mag2 - q_max;
 c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
 c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
 
-c(1:M,1) = Thrust_1 - Thrust_max;
-c(M+1:2*M,1) = Thrust_2 - Thrust_max_2;
+c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
+c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
 
 %Mass change constraint
 for i = 1:(M-1)
-    c(2*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+    c(6*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
 end
 for i = 1:(M-1)  
-    c(2*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+    c(6*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
 end
 
 

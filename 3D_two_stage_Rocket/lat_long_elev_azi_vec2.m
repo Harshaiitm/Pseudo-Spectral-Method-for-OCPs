@@ -25,66 +25,38 @@ Azim_2 = linspace(Azim_s,Azim_f,M);
 latitude_2 = deg2rad(interp1(alt, lat, Altitude0_2, 'spline'));
 longitude_2 = deg2rad(interp1(alt, long, Altitude0_2, 'spline'));
 
-R2_B = Altitude0_2./sin(Elev_2);
-Rx2_L = -cos(Elev_2).*cos(Azim_2).*R2_B;
-Ry2_L = cos(Elev_2).*sin(Azim_2).*R2_B; 
-Rz2_L = sin(Elev_2).*R2_B;
-
-% Rx2_L =  -cos(Elev_2).*cos(Azim_2).*Rx2_B + sin(Azim_2).*Ry2_B - sin(Elev_2).*cos(Azim_2).*Rz2_B;
-% Ry2_L =  -cos(Elev_2).*sin(Azim_2).*Rx2_B + cos(Azim_2).*Ry2_B + sin(Elev_2).*sin(Azim_2).*Rz2_B;
-% Rz2_L =  sin(Elev_2).*Rx2_B- cos(Elev_2).*Rz2_B;
-
-R2_L_mag = sqrt(Rx2_L.^2+Ry2_L.^2+Rz2_L.^2);
-
-Rx2_I = sin(latitude_2).*cos(longitude_2).*Rx2_L - sin(longitude_2).*Ry2_L + cos(latitude_2).*cos(longitude_2).*(Re+Rz2_L);
-Ry2_I = sin(latitude_2).*sin(longitude_2).*Rx2_L + cos(longitude_2).*Ry2_L + cos(latitude_2).*sin(longitude_2).*(Re+Rz2_L);
-Rz2_I = -cos(latitude_2).*Rx2_L + sin(latitude_2).*(Re+Rz2_L);
-
+R2_B = (Altitude0_2+Re);
+Rx2_I = R2_B.*cos(latitude_2).*cos(longitude_2);
+Ry2_I = R2_B.*cos(latitude_2).*sin(longitude_2); 
+Rz2_I = R2_B.*sin(latitude_2);
 
 R2_I = [Rx2_I;Ry2_I;Rz2_I];
 
 R2_I_mag = sqrt(Rx2_I.^2+Ry2_I.^2+Rz2_I.^2);
 
-V2_B = Velocity0_2./sin(Elev_2);
-Vx2_L = -cos(Elev_2).*cos(Azim_2).*V2_B;
-Vy2_L = cos(Elev_2).*sin(Azim_2).*V2_B; 
-Vz2_L = sin(Elev_2).*V2_B;
-
-% Vx2_L =  -cos(Elev_2).*cos(Azim_2).*Vx2_B + sin(Azim_2).*Vy2_B - sin(Elev_2).*cos(Azim_2).*Vz2_B;
-% Vy2_L =  cos(Elev_2).*sin(Azim_2).*Vx2_B + cos(Azim_2).*Vy2_B + sin(Elev_2).*sin(Azim_2).*Vz2_B;
-% Vz2_L =  sin(Elev_2).*Vx2_B- cos(Elev_2).*Vz2_B;
-
-V2_L_mag = sqrt(Vx2_L.^2+Vy2_L.^2+Vz2_L.^2);
-
 Omega_z = 2*pi/(24*60*60);      % Sideral Rotation Rate (rad/s)
 Omega_x = 0; Omega_y = 0;
 Omega_I = [Omega_x;Omega_y;Omega_z];
 
-Vx2_I = sin(latitude_2).*cos(longitude_2).*Vx2_L - sin(longitude_2).*Vy2_L + cos(latitude_2).*cos(longitude_2).*Vz2_L + (Omega_y*Rz2_I-Omega_z*Ry2_I);
-Vy2_I = sin(latitude_2).*sin(longitude_2).*Vx2_L + cos(longitude_2).*Vy2_L + cos(latitude_2).*sin(longitude_2).*Vz2_L + (Omega_z*Rx2_I-Omega_x*Rz2_I);
-Vz2_I = -cos(latitude_2).*Vx2_L + sin(latitude_2).*Vz2_L+(Omega_x*Ry2_I-Omega_y*Rx2_I);
+V2_B = Velocity0_2;
+Vx2_I = V2_B.*cos(latitude_2).*cos(longitude_2) +  (Omega_y*Rz2_I-Omega_z*Ry2_I);
+Vy2_I = V2_B.*cos(latitude_2).*sin(longitude_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I);
+Vz2_I = V2_B.*sin(latitude_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I);
 
 V2_I = [Vx2_I;Vy2_I;Vz2_I];
 V2_I_mag = sqrt(Vx2_I.^2 + Vy2_I.^2 + Vz2_I.^2);
 
-T2_B = Thrust0_2./sin(Elev_2);
-Tx2_L = -cos(Elev_2).*cos(Azim_2).*T2_B;
-Ty2_L = cos(Elev_2).*sin(Azim_2).*T2_B; 
-Tz2_L = sin(Elev_2).*T2_B;
+T2_B = Thrust0_2;
+Tx2_I = T2_B.*cos(latitude_2).*cos(longitude_2);
+Ty2_I = T2_B.*cos(latitude_2).*sin(longitude_2); 
+Tz2_I = T2_B.*sin(latitude_2);
 
-% Tx2_L =  -cos(Elev_2).*cos(Azim_2).*Tx2_B + sin(Azim_2).*Ty2_B - sin(Elev_2).*cos(Azim_2).*Tz2_B;
-% Ty2_L =  cos(Elev_2).*sin(Azim_2).*Tx2_B + cos(Azim_2).*Ty2_B + sin(Elev_2).*sin(Azim_2).*Tz2_B;
-% Tz2_L =  sin(Elev_2).*Tx2_B- cos(Elev_2).*Tz2_B;
-
-T2_L_mag = sqrt(Tx2_L.^2 + Ty2_L.^2 + Tz2_L.^2);
-
-Tx2_I = sin(latitude_2).*cos(longitude_2).*Tx2_L - sin(longitude_2).*Ty2_L + cos(latitude_2).*cos(longitude_2).*Tz2_L;
-Ty2_I = sin(latitude_2).*sin(longitude_2).*Tx2_L + cos(longitude_2).*Ty2_L + cos(latitude_2).*sin(longitude_2).*Tz2_L;
-Tz2_I = -cos(latitude_2).*Tx2_L + sin(latitude_2).*Tz2_L;
 
 T2_I = [Tx2_I;Ty2_I;Tz2_I];
 T2_I_mag = sqrt(Tx2_I.^2 + Ty2_I.^2 + Tz2_I.^2);
 
+latitude_2 = deg2rad(28);
+longitude_2 = deg2rad(0);
 % Attitude matrix
 Q11 = - sin(latitude_2).*cos(longitude_2).*cos(Elev_2).*cos(Azim_2) - sin(longitude_2).*cos(Elev_2).*sin(Azim_2) + cos(latitude_2).*cos(longitude_2).*sin(Elev_2);
 
