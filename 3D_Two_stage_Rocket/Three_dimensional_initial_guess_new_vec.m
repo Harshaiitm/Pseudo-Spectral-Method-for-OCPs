@@ -78,12 +78,12 @@ N = M-1;                            % Order of the polynomial
 [nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
   
 t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
-t_2 = ((final_time-t0)/2).*nodes+(final_time+t0)/2;
+t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
 Vx1_I = 10.*cos(deg2rad(28));
-Vy1_I = 10*cos(deg2rad(28)); 
+Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
 Vz1_I = 10.*sin(deg2rad(28));
 
-Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3));
+Vx2_I = sqrt(mu/(Re+hf_f));
 Vy2_I = 0;
 Vz2_I = 0;
 

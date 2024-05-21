@@ -206,6 +206,9 @@ Static_Press_2 = interp1(altitude, Press,h_2);
 rho_1 = interp1(altitude,rho,h_1);
 rho_2 = interp1(altitude,rho,h_2);
 
+rho_1 = rho0*exp(-(R_1-Re)./h_scale);
+rho_2 = rho0*exp(-(R_2-Re)./h_scale);
+
 q_mag1 = 0.5* rho_1.* Vrel_1.^2;
 q_mag2 = 0.5* rho_2.* Vrel_2.^2;
 q_mag = [q_mag1 q_mag2];

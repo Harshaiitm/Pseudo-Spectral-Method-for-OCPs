@@ -353,8 +353,8 @@ Mach_2 = Vrel_2./sqrt(Gamma*R*Static_Temp_2);
 
 % rho_1 = rho0.*(Static_Temp_1/Temp0).^(Gamma-1);
 % rho_2 = rho0.*(Static_Temp_2/Temp0).^(Gamma-1);
-% rho_1 = rho0*exp(-(R_1-Re)./h_scale);
-% rho_2 = rho0*exp(-(R_2-Re)./h_scale);
+rho_1 = rho0*exp(-(R_1-Re)./h_scale);
+rho_2 = rho0*exp(-(R_2-Re)./h_scale);
 
 q_mag1 = 0.5* rho_1.* Vrel_1.^2;
 q_mag2 = 0.5* rho_2.* Vrel_2.^2;
