@@ -90,7 +90,7 @@ problem.dCbz2_by_dalpha = dCbz2_by_dalpha;
 T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
-Thrust_max_2 = T_max_by_W*m0_2*g0;
+Thrust_max_2 = 2.66*m0_2*g0;
 Thrust_max_3 = 10;
 Thrust_s = Thrust_max-Thrust_max_2;
 
