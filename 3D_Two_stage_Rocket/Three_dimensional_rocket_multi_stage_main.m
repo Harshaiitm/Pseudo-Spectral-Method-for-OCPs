@@ -90,7 +90,7 @@ problem.dCbz2_by_dalpha = dCbz2_by_dalpha;
 T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
-Thrust_max_2 = 2.66*m0_2*g0;
+Thrust_max_2 = T_max_by_W*m0_2*g0;
 Thrust_max_3 = 10;
 Thrust_s = Thrust_max-Thrust_max_2;
 
@@ -160,7 +160,7 @@ problem.gamma_f = gamma_f;
 problem.inclin_f = inclin_f;
 
 % Decision veriables
-x = zeros(28*M+2);
+x = zeros(30*M+2);
 Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
@@ -168,29 +168,32 @@ Vx_1 = x(3*M+1:4*M);
 Vy_1 = x(4*M+1:5*M);
 Vz_1 = x(5*M+1:6*M);
 mass_1 = x(6*M+1:7*M);
-Thrust_x1 = x(7*M+1:8*M);
-Thrust_y1 = x(8*M+1:9*M);
-Thrust_z1 = x(9*M+1:10*M);
-q11 = x(10*M+1:11*M);
-q12 = x(11*M+1:12*M);
-q13 = x(12*M+1:13*M);
-q14 = x(13*M+1:14*M);
-Rx_2 = x(14*M+1:15*M);
-Ry_2 = x(15*M+1:16*M);
-Rz_2 = x(16*M+1:17*M);
-Vx_2 = x(17*M+1:18*M);
-Vy_2 = x(18*M+1:19*M);
-Vz_2 = x(19*M+1:20*M);
-mass_2 = x(20*M+1:21*M);
-Thrust_x2 = x(21*M+1:22*M);
-Thrust_y2 = x(22*M+1:23*M);
-Thrust_z2 = x(23*M+1:24*M);
-q21 = x(24*M+1:25*M);
-q22 = x(25*M+1:26*M);
-q23 = x(26*M+1:27*M);
-q24 = x(27*M+1:28*M);
-stage_time = x(28*M+1);
-final_time = x(28*M+2);
+Thrust_1 = x(7*M+1:8*M);
+uTx1 = x(8*M+1:9*M);
+uTy1 = x(9*M+1:10*M);
+uTz1 = x(10*M+1:11*M);
+q11 = x(11*M+1:12*M);
+q12 = x(12*M+1:13*M);
+q13 = x(13*M+1:14*M);
+q14 = x(14*M+1:15*M);
+Rx_2 = x(15*M+1:16*M);
+Ry_2 = x(16*M+1:17*M);
+Rz_2 = x(17*M+1:18*M);
+Vx_2 = x(18*M+1:19*M);
+Vy_2 = x(19*M+1:20*M);
+Vz_2 = x(20*M+1:21*M);
+mass_2 = x(21*M+1:22*M);
+Thrust_2 = x(22*M+1:23*M);
+uTx2 = x(23*M+1:24*M);
+uTy2 = x(24*M+1:25*M);
+uTz2 = x(25*M+1:26*M);
+q21 = x(26*M+1:27*M);
+q22 = x(27*M+1:28*M);
+q23 = x(28*M+1:29*M);
+q24 = x(29*M+1:30*M);
+stage_time = x(30*M+1);
+final_time = x(30*M+2);
+
 
 
 % Initial guess for decision variables
@@ -207,7 +210,7 @@ b = [];
 beq = [];
 
 tic;
-options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
+options =  optimoptions ('fmincon','Algorithm','interior-point','Display','iter','OptimalityTolerance',...
 1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',20,'MaxFunctionEvaluations',...
 200000);
    
@@ -239,29 +242,32 @@ Vx_1 = x(3*M+1:4*M);
 Vy_1 = x(4*M+1:5*M);
 Vz_1 = x(5*M+1:6*M);
 mass_1 = x(6*M+1:7*M);
-Thrust_x1 = x(7*M+1:8*M);
-Thrust_y1 = x(8*M+1:9*M);
-Thrust_z1 = x(9*M+1:10*M);
-q11 = x(10*M+1:11*M);
-q12 = x(11*M+1:12*M);
-q13 = x(12*M+1:13*M);
-q14 = x(13*M+1:14*M);
-Rx_2 = x(14*M+1:15*M);
-Ry_2 = x(15*M+1:16*M);
-Rz_2 = x(16*M+1:17*M);
-Vx_2 = x(17*M+1:18*M);
-Vy_2 = x(18*M+1:19*M);
-Vz_2 = x(19*M+1:20*M);
-mass_2 = x(20*M+1:21*M);
-Thrust_x2 = x(21*M+1:22*M);
-Thrust_y2 = x(22*M+1:23*M);
-Thrust_z2 = x(23*M+1:24*M);
-q21 = x(24*M+1:25*M);
-q22 = x(25*M+1:26*M);
-q23 = x(26*M+1:27*M);
-q24 = x(27*M+1:28*M);
-stage_time = x(28*M+1);
-final_time = x(28*M+2);
+Thrust_1 = x(7*M+1:8*M);
+uTx1 = x(8*M+1:9*M);
+uTy1 = x(9*M+1:10*M);
+uTz1 = x(10*M+1:11*M);
+q11 = x(11*M+1:12*M);
+q12 = x(12*M+1:13*M);
+q13 = x(13*M+1:14*M);
+q14 = x(14*M+1:15*M);
+Rx_2 = x(15*M+1:16*M);
+Ry_2 = x(16*M+1:17*M);
+Rz_2 = x(17*M+1:18*M);
+Vx_2 = x(18*M+1:19*M);
+Vy_2 = x(19*M+1:20*M);
+Vz_2 = x(20*M+1:21*M);
+mass_2 = x(21*M+1:22*M);
+Thrust_2 = x(22*M+1:23*M);
+uTx2 = x(23*M+1:24*M);
+uTy2 = x(24*M+1:25*M);
+uTz2 = x(25*M+1:26*M);
+q21 = x(26*M+1:27*M);
+q22 = x(27*M+1:28*M);
+q23 = x(28*M+1:29*M);
+q24 = x(29*M+1:30*M);
+stage_time = x(30*M+1);
+final_time = x(30*M+2);
+
 
 % time span
 t_1= ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
@@ -438,6 +444,13 @@ A_x2 = q_mag2.* Cx2 * A_ref;
 A_y2 = q_mag2.* Cy2 * A_ref;
 A_z2 = q_mag2.* Cz2 * A_ref;
 
+Thrust_x1 = uTx1.*Thrust_1;
+Thrust_y1 = uTy1.*Thrust_1;
+Thrust_z1 = uTz1.*Thrust_1;
+
+Thrust_x2 = uTx2.*Thrust_2;
+Thrust_y2 = uTy2.*Thrust_2;
+Thrust_z2 = uTz2.*Thrust_2;
 
 % Senced acceleration calculation
 a_sen_x1 = (Thrust_x1 + A_x1)./mass_1;
