@@ -368,15 +368,86 @@ g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 
+% Attitude matrix for stage_1
+Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
+Q112 = 2*(q11.*q12 + q13.*q14);
+Q113 = 2*(q11.*q13 - q12.*q14);
+Q121 = 2*(q11.*q12 - q13.*q14);
+Q122 = -q11.^2 + q12.^2 - q13.^2 + q14.^2;
+Q123 = 2*(q12.*q13 + q11.*q14);
+Q131 = 2*(q11.*q13 + q12.*q14);
+Q132 = 2*(q12.*q13 - q11.*q14);
+Q133 = -q11.^2 - q12.^2 + q13.^2 + q14.^2;
+
+
+Q1 = [Q111 Q112 Q113; Q121 Q122 Q123; Q131 Q132 Q133];
+
+% Attitude matrix for stage_2
+Q211 = q21.^2 - q22.^2 - q23.^2 + q24.^2;
+Q212 = 2*(q21.*q22 + q23.*q24);
+Q213 = 2*(q21.*q23 - q22.*q24);
+Q221 = 2*(q21.*q22 - q23.*q24);
+Q222 = -q21.^2 + q22.^2 - q23.^2 + q24.^2;
+Q223 = 2*(q22.*q23 + q21.*q24);
+Q231 = 2*(q21.*q23 + q22.*q24);
+Q232 = 2*(q22.*q23 - q21.*q24);
+Q233 = -q21.^2 - q22.^2 + q23.^2 + q24.^2;
+
+
+Q2 = [Q211 Q212 Q213; Q221 Q222 Q223; Q231 Q232 Q233];
+
+Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
+Vby1 = Q112.*Vrel_x1 + Q122.*Vrel_y1 + Q132.*Vrel_z1;
+Vbz1 = Q113.*Vrel_x1 + Q123.*Vrel_y1 + Q133.*Vrel_z1;
+Vbx2 = Q211.*Vrel_x2 + Q221.*Vrel_y2 + Q231.*Vrel_z2;
+Vby2 = Q212.*Vrel_x2 + Q222.*Vrel_y2 + Q232.*Vrel_z2;
+Vbz2 = Q213.*Vrel_x2 + Q223.*Vrel_y2 + Q233.*Vrel_z2;
+
+% Inertial Aerodynamic Coefficients
+alpha_1 = atan(Vbz1./Vbx1);
+alpha_2 = atan(Vbz2./Vbx2);
+beta_1 = atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2));
+beta_2 = atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2));
+phi_1 = atan(Vby1./Vbx1);
+phi_2 = atan(Vby2./Vbx2);
+
+% % Cbx1 = -Ca;
+% Cby1 = -Cn*sin(phi_1);
+% Cbz1 = -Cn*cos(phi_1);
+% % Cbx2 = -Ca;
+% Cby2 = -Cn*sin(phi_2);
+% Cbz2 = -Cn*cos(phi_2);
+
+
+Cby1 = dCby1_by_dbeta*beta_1;
+Cbz1 = dCbz1_by_dalpha*alpha_1;
+Cby2 = dCby2_by_dbeta*beta_2;
+Cbz2 = dCbz2_by_dalpha*alpha_2;
+
+Cx1 = Q111.*Cbx1 + Q112.*Cby1 + Q113.*Cbz1;
+Cy1 = Q121.*Cbx1 + Q122.*Cby1 + Q123.*Cbz1;
+Cz1 = Q131.*Cbx1 + Q132.*Cby1 + Q133.*Cbz1;
+Cx2 = Q211.*Cbx2 + Q212.*Cby2 + Q213.*Cbz2;
+Cy2 = Q221.*Cbx2 + Q222.*Cby2 + Q223.*Cbz2;
+Cz2 = Q231.*Cbx2 + Q232.*Cby2 + Q233.*Cbz2;
+
+A_x1 = q_mag1.* Cx1 * A_ref;
+A_y1 = q_mag1.* Cy1 * A_ref;
+A_z1 = q_mag1.* Cz1 * A_ref;
+A_x2 = q_mag2.* Cx2 * A_ref;
+A_y2 = q_mag2.* Cy2 * A_ref;
+A_z2 = q_mag2.* Cz2 * A_ref;
+
+
 % Senced acceleration calculation
-a_sen_x1 = D*Vx_1' - g_x1';
-a_sen_y1 = D*Vy_1' - g_y1';
-a_sen_z1 = D*Vz_1' - g_z1';
+a_sen_x1 = (Thrust_x1 + A_x1)./mass_1;
+a_sen_y1 = (Thrust_y1 + A_y1)./mass_1;
+a_sen_z1 = (Thrust_z1 + A_z1)./mass_1;
 a_sen_mag1 = sqrt((a_sen_x1).^2 + (a_sen_y1).^2 + (a_sen_z1).^2);
 
-a_sen_x2 = D*Vx_2' - g_x2';
-a_sen_y2 = D*Vy_2' - g_y2';
-a_sen_z2 = D*Vz_2' - g_z2';
+a_sen_x2 = (Thrust_x2 + A_x2)./mass_2;
+a_sen_y2 = (Thrust_y2 + A_y2)./mass_2;
+a_sen_z2 = (Thrust_z2 + A_z2)./mass_2;
 a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Lagrange interpolation for altitude

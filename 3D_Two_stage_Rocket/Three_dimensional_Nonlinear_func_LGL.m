@@ -316,14 +316,14 @@ ceq(17*M+1:18*M) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1;
 % find(isnan(ceq))
 
 % Senced acceleration calculation
-a_sen_x1 = D*Vx_1' - g_x1';
-a_sen_y1 = D*Vy_1' - g_y1';
-a_sen_z1 = D*Vz_1' - g_z1';
+a_sen_x1 = (Thrust_x1 + A_x1)./mass_1;
+a_sen_y1 = (Thrust_y1 + A_y1)./mass_1;
+a_sen_z1 = (Thrust_z1 + A_z1)./mass_1;
 a_sen_mag1 = sqrt((a_sen_x1).^2 + (a_sen_y1).^2 + (a_sen_z1).^2);
 
-a_sen_x2 = D*Vx_2' - g_x2';
-a_sen_y2 = D*Vy_2' - g_y2';
-a_sen_z2 = D*Vz_2' - g_z2';
+a_sen_x2 = (Thrust_x2 + A_x2)./mass_2;
+a_sen_y2 = (Thrust_y2 + A_y2)./mass_2;
+a_sen_z2 = (Thrust_z2 + A_z2)./mass_2;
 a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
