@@ -46,6 +46,12 @@ Thrustx0_1 = T1_I(1,1:M);
 Thrusty0_1 = T1_I(2,1:M);
 Thrustz0_1 = T1_I(3,1:M);
 
+Thrust0_1 = sqrt(Thrustx0_1.^2 + Thrusty0_1.^2 + Thrustz0_1.^2);
+
+uTx01 = 1;
+uTy01 = 0;
+uTz01 = 0;
+
 q11 = qn1(1,1:M);
 q12 = qn1(2,1:M);
 q13 = qn1(3,1:M);
@@ -65,6 +71,12 @@ Thrustx0_2 = T2_I(1,1:M);
 Thrusty0_2 = T2_I(2,1:M);
 Thrustz0_2 = T2_I(3,1:M);
 
+Thrust0_2 = sqrt(Thrustx0_2.^2 + Thrusty0_2.^2 + Thrustz0_2.^2);
+
+uTx02 = 1;
+uTy02 = 0;
+uTz02 = 0;
+
 q21 = qn2(1,1:M);
 q22 = qn2(2,1:M);
 q23 = qn2(3,1:M);
@@ -83,28 +95,30 @@ x0(3*M+1:4*M) = Vx0_1*n_velocity;                          % Vx_1
 x0(4*M+1:5*M) = Vy0_1*n_velocity;                          % Vy_1
 x0(5*M+1:6*M) = Vz0_1*n_velocity;                          % Vz_1    
 x0(6*M+1:7*M) = (linspace(m0,m0-mass1_f,M))*n_mass;                       % mass_1
-x0(7*M+1:8*M) = Thrustx0_1*n_thrust;                % Thrust_x1                                
-x0(8*M+1:9*M) = Thrusty0_1*n_thrust;                % Thrust_y1
-x0(9*M+1:10*M) = Thrustz0_1*n_thrust;               % Thrust_z1
-x0(10*M+1:11*M) = q11;                                          % q11
-x0(11*M+1:12*M) = q12;                                          % q12
-x0(12*M+1:13*M) = q13;                                          % q13
-x0(13*M+1:14*M) = q14;                                          % q14
-x0(14*M+1:15*M) = Rx0_2*n_length;                        % Rx_2
-x0(15*M+1:16*M) = Ry0_2*n_length;                        % Ry_2 
-x0(16*M+1:17*M) = Rz0_2*n_length;                        % Rz_2 
-x0(17*M+1:18*M) = Vx0_2*n_velocity;                        % Vx_2 
-x0(18*M+1:19*M) = Vy0_2*n_velocity;                        % Vy_2
-x0(19*M+1:20*M) = Vz0_2*n_velocity;                        % Vz_2
-x0(20*M+1:21*M) = (linspace(m0_2,mass2_f,M))*n_mass;                     % mass_2
-x0(21*M+1:22*M) = Thrustx0_2*n_thrust;              % Thrust_x2
-x0(22*M+1:23*M) = Thrusty0_2*n_thrust;              % Thrust_y2
-x0(23*M+1:24*M) = Thrustz0_2*n_thrust;              % Thrust_z2
-x0(24*M+1:25*M) = q21;                                          % q21
-x0(25*M+1:26*M) = q22;                                          % q22
-x0(26*M+1:27*M) = q23;                                          % q23
-x0(27*M+1:28*M) = q24;                                          % q24
-x0(28*M+1) = 137*n_time;                                               % stage_time
-x0(28*M+2) = 1750*n_time;                                              % final_time
+x0(7*M+1:8*M) = Thrust0_1*n_thrust;                % Thrust_1                                
+x0(8*M+1:9*M) = uTx01;
+x0(9*M+1:10*M) = uTy01;
+x0(10*M+1:11*M) = uTz01;
+x0(11*M+1:12*M) = q11;                                          % q11
+x0(12*M+1:13*M) = q12;                                          % q12
+x0(13*M+1:14*M) = q13;                                          % q13
+x0(14*M+1:15*M) = q14;                                          % q14
+x0(15*M+1:16*M) = Rx0_2*n_length;                        % Rx_2
+x0(16*M+1:17*M) = Ry0_2*n_length;                        % Ry_2 
+x0(17*M+1:18*M) = Rz0_2*n_length;                        % Rz_2 
+x0(18*M+1:19*M) = Vx0_2*n_velocity;                        % Vx_2 
+x0(19*M+1:20*M) = Vy0_2*n_velocity;                        % Vy_2
+x0(20*M+1:21*M) = Vz0_2*n_velocity;                        % Vz_2
+x0(21*M+1:22*M) = (linspace(m0_2,mass2_f,M))*n_mass;                     % mass_2
+x0(22*M+1:23*M) = Thrust0_2*n_thrust;                % Thrust_1                                
+x0(23*M+1:24*M) = uTx02;
+x0(24*M+1:25*M) = uTy02;
+x0(25*M+1:26*M) = uTz02;
+x0(26*M+1:27*M) = q21;                                          % q21
+x0(27*M+1:28*M) = q22;                                          % q22
+x0(28*M+1:29*M) = q23;                                          % q23
+x0(29*M+1:30*M) = q24;                                          % q24
+x0(30*M+1) = 137*n_time;                                               % stage_time
+x0(30*M+2) = 1750*n_time;                                              % final_time
 
 end

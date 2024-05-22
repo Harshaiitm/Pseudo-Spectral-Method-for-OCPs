@@ -42,6 +42,8 @@ dCbz2_by_dalpha = problem.dCbz2_by_dalpha;
 Isp = problem.Isp;
 Thrust_max = problem.Thrust_max;
 Thrust_max_2 = problem.Thrust_max_2;
+Thrust_max_3 = problem.Thrust_max_3;
+
 
 q_max = problem.q_max;
 a_sen_max = problem.a_sen_max;
@@ -63,29 +65,31 @@ Vx_1 = x(3*M+1:4*M);
 Vy_1 = x(4*M+1:5*M);
 Vz_1 = x(5*M+1:6*M);
 mass_1 = x(6*M+1:7*M);
-Thrust_x1 = x(7*M+1:8*M);
-Thrust_y1 = x(8*M+1:9*M);
-Thrust_z1 = x(9*M+1:10*M);
-q11 = x(10*M+1:11*M);
-q12 = x(11*M+1:12*M);
-q13 = x(12*M+1:13*M);
-q14 = x(13*M+1:14*M);
-Rx_2 = x(14*M+1:15*M);
-Ry_2 = x(15*M+1:16*M);
-Rz_2 = x(16*M+1:17*M);
-Vx_2 = x(17*M+1:18*M);
-Vy_2 = x(18*M+1:19*M);
-Vz_2 = x(19*M+1:20*M);
-mass_2 = x(20*M+1:21*M);
-Thrust_x2 = x(21*M+1:22*M);
-Thrust_y2 = x(22*M+1:23*M);
-Thrust_z2 = x(23*M+1:24*M);
-q21 = x(24*M+1:25*M);
-q22 = x(25*M+1:26*M);
-q23 = x(26*M+1:27*M);
-q24 = x(27*M+1:28*M);
-stage_time = x(28*M+1);
-final_time = x(28*M+2);
+Thrust_1 = x(7*M+1:8*M);
+uTx1 = x(8*M+1:9*M);
+uTy1 = x(9*M+1:10*M);
+uTz1 = x(10*M+1:11*M);
+q11 = x(11*M+1:12*M);
+q12 = x(12*M+1:13*M);
+q13 = x(13*M+1:14*M);
+q14 = x(14*M+1:15*M);
+Rx_2 = x(15*M+1:16*M);
+Ry_2 = x(16*M+1:17*M);
+Rz_2 = x(17*M+1:18*M);
+Vx_2 = x(18*M+1:19*M);
+Vy_2 = x(19*M+1:20*M);
+Vz_2 = x(20*M+1:21*M);
+mass_2 = x(21*M+1:22*M);
+Thrust_2 = x(22*M+1:23*M);
+uTx2 = x(23*M+1:24*M);
+uTy2 = x(24*M+1:25*M);
+uTz2 = x(25*M+1:26*M);
+q21 = x(26*M+1:27*M);
+q22 = x(27*M+1:28*M);
+q23 = x(28*M+1:29*M);
+q24 = x(29*M+1:30*M);
+stage_time = x(30*M+1);
+final_time = x(30*M+2);
 
 % Attitude matrix for stage_1
 Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
@@ -130,33 +134,18 @@ Vy_2 = Vy_2/n_velocity;
 Vz_2 = Vz_2/n_velocity;
 mass_1 = mass_1/n_mass;
 mass_2 = mass_2/n_mass;
-Thrust_x1 = Thrust_x1/n_thrust;
-Thrust_y1 = Thrust_y1/n_thrust;
-Thrust_z1 = Thrust_z1/n_thrust;
-Thrust_x2 = Thrust_x2/n_thrust;
-Thrust_y2 = Thrust_y2/n_thrust;
-Thrust_z2 = Thrust_z2/n_thrust;
+Thrust_1 = Thrust_1/n_thrust;
+Thrust_2 = Thrust_2/n_thrust;
 stage_time = stage_time/n_time;
 final_time = final_time/n_time;
 
+Thrust_x1 = linspace(Thrust_max,Thrust_max_2,M).*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
+Thrust_y1 = linspace(Thrust_max,Thrust_max_2,M).*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
+Thrust_z1 = linspace(Thrust_max,Thrust_max_2,M).*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
-% Inertial Thrust vector
-Thrust_1 = sqrt(Thrust_x1.^2 + Thrust_y1.^2 + Thrust_z1.^2);
-Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
-
-uTx1 = Thrust_x1./Thrust_1; 
-uTy1 = Thrust_y1./Thrust_1;
-uTz1 = Thrust_z1./Thrust_1;
-Thrust_x1 = Thrust_1.*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
-Thrust_y1 = Thrust_1.*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
-Thrust_z1 = Thrust_1.*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
-
-uTx2 = Thrust_x2./Thrust_2;
-uTy2 = Thrust_y2./Thrust_2;
-uTz2 = Thrust_z2./Thrust_2;
-Thrust_x2 = Thrust_2.*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
-Thrust_y2 = Thrust_2.*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
-Thrust_z2 = Thrust_2.*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
+Thrust_x2 = linspace(Thrust_max_2,Thrust_max_3,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = linspace(Thrust_max_2,Thrust_max_3,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = linspace(Thrust_max_2,Thrust_max_3,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
@@ -166,7 +155,7 @@ g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 
-Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
+Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z; 
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
 Vrel_z1 = Vz_1 - Ry_1.*Omega_x + Rx_1.*Omega_y;
 Vrel_x2 = Vx_2 - Rz_2.*Omega_y + Ry_2.*Omega_z;
@@ -255,6 +244,8 @@ Vy_2 = Vy_2*n_velocity;
 Vz_2 = Vz_2*n_velocity;
 mass_1 = mass_1*n_mass;
 mass_2 = mass_2*n_mass;
+Thrust_1 = Thrust_1*n_thrust;
+Thrust_2 = Thrust_2*n_thrust;
 Thrust_x1 = Thrust_x1*n_thrust;
 Thrust_y1 = Thrust_y1*n_thrust;
 Thrust_z1 = Thrust_z1*n_thrust;
@@ -288,12 +279,12 @@ ceq(10*M+1:11*M,1) = D*Vx_2' - ((final_time-stage_time)/2)*((Thrust_x2 + A_x2)./
 ceq(11*M+1:12*M,1) = D*Vy_2' - ((final_time-stage_time)/2)*((Thrust_y2 + A_y2)./mass_2 + 1./Ry_2.^2)';
 ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./mass_2 + 1./Rz_2.^2)';
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
-
+% 
 [R1_I,V1_I,~,~] = lat_long_elev_azi_vec1(M,problem);
 Rx0_1 = R1_I(1,1:M)*n_length;
 Ry0_1 = R1_I(2,1:M)*n_length;
 Rz0_1 = R1_I(3,1:M)*n_length;
- 
+
 Vx0_1 = V1_I(1,1:M)*n_velocity;
 Vy0_1 = V1_I(2,1:M)*n_velocity;
 Vz0_1 = V1_I(3,1:M)*n_velocity;
@@ -329,20 +320,20 @@ ceq(14*M+23) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re*n_length + hf_
 % Normalisation constraint for Quaternion elements 
 ceq(17*M+1:18*M) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
 ceq(18*M+1:19*M) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
-% find(iszero(ceq))
-
+% find(isnan(ceq))
+% find(ceq~=0)
 
 
 
 % Senced acceleration calculation
-a_sen_x1 = D*(Vx_1/n_velocity)' - g_x1';
-a_sen_y1 = D*(Vy_1/n_velocity)' - g_y1';
-a_sen_z1 = D*(Vz_1/n_velocity)' - g_z1';
+a_sen_x1 = D*(Vx_1/n_velocity)' - (g_x1/g0)';
+a_sen_y1 = D*(Vy_1/n_velocity)' - (g_y1/g0)';
+a_sen_z1 = D*(Vz_1/n_velocity)' - (g_z1/g0)';
 a_sen_mag1 = sqrt((a_sen_x1).^2 + (a_sen_y1).^2 + (a_sen_z1).^2);
 
-a_sen_x2 = D*(Vx_2/n_velocity)' - g_x2';
-a_sen_y2 = D*(Vy_2/n_velocity)' - g_y2';
-a_sen_z2 = D*(Vz_2/n_velocity)' - g_z2';
+a_sen_x2 = D*(Vx_2/n_velocity)' - (g_x2/g0)';
+a_sen_y2 = D*(Vy_2/n_velocity)' - (g_y2/g0)';
+a_sen_z2 = D*(Vz_2/n_velocity)' - (g_z2/g0)';
 a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 

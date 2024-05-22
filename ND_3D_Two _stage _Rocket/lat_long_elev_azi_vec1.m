@@ -25,8 +25,10 @@ latitude_1 = deg2rad(interp1(alt, lat, Altitude0_1, 'spline'));
 longitude_1 = deg2rad(interp1(alt, long, Altitude0_1, 'spline'));
 
 
-% latitude_1 = linspace(deg2rad(28),deg2rad(27),M);
-% longitude_1 = linspace(deg2rad(1),deg2rad(10),M);
+latitude_1 = linspace(deg2rad(28),deg2rad(27),M);
+longitude_1 = linspace(deg2rad(1),deg2rad(10),M);
+% latitude_1  = deg2rad(28);
+% longitude_1 = deg2rad(0.5);
 R1_B = (Altitude0_1+Re);
 Rx1_I = R1_B.*cos(latitude_1).*cos(longitude_1);
 Ry1_I = R1_B.*cos(latitude_1).*sin(longitude_1); 
@@ -59,8 +61,8 @@ Tz1_I = T1_B.*sin(latitude_1);
 T1_I = [Tx1_I;Ty1_I;Tz1_I];
 T1_I_mag = sqrt(Tx1_I.^2 + Ty1_I.^2 + Tz1_I.^2);
 
-latitude_1 = deg2rad(28);
-longitude_1 = deg2rad(0);
+% latitude_1 = deg2rad(28);
+% longitude_1 = deg2rad(0.1);
 
 % Attitude matrix
 Q11 = - sin(latitude_1).*cos(longitude_1).*cos(Elev_1).*cos(Azim_1) - sin(longitude_1).*cos(Elev_1).*sin(Azim_1) + cos(latitude_1).*cos(longitude_1).*sin(Elev_1);

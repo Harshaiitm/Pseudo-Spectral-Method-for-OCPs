@@ -4,8 +4,8 @@ clc;clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';                          % either LGL or CGL
-M = 20;                                      % Number of collocation points
+PS_method = 'LGL';                         % either LGL or CGL
+M = 15;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -91,7 +91,7 @@ T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
 Thrust_max_2 = T_max_by_W*m0_2*g0;
-Thrust_max_3 = 1000;
+Thrust_max_3 = 10;
 Thrust_s = Thrust_max-Thrust_max_2;
 
 problem.Isp = Isp;
@@ -160,7 +160,7 @@ problem.gamma_f = gamma_f;
 problem.inclin_f = inclin_f;
 
 % Decision veriables
-x = zeros(28*M+2);
+x = zeros(30*M+2);
 Rx_1 = x(0*M+1:1*M);
 Ry_1 = x(1*M+1:2*M);
 Rz_1 = x(2*M+1:3*M);
@@ -168,29 +168,31 @@ Vx_1 = x(3*M+1:4*M);
 Vy_1 = x(4*M+1:5*M);
 Vz_1 = x(5*M+1:6*M);
 mass_1 = x(6*M+1:7*M);
-Thrust_x1 = x(7*M+1:8*M);
-Thrust_y1 = x(8*M+1:9*M);
-Thrust_z1 = x(9*M+1:10*M);
-q11 = x(10*M+1:11*M);
-q12 = x(11*M+1:12*M);
-q13 = x(12*M+1:13*M);
-q14 = x(13*M+1:14*M);
-Rx_2 = x(14*M+1:15*M);
-Ry_2 = x(15*M+1:16*M);
-Rz_2 = x(16*M+1:17*M);
-Vx_2 = x(17*M+1:18*M);
-Vy_2 = x(18*M+1:19*M);
-Vz_2 = x(19*M+1:20*M);
-mass_2 = x(20*M+1:21*M);
-Thrust_x2 = x(21*M+1:22*M);
-Thrust_y2 = x(22*M+1:23*M);
-Thrust_z2 = x(23*M+1:24*M);
-q21 = x(24*M+1:25*M);
-q22 = x(25*M+1:26*M);
-q23 = x(26*M+1:27*M);
-q24 = x(27*M+1:28*M);
-stage_time = x(28*M+1);
-final_time = x(28*M+2);
+Thrust_1 = x(7*M+1:8*M);
+uTx1 = x(8*M+1:9*M);
+uTy1 = x(9*M+1:10*M);
+uTz1 = x(10*M+1:11*M);
+q11 = x(11*M+1:12*M);
+q12 = x(12*M+1:13*M);
+q13 = x(13*M+1:14*M);
+q14 = x(14*M+1:15*M);
+Rx_2 = x(15*M+1:16*M);
+Ry_2 = x(16*M+1:17*M);
+Rz_2 = x(17*M+1:18*M);
+Vx_2 = x(18*M+1:19*M);
+Vy_2 = x(19*M+1:20*M);
+Vz_2 = x(20*M+1:21*M);
+mass_2 = x(21*M+1:22*M);
+Thrust_2 = x(22*M+1:23*M);
+uTx2 = x(23*M+1:24*M);
+uTy2 = x(24*M+1:25*M);
+uTz2 = x(25*M+1:26*M);
+q21 = x(26*M+1:27*M);
+q22 = x(27*M+1:28*M);
+q23 = x(28*M+1:29*M);
+q24 = x(29*M+1:30*M);
+stage_time = x(30*M+1);
+final_time = x(30*M+2);
 
 n_length = 1/Re;
 n_velocity = 1/sqrt(mu/Re);
@@ -248,7 +250,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e1, 'MaxIterations',1000,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',1000,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -274,61 +276,38 @@ end
 
 %%%
 % Decision Variables
-Rx_1 = x(0*M+1:1*M);
-Ry_1 = x(1*M+1:2*M);
-Rz_1 = x(2*M+1:3*M);
-Vx_1 = x(3*M+1:4*M);
-Vy_1 = x(4*M+1:5*M);
-Vz_1 = x(5*M+1:6*M);
-mass_1 = x(6*M+1:7*M);
-Thrust_x1 = x(7*M+1:8*M);
-Thrust_y1 = x(8*M+1:9*M);
-Thrust_z1 = x(9*M+1:10*M);
-q11 = x(10*M+1:11*M);
-q12 = x(11*M+1:12*M);
-q13 = x(12*M+1:13*M);
-q14 = x(13*M+1:14*M);
-Rx_2 = x(14*M+1:15*M);
-Ry_2 = x(15*M+1:16*M);
-Rz_2 = x(16*M+1:17*M);
-Vx_2 = x(17*M+1:18*M);
-Vy_2 = x(18*M+1:19*M);
-Vz_2 = x(19*M+1:20*M);
-mass_2 = x(20*M+1:21*M);
-Thrust_x2 = x(21*M+1:22*M);
-Thrust_y2 = x(22*M+1:23*M);
-Thrust_z2 = x(23*M+1:24*M);
-q21 = x(24*M+1:25*M);
-q22 = x(25*M+1:26*M);
-q23 = x(26*M+1:27*M);
-q24 = x(27*M+1:28*M);
-stage_time = x(28*M+1);
-final_time = x(28*M+2);
-
-
-% Dimensionlization
-Rx_1 = Rx_1/n_length;
-Ry_1 = Ry_1/n_length;
-Rz_1 = Rz_1/n_length;
-Rx_2 = Rx_2/n_length;
-Ry_2 = Ry_2/n_length;
-Rz_2 = Rz_2/n_length;
-Vx_1 = Vx_1/n_velocity;
-Vy_1 = Vy_1/n_velocity;
-Vz_1 = Vz_1/n_velocity;
-Vx_2 = Vx_2/n_velocity;
-Vy_2 = Vy_2/n_velocity;
-Vz_2 = Vz_2/n_velocity;
-mass_1 = mass_1/n_mass;
-mass_2 = mass_2/n_mass;
-Thrust_x1 = Thrust_x1/n_thrust;
-Thrust_y1 = Thrust_y1/n_thrust;
-Thrust_z1 = Thrust_z1/n_thrust;
-Thrust_x2 = Thrust_x2/n_thrust;
-Thrust_y2 = Thrust_y2/n_thrust;
-Thrust_z2 = Thrust_z2/n_thrust;
-stage_time = stage_time/n_time;
-final_time = final_time/n_time;
+Rx_1 = x(0*M+1:1*M)/n_length;
+Ry_1 = x(1*M+1:2*M)/n_length;
+Rz_1 = x(2*M+1:3*M)/n_length;
+Vx_1 = x(3*M+1:4*M)/n_velocity;
+Vy_1 = x(4*M+1:5*M)/n_velocity;
+Vz_1 = x(5*M+1:6*M)/n_velocity;
+mass_1 = x(6*M+1:7*M)/n_mass;
+Thrust_1 = x(7*M+1:8*M)/n_thrust;
+uTx1 = x(8*M+1:9*M);
+uTy1 = x(9*M+1:10*M);
+uTz1 = x(10*M+1:11*M);
+q11 = x(11*M+1:12*M);
+q12 = x(12*M+1:13*M);
+q13 = x(13*M+1:14*M);
+q14 = x(14*M+1:15*M);
+Rx_2 = x(15*M+1:16*M)/n_length;
+Ry_2 = x(16*M+1:17*M)/n_length;
+Rz_2 = x(17*M+1:18*M)/n_length;
+Vx_2 = x(18*M+1:19*M)/n_velocity;
+Vy_2 = x(19*M+1:20*M)/n_velocity;
+Vz_2 = x(20*M+1:21*M)/n_velocity;
+mass_2 = x(21*M+1:22*M)/n_mass;
+Thrust_2 = x(22*M+1:23*M)/n_thrust;
+uTx2 = x(23*M+1:24*M);
+uTy2 = x(24*M+1:25*M);
+uTz2 = x(25*M+1:26*M);
+q21 = x(26*M+1:27*M);
+q22 = x(27*M+1:28*M);
+q23 = x(28*M+1:29*M);
+q24 = x(29*M+1:30*M);
+stage_time = x(30*M+1)/n_time;
+final_time = x(30*M+2)/n_time;
 t0 = t0/n_time;
 Isp = Isp/n_time;
 
@@ -561,10 +540,6 @@ legend("PS Method","NPSOL");
 title("Vehicle mass variation w.r.t time",PS_method)
 set(gca, 'FontSize', 20);
 hold off
-
-% Lagrange interpolation for Thrust 
-Thrust_1 = sqrt(Thrust_x1.^2 + Thrust_y1.^2 + Thrust_z1.^2);
-Thrust_2 = sqrt(Thrust_x2.^2 + Thrust_y2.^2 + Thrust_z2.^2);
 
 % stage_1
 collocation_points = t_1';
