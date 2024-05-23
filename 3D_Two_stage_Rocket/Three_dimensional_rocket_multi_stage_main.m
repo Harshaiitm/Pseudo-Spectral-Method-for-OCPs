@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                     % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -665,7 +665,6 @@ legend("PS Method","NPSOL");
 title("Sensed acceleration w.r.t time")
 % set(gca, 'FontSize', 40);
 hold off
-
 figure(9)
 subplot(2,1,1)
 plot([h_1 h_2], [rho_1 rho_2]);

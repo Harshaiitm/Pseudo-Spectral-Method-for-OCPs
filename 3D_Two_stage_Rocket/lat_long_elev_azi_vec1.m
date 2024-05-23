@@ -58,8 +58,7 @@ T1_I_mag = sqrt(Tx1_I.^2 + Ty1_I.^2 + Tz1_I.^2);
 
 latitude_1 = deg2rad(28);
 longitude_1 = deg2rad(0);
-Elev_1 = deg2rad(90);
-Azim_1 = deg2rad(90);
+
 
 % Attitude matrix
 Q11 = - sin(latitude_1).*cos(longitude_1).*cos(Elev_1).*cos(Azim_1) - sin(longitude_1).*cos(Elev_1).*sin(Azim_1) + cos(latitude_1).*cos(longitude_1).*sin(Elev_1);
