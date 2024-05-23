@@ -55,11 +55,10 @@ Tz2_I = T2_B.*sin(latitude_2);
 T2_I = [Tx2_I;Ty2_I;Tz2_I];
 T2_I_mag = sqrt(Tx2_I.^2 + Ty2_I.^2 + Tz2_I.^2);
 
-latitude_2 = deg2rad(linspace(27,-3,M));
-longitude_2 = deg2rad(linspace(10,87,M));
-Elev_2 = deg2rad(linspace(70,40,M));
-Azim_2 = deg2rad(linspace(90,90,M));
-
+latitude_2 = deg2rad(28);
+longitude_2 = deg2rad(0);
+Elev_2 = deg2rad(90);
+Azim_2 = deg2rad(90);
 % Attitude matrix
 Q11 = - sin(latitude_2).*cos(longitude_2).*cos(Elev_2).*cos(Azim_2) - sin(longitude_2).*cos(Elev_2).*sin(Azim_2) + cos(latitude_2).*cos(longitude_2).*sin(Elev_2);
 
