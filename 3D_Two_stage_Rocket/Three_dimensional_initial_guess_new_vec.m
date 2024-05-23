@@ -10,6 +10,7 @@ m0_2 = problem.m0_2;
 Re = problem.Re;
 mu = problem.mu;
 mass2_f = problem.mass2_f;
+g0 = problem.g0;
 
 lat_i = problem.lat_i;
 long_i = problem.long_i;
@@ -87,6 +88,7 @@ N = M-1;                            % Order of the polynomial
   
 t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
 t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
+
 Vx1_I = 10.*cos(deg2rad(28));
 Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
 Vz1_I = 10.*sin(deg2rad(28));
@@ -107,7 +109,7 @@ x0(3*M+1:4*M) = Vx_I(1:M);                          % Vx_1
 x0(4*M+1:5*M) = Vy_I(1:M);                          % Vy_1
 x0(5*M+1:6*M) = Vz_I(1:M);                          % Vz_1    
 x0(6*M+1:7*M) = linspace(m0,m0-mass1_f,M);                       % mass_1
-x0(7*M+1:8*M) = linspace(Thrust_max,Thrust_max_2,M);                % Thrust_x1                                
+x0(7*M+1:8*M) = linspace(Thrust_max,mass1_f*g0*1.2,M);                % Thrust_x1                                
 x0(8*M+1:9*M) = uTx01;
 x0(9*M+1:10*M) = uTy01;
 x0(10*M+1:11*M) = uTz01;              % Thrust_z1

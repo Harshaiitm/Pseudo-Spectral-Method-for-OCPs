@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 20;                                      % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -103,7 +103,7 @@ problem.Thrust_s = Thrust_s;
 
 % Trajectory constraints(loads)
 q_max = 15000;                  % Dynamic pressure limit(Pa)
-a_sen_max = 4;                  % Sensed acceleration limit (g's)
+a_sen_max = 4*g0;                  % Sensed acceleration limit (g's)
 
 problem.q_max = q_max;
 problem.a_sen_max = a_sen_max;
@@ -211,7 +211,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',20,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',3,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
