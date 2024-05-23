@@ -97,9 +97,9 @@ Vx2_I = sqrt(mu/(Re+hf_f));
 Vy2_I = 0;
 Vz2_I = 0;
 
-Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'spline');
-Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'spline');
-Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'spline');
+Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
+Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
+Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
 
 
 x0(0*M+1:1*M) = Rx0_1;                          % Rx_1

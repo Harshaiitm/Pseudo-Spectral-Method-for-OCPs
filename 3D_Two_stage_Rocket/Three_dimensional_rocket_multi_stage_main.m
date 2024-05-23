@@ -341,8 +341,8 @@ Static_Temp_1 = interp1(altitude, Temp,h_1);
 Static_Temp_2 = interp1(altitude, Temp,h_2);
 Static_Press_1 = interp1(altitude, Press,h_1);
 Static_Press_2 = interp1(altitude, Press,h_2);
-rho_1 = interp1(altitude,rho,h_1);
-rho_2 = interp1(altitude,rho,h_2);
+rho_11 = interp1(altitude,rho,h_1);
+rho_22 = interp1(altitude,rho,h_2);
 
 Vrel_x1 = Vx_1 - Rz_1.*Omega_y + Ry_1.*Omega_z;
 Vrel_y1 = Vy_1 - Rx_1.*Omega_z + Rz_1.*Omega_x;
@@ -667,4 +667,10 @@ title("Sensed acceleration w.r.t time")
 hold off
 
 figure(9)
+subplot(2,1,1)
 plot([h_1 h_2], [rho_1 rho_2]);
+title("Density atm model w.r.t time")
+subplot(2,1,2)
+plot([h_1 h_2], [rho_11 rho_22]);
+title("Density Exponential model w.r.t time")
+
