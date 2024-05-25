@@ -12,6 +12,7 @@ mu = problem.mu;
 mass2_f = problem.mass2_f;
 g0 = problem.g0;
 
+
 lat_i = problem.lat_i;
 long_i = problem.long_i;
 Elev_i = problem.Elev_i;
@@ -93,9 +94,9 @@ Vx1_I = 10.*cos(deg2rad(28));
 Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
 Vz1_I = 10.*sin(deg2rad(28));
 
-Vx2_I = sqrt(mu/(Re+hf_f));
-Vy2_I = 0;
-Vz2_I = 0;
+Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*cos(deg2rad(87));
+Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*sin(deg2rad(87));
+Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(-3));
 
 Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
 Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
@@ -124,7 +125,7 @@ x0(18*M+1:19*M) = Vx_I(M+1:2*M);                        % Vx_2
 x0(19*M+1:20*M) = Vy_I(M+1:2*M);                        % Vy_2
 x0(20*M+1:21*M) = Vz_I(M+1:2*M);                        % Vz_2
 x0(21*M+1:22*M) = linspace(m0_2,mass2_f,M);                     % mass_2
-x0(22*M+1:23*M) = linspace(Thrust_max_2,10,M);              % Thrust_x2
+x0(22*M+1:23*M) = linspace(Thrust_max_2,mass2_f*g0*1.2,M);              % Thrust_x2
 x0(23*M+1:24*M) = uTx02;
 x0(24*M+1:25*M) = uTy02;
 x0(25*M+1:26*M) = uTz02;            % Thrust_z2

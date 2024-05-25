@@ -80,7 +80,7 @@ Q32 = - cos(latitude_1).*sin(Azim_1);
 Q33 = cos(latitude_1).*sin(Elev_1).*cos(Azim_1) - sin(latitude_1).*cos(Elev_1);
 
 % Quaternion elements
-q1 = (0.5*(1 + Q11 - Q22 - Q33).^0.5);
+q1 = -(0.5*(1 + Q11 - Q22 - Q33).^0.5);
 q2 = ((Q12 + Q21)./(4*q1));
 q3 = ((Q13 + Q31)./(4*q1));
 q4 = ((Q23 - Q32)./(4*q1));

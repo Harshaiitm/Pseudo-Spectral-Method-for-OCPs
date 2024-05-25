@@ -117,9 +117,9 @@ Thrust_x1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q111.*uTx1 + Q112.*uTy1 + Q1
 Thrust_y1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
 Thrust_z1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
-Thrust_x2 = linspace(Thrust_max_2,10,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
-Thrust_y2 = linspace(Thrust_max_2,10,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
-Thrust_z2 = linspace(Thrust_max_2,10,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
+Thrust_x2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
@@ -144,68 +144,8 @@ h_1 = R_1-Re;
 R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
 h_2 = R_2-Re;
 
-
-% Calculate temperature based on altitude
-altitude = 0:500000;
-Temp = zeros(size(altitude));
-Press = zeros(size(altitude));
-rho = zeros(size(altitude));
-
-% Troposhere 
-Temp(altitude < 11000) = Temp0 - 0.0065 * altitude(altitude < 11000);
-Temp_Tropo =  Temp(altitude < 11000);
-
-Press(altitude < 11000) = 101.29 * (Temp_Tropo./288.16).^5.256; 
-Press_Tropo = Press(altitude < 11000)*1000;
-
-rho(altitude < 11000) = Press_Tropo./(R*Temp_Tropo);
-rho_Tropo = rho(altitude < 11000);
-
-% Stratosphere
-Temp(altitude >= 11000 & altitude < 25000) = 216.66;
-Temp_Strato = Temp(altitude >= 11000 & altitude < 25000);
-
-Press(altitude >= 11000 & altitude < 25000) = 22.65 * exp(1.73-0.000157*altitude(altitude >= 11000 & altitude < 25000)); 
-Press_Strato = Press(altitude >= 11000 & altitude < 25000)*1000;
-
-rho(altitude >= 11000 & altitude < 25000) = Press_Strato./(R*Temp_Strato);
-rho_Strato = rho(altitude >= 11000 & altitude < 25000);
-
-% Thermosphere_till_hf_s
-Temp(altitude >= 25000 & altitude < hf_s) = 141.79 + 0.00299 * altitude(altitude >= 25000 & altitude < hf_s);
-Temp_Thermo_1 = Temp(altitude >= 25000 & altitude < hf_s);
-
-Press(altitude >= 25000 & altitude < hf_s) = 2.488 * (Temp_Thermo_1/216.16).^(-11.388);
-Press_Thermo_1 = Press(altitude >= 25000 & altitude < hf_s)*1000; 
-
-rho(altitude >= 25000 & altitude < hf_s) = Press_Thermo_1./(R*Temp_Thermo_1);
-rho_Thermo_1 = rho(altitude >= 25000 & altitude < hf_s);
-
-% Thermosphere_above_hf_s and till hf_f
-Temp(altitude >= hf_s) = 141.79 + 0.00299 * hf_s;
-Temp_Thermo_2 = Temp(altitude >= hf_s);
-
-Press(altitude >= hf_s) = 2.488 * (Temp_Thermo_2/216.16).^(-11.388);
-Press_Thermo_2 = Press(altitude >= hf_s)*1000;
-
-rho(altitude >= hf_s) = Press_Thermo_2/(R*Temp_Thermo_2);
-rho_Thermo_2 = rho(altitude >= hf_s);
-
-% Interpolate
-Static_Temp_1 = interp1(altitude, Temp,h_1);
-Static_Temp_2 = interp1(altitude, Temp,h_2);
-Static_Press_1 = interp1(altitude, Press,h_1);
-Static_Press_2 = interp1(altitude, Press,h_2);
-rho_1 = interp1(altitude,rho,h_1);
-rho_2 = interp1(altitude,rho,h_2);
-
 rho_1 = rho0*exp(-(R_1-Re)./h_scale);
 rho_2 = rho0*exp(-(R_2-Re)./h_scale);
-
-q_mag1 = 0.5* rho_1.* Vrel_1.^2;
-q_mag2 = 0.5* rho_2.* Vrel_2.^2;
-q_mag = [q_mag1 q_mag2];
-
 
 Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
 Vby1 = Q112.*Vrel_x1 + Q122.*Vrel_y1 + Q132.*Vrel_z1;
@@ -214,7 +154,11 @@ Vbx2 = Q211.*Vrel_x2 + Q221.*Vrel_y2 + Q231.*Vrel_z2;
 Vby2 = Q212.*Vrel_x2 + Q222.*Vrel_y2 + Q232.*Vrel_z2;
 Vbz2 = Q213.*Vrel_x2 + Q223.*Vrel_y2 + Q233.*Vrel_z2;
 
+Vb_1 = sqrt(Vbx1.^2 + Vby1.^2 + Vbz1.^2);
+Vb_2 = sqrt(Vbx2.^2 + Vby2.^2 + Vbz2.^2);
 
+q_mag1 = 0.5* rho_1.* Vb_1.^2;
+q_mag2 = 0.5* rho_2.* Vb_2.^2;
 
 % Inertial Aerodynamic Coefficients
 alpha_1 = atan(Vbz1./Vbx1);
@@ -230,7 +174,6 @@ phi_2 = atan(Vby2./Vbx2);
 % % Cbx2 = -Ca;
 % Cby2 = -Cn*sin(phi_2);
 % Cbz2 = -Cn*cos(phi_2);
-
 
 Cby1 = dCby1_by_dbeta*beta_1;
 Cbz1 = dCbz1_by_dalpha*alpha_1;

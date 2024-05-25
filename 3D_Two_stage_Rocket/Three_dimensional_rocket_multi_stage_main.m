@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                      % Number of collocation points
+M = 15;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -91,7 +91,7 @@ T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
 Thrust_max_2 = T_max_by_W*m0_2*g0;
-Thrust_max_3 = 10;
+Thrust_max_3 = mass2_f*g0*1.2;
 Thrust_s = Thrust_max-Thrust_max_2;
 
 problem.Isp = Isp;
@@ -211,7 +211,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',3,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',3000,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -362,18 +362,6 @@ Mach_2 = Vrel_2./sqrt(Gamma*R*Static_Temp_2);
 rho_1 = rho0*exp(-(R_1-Re)./h_scale);
 rho_2 = rho0*exp(-(R_2-Re)./h_scale);
 
-q_mag1 = 0.5* rho_1.* Vrel_1.^2;
-q_mag2 = 0.5* rho_2.* Vrel_2.^2;
-
- 
-% Gravity
-g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
-g_y1 = (-mu*Ry_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
-g_z1 = (-mu*Rz_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
-g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
-g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
-g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
-
 % Attitude matrix for stage_1
 Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
 Q112 = 2*(q11.*q12 + q13.*q14);
@@ -402,12 +390,30 @@ Q233 = -q21.^2 - q22.^2 + q23.^2 + q24.^2;
 
 Q2 = [Q211 Q212 Q213; Q221 Q222 Q223; Q231 Q232 Q233];
 
+
 Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
 Vby1 = Q112.*Vrel_x1 + Q122.*Vrel_y1 + Q132.*Vrel_z1;
 Vbz1 = Q113.*Vrel_x1 + Q123.*Vrel_y1 + Q133.*Vrel_z1;
 Vbx2 = Q211.*Vrel_x2 + Q221.*Vrel_y2 + Q231.*Vrel_z2;
 Vby2 = Q212.*Vrel_x2 + Q222.*Vrel_y2 + Q232.*Vrel_z2;
 Vbz2 = Q213.*Vrel_x2 + Q223.*Vrel_y2 + Q233.*Vrel_z2;
+
+
+Vb_1 = sqrt(Vbx1.^2 + Vby1.^2 + Vbz1.^2);
+Vb_2 = sqrt(Vbx2.^2 + Vby2.^2 + Vbz2.^2);
+
+q_mag1 = 0.5* rho_1.* Vb_1.^2;
+q_mag2 = 0.5* rho_2.* Vb_2.^2;
+
+ 
+% Gravity
+g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_y1 = (-mu*Ry_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_z1 = (-mu*Rz_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
+g_x2 = (-mu*Rx_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+g_y2 = (-mu*Ry_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
+
 
 % Inertial Aerodynamic Coefficients
 alpha_1 = atan(Vbz1./Vbx1);
