@@ -137,7 +137,11 @@ ceq(2*M+1:3*M,1) = D*Rz' - ((final_time-t0)/2)*(Vz)';
 ceq(3*M+1:4*M,1) = D*Vx' - ((final_time-t0)/2)*((Thrust_x + A_x)./mass + g_x)';
 ceq(4*M+1:5*M,1) = D*Vy' - ((final_time-t0)/2)*((Thrust_y + A_y)./mass + g_y)';
 ceq(5*M+1:6*M,1) = D*Vz' - ((final_time-t0)/2)*((Thrust_z + A_z)./mass + g_z)';
-ceq(6*M+1:7*M,1) = D*mass' + ((final_time-t0)/2)*((Thrust)./(g0.*Isp))';
+
+D1=collocD(nodes(1:M1));
+ceq(6*M+1:6*M+M1,1) = D1*mass(1:M1)' + ((stage_time-t0)/2)*((Thrust(1:M1))./(g0.*Isp))';
+D2=collocD(nodes(M1+1:M));
+ceq(6*M+M1+1:7*M,1) = D2*mass(M1+1:M)' + ((final_time-stage_time)/2)*((Thrust(M1+1:M))./(g0.*Isp))';
 
 Rx_I = (Re+10)*cos(deg2rad(28))*cos(deg2rad(0));
 Ry_I = (Re+10)*cos(deg2rad(28))*sin(deg2rad(0));
@@ -196,12 +200,17 @@ c(2*M+1:3*M,1) = Thrust - Thrust_max;
 for i = 1:(M-1)
     c(3*M+i) = (mass(i+1) - mass(i)) - 0;
 end
-if any(isnan(c) | isinf(c))
-   % pause;
+if any(isnan(ceq) | isinf(ceq)) || any(isnan(c) | isinf(c))
+    pause;
+    ceq_inf_indices = find(isnan(ceq) | isinf(ceq));
+    c_inf_indices = find(isnan(c) | isinf(c));
 
-   inf_indices = find(isnan(c) | isinf(c));
-   disp(inf_indices);
-end
+    if ~isempty(ceq_inf_indices)
+      disp(['Infinity in ceq at indices: ' num2str(ceq_inf_indices)]);
+    end
+    if ~isempty(c_inf_indices)
+      disp(['Infinity in c at indices: ' num2str(c_inf_indices)]);
+    end
+ end
 
-% ceq_inf_indices = find(isnan(ceq) | isinf(ceq));
 end
