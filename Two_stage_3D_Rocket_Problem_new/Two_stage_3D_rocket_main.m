@@ -89,16 +89,14 @@ problem.dCbz_by_dalpha = dCbz_by_dalpha;
 % Rocket engine definitions
 T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
-Thrust_max = T_max_by_W*m0*g0;
-Thrust_max_2 = T_max_by_W*m0_2*g0;
-Thrust_max_3 = 10;
-Thrust_s = Thrust_max-Thrust_max_2;
+Thrust_max = mass1_i*g0*T_max_by_W;
+Thrust_max_2 = mass2_i*g0*1.2;
+Thrust_max_3 = mass2_f*g0*1.2;
 
 problem.Isp = Isp;
 problem.Thrust_max = Thrust_max;
 problem.Thrust_max_2 = Thrust_max_2;
 problem.Thrust_max_3 = Thrust_max_3;
-problem.Thrust_s = Thrust_s;
 
 
 % Trajectory constraints(loads)
@@ -117,14 +115,6 @@ Vi = 10;
 Elev_i = deg2rad(90);
 Azim_i = deg2rad(90);
 
-% Stage State
-lat_s = deg2rad(27);
-long_s = deg2rad(1);
-hf_s = 50000;
-Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = deg2rad(70);
-Azim_s = deg2rad(90);
-
 % Final State
 lat_f = deg2rad(-3);
 long_f = deg2rad(87);
@@ -142,13 +132,6 @@ problem.Azim_i = Azim_i;
 problem.hi = hi;
 problem.Vi = Vi;
 problem.t0 = t0;
-
-problem.lat_s = lat_s;
-problem.long_s = long_s;
-problem.Elev_s = Elev_s;
-problem.Azim_s = Azim_s;
-problem.hf_s = hf_s;
-problem.Vf_s = Vf_s;
 
 problem.lat_f = lat_f;
 problem.long_f = long_f;
@@ -195,7 +178,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',30,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-7, 'MaxIterations',1000,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -257,13 +240,9 @@ Temp_Tropo =  Temp(altitude < 11000);
 Temp(altitude >= 11000 & altitude < 25000) = 216.66;
 Temp_Strato = Temp(altitude >= 11000 & altitude < 25000);
 
-% Thermosphere_till_hf_s
-Temp(altitude >= 25000 & altitude < hf_s) = 141.79 + 0.00299 * altitude(altitude >= 25000 & altitude < hf_s);
-Temp_Thermo_1 = Temp(altitude >= 25000 & altitude < hf_s);
-
-% Thermosphere_above_hf_s and till hf_f
-Temp(altitude >= hf_s) = 141.79 + 0.00299 * hf_s;
-Temp_Thermo_2 = Temp(altitude >= hf_s);
+% Thermosphere_above_25000 and till hf_f
+Temp(altitude >= 25000) = 141.79 + 0.00299 * altitude(altitude >= 25000);
+Temp_Thermo_2 = Temp(altitude >= 25000);
 
 % Interpolate
 Static_Temp = interp1(altitude, Temp,h);

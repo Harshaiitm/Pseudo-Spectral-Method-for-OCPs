@@ -39,8 +39,7 @@ a_sen_max = problem.a_sen_max;
 hi = problem.hi;
 Vi = problem.Vi;
 t0 = problem.t0;
-hf_s = problem.hf_s;
-Vf_s = problem.Vf_s;
+
 hf_f = problem.hf_f;
 Vf_f = problem.Vf_f;
 gamma_f = problem.gamma_f;
@@ -197,7 +196,12 @@ c(2*M+1:3*M,1) = Thrust - Thrust_max;
 for i = 1:(M-1)
     c(3*M+i) = (mass(i+1) - mass(i)) - 0;
 end
+if any(isnan(c) | isinf(c))
+   % pause;
 
+   inf_indices = find(isnan(c) | isinf(c));
+   disp(inf_indices);
+end
 
-
+% ceq_inf_indices = find(isnan(ceq) | isinf(ceq));
 end

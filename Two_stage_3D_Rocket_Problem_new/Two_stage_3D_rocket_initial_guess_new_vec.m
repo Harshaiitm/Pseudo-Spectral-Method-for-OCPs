@@ -71,18 +71,18 @@ q1 = qn(1,1:M);
 q2 = qn(2,1:M);
 q3 = qn(3,1:M);
 q4 = qn(4,1:M);
-
-Vx1_I = 10.*cos(deg2rad(28));
-Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
-Vz1_I = 10.*sin(deg2rad(28));
-
-Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*cos(deg2rad(87));
-Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*sin(deg2rad(87));
-Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(1));
-
-Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'spline');
-Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'spline');
-Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'spline');
+% 
+% Vx1_I = 10.*cos(deg2rad(28));
+% Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
+% Vz1_I = 10.*sin(deg2rad(28));
+% 
+% Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*cos(deg2rad(87));
+% Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*sin(deg2rad(87));
+% Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(1));
+% 
+% Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'spline');
+% Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'spline');
+% Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'spline');
 
 x0(0*M+1:1*M) = Rx_I;
 x0(1*M+1:2*M) = Ry_I;
@@ -101,7 +101,7 @@ x0(11*M+1:12*M) = q1;
 x0(12*M+1:13*M) = q2;
 x0(13*M+1:14*M) = q3;
 x0(14*M+1:15*M) = q4;
-x0(15*M+1) = 200;
-x0(15*M+2) = 2000;
+x0(15*M+1) = 135;
+x0(15*M+2) = 1650;
 
 end
