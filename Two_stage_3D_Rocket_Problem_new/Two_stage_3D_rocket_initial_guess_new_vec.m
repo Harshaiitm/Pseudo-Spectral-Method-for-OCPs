@@ -59,9 +59,9 @@ Rx_I = R_I(1,1:M);
 Ry_I = R_I(2,1:M);
 Rz_I = R_I(3,1:M);
 
-Vx_I = V_I(1,1:M);
-Vy_I = V_I(2,1:M);
-Vz_I = V_I(3,1:M);
+% Vx_I = V_I(1,1:M);
+% Vy_I = V_I(2,1:M);
+% Vz_I = V_I(3,1:M);
 
 Thrustx_I = T_I(1,1:M);
 Thrusty_I = T_I(2,1:M);
@@ -72,17 +72,17 @@ q2 = qn(2,1:M);
 q3 = qn(3,1:M);
 q4 = qn(4,1:M);
 % 
-% Vx1_I = 10.*cos(deg2rad(28));
-% Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
-% Vz1_I = 10.*sin(deg2rad(28));
-% 
-% Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*cos(deg2rad(87));
-% Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*sin(deg2rad(87));
-% Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(1));
-% 
-% Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'spline');
-% Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'spline');
-% Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'spline');
+Vx1_I = 10.*cos(deg2rad(28));
+Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
+Vz1_I = 10.*sin(deg2rad(28));
+
+Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*cos(deg2rad(87));
+Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(1))*sin(deg2rad(87));
+Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(1));
+
+Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'spline');
+Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'spline');
+Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'spline');
 
 x0(0*M+1:1*M) = Rx_I;
 x0(1*M+1:2*M) = Ry_I;
