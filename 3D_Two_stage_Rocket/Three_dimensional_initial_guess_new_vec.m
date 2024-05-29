@@ -56,7 +56,7 @@ q12 = qn1(2,1:M);
 q13 = qn1(3,1:M);
 q14 = qn1(4,1:M);
 
-[R2_I,V2_I,T2_I,qn2] = lat_long_elev_azi_vec2(M,problem); 
+[R2_I,V2_I,~,qn2] = lat_long_elev_azi_vec2(M,problem); 
 
 Rx0_2 = R2_I(1,1:M);
 Ry0_2 = R2_I(2,1:M);
@@ -65,10 +65,6 @@ Rz0_2 = R2_I(3,1:M);
 Vx0_2 = V2_I(1,1:M);
 Vy0_2 = V2_I(2,1:M);
 Vz0_2 = V2_I(3,1:M);
-
-Thrustx0_2 = T2_I(1,1:M);
-Thrusty0_2 = T2_I(2,1:M);
-Thrustz0_2 = T2_I(3,1:M);
 
 uTx02 = 1;
 uTy02 = 0;
@@ -125,7 +121,7 @@ x0(18*M+1:19*M) = Vx_I(M+1:2*M);                        % Vx_2
 x0(19*M+1:20*M) = Vy_I(M+1:2*M);                        % Vy_2
 x0(20*M+1:21*M) = Vz_I(M+1:2*M);                        % Vz_2
 x0(21*M+1:22*M) = linspace(m0_2,mass2_f,M);                     % mass_2
-x0(22*M+1:23*M) = linspace(Thrust_max_2,mass2_f*g0*1.2,M);              % Thrust_x2
+x0(22*M+1:23*M) = linspace(Thrust_max_2,0,M);              % Thrust_x2
 x0(23*M+1:24*M) = uTx02;
 x0(24*M+1:25*M) = uTy02;
 x0(25*M+1:26*M) = uTz02;            % Thrust_z2

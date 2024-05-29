@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 15;                                      % Number of collocation points
+M = 25;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -91,14 +91,12 @@ T_max_by_W = 1.2;               % Thrust to weight ratio same for both stages
 Isp = 300;                      % Specific Impulse (s) 
 Thrust_max = T_max_by_W*m0*g0;
 Thrust_max_2 = T_max_by_W*m0_2*g0;
-Thrust_max_3 = mass2_f*g0*1.2;
-Thrust_s = Thrust_max-Thrust_max_2;
+Thrust_max_3 = 0;
 
 problem.Isp = Isp;
 problem.Thrust_max = Thrust_max;
 problem.Thrust_max_2 = Thrust_max_2;
 problem.Thrust_max_3 = Thrust_max_3;
-problem.Thrust_s = Thrust_s;
 
 
 % Trajectory constraints(loads)

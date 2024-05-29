@@ -117,9 +117,9 @@ Thrust_x1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q111.*uTx1 + Q112.*uTy1 + Q1
 Thrust_y1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
 Thrust_z1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
-Thrust_x2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
-Thrust_y2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
-Thrust_z2 = linspace(Thrust_max_2,mass2_f*g0*1.2,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
+Thrust_x2 = linspace(Thrust_max_2,0,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = linspace(Thrust_max_2,0,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = linspace(Thrust_max_2,0,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
@@ -217,7 +217,7 @@ Ry0_1 = R1_I(2,1:M);
 Rz0_1 = R1_I(3,1:M);
  
 Vx1_I = 10.*cos(deg2rad(28));
-Vy1_I = 10*cos(deg2rad(28)) + (Omega_z*(Re+10)); 
+Vy1_I = Omega_z*(Re+10)*cos(deg2rad(28)); 
 Vz1_I = 10.*sin(deg2rad(28));
 
 % % Initial and final constraints
@@ -237,13 +237,12 @@ ceq(15*M) = Vx_2(1) - Vx_1(end);
 ceq(15*M+1) = Vy_2(1) - Vy_1(end);
 ceq(15*M+2) = Vz_2(1) - Vz_1(end);
 ceq(15*M+3) = mass_1(1) - mass1_i;
-% ceq(14*M+18) = mass_1(end) - mass1_f;
 ceq(15*M+4) = mass_2(1) - mass2_i;
 
 ceq(15*M+5) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
 ceq(15*M+6) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
 ceq(15*M+7) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
-ceq(15*M+8) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * sin(inclin_f));
+ceq(15*M+8) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * cos(inclin_f));
 
 
 % Normalisation constraint for Quaternion elements 
@@ -264,25 +263,25 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-c = [];
-% c = zeros(7*M,1);
-% 
-% c(1:M,1) = q_mag1 - q_max;
-% c(M+1:2*M,1) = q_mag2 - q_max;
-% 
-% c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-% 
-% c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
-% c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
-% 
-% %Mass change constraint
-% for i = 1:(M-1)
-%     c(6*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
-% end
-% for i = 1:(M-1)  
-%     c(6*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
-% end
+% c = [];
+c = zeros(7*M,1);
+
+c(1:M,1) = q_mag1 - q_max;
+c(M+1:2*M,1) = q_mag2 - q_max;
+
+c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+
+c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
+c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
+
+%Mass change constraint
+for i = 1:(M-1)
+    c(6*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+end
+for i = 1:(M-1)  
+    c(6*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+end
 % 
 
 end
