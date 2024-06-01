@@ -209,7 +209,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',100,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',50,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -671,9 +671,9 @@ title("Sensed acceleration w.r.t time")
 hold off
 figure(9)
 subplot(2,1,1)
-plot([h_1 h_2], [rho_1 rho_2]);
+plot([h_1 h_2], [rho_11 rho_22]);
 title("Density atm model w.r.t time")
 subplot(2,1,2)
-plot([h_1 h_2], [rho_11 rho_22]);
+plot([h_1 h_2], [rho_1 rho_2]);
 title("Density Exponential model w.r.t time")
 

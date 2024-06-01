@@ -1,4 +1,4 @@
-function [R1_I,V1_I,T1_I,qn1] = lat_long_elev_azi_vec1(M,problem) 
+function [R1_I,V1_I,qn1] = lat_long_elev_azi_vec1(M,problem) 
 
 Elev_i = problem.Elev_i;
 Azim_i = problem.Azim_i;
@@ -46,15 +46,6 @@ Vz1_I = V1_B.*sin(latitude_1) + (Omega_x*Ry1_I-Omega_y*Rx1_I);
 
 V1_I = [Vx1_I;Vy1_I;Vz1_I];
 V1_I_mag = sqrt(Vx1_I.^2 + Vy1_I.^2 + Vz1_I.^2);
-
-T1_B = Thrust0_1;
-Tx1_I = T1_B.*cos(latitude_1).*cos(longitude_1);
-Ty1_I = T1_B.*cos(latitude_1).*sin(longitude_1); 
-Tz1_I = T1_B.*sin(latitude_1);
-
-
-T1_I = [Tx1_I;Ty1_I;Tz1_I];
-T1_I_mag = sqrt(Tx1_I.^2 + Ty1_I.^2 + Tz1_I.^2);
 
 latitude_1 = deg2rad(28);
 longitude_1 = deg2rad(0);

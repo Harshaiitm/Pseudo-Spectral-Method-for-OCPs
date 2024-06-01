@@ -34,7 +34,7 @@ Azim_f = problem.Azim_f;
 hf_f = problem.hf_f;
 Vf_f = problem.Vf_f;
 
-[R1_I,V1_I,T1_I,qn1] = lat_long_elev_azi_vec1(M,problem);
+[R1_I,V1_I,qn1] = lat_long_elev_azi_vec1(M,problem);
 Rx0_1 = R1_I(1,1:M);
 Ry0_1 = R1_I(2,1:M);
 Rz0_1 = R1_I(3,1:M);
@@ -42,10 +42,6 @@ Rz0_1 = R1_I(3,1:M);
 Vx0_1 = V1_I(1,1:M);
 Vy0_1 = V1_I(2,1:M);
 Vz0_1 = V1_I(3,1:M);
-
-Thrustx0_1 = T1_I(1,1:M);
-Thrusty0_1 = T1_I(2,1:M);
-Thrustz0_1 = T1_I(3,1:M);
 
 uTx01 = 1;
 uTy01 = 0;
@@ -56,7 +52,7 @@ q12 = qn1(2,1:M);
 q13 = qn1(3,1:M);
 q14 = qn1(4,1:M);
 
-[R2_I,V2_I,~,qn2] = lat_long_elev_azi_vec2(M,problem); 
+[R2_I,V2_I,qn2] = lat_long_elev_azi_vec2(M,problem); 
 
 Rx0_2 = R2_I(1,1:M);
 Ry0_2 = R2_I(2,1:M);
@@ -86,25 +82,25 @@ N = M-1;                            % Order of the polynomial
 t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
 t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
 
-Vx1_I = 10.*cos(deg2rad(28));
-Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
-Vz1_I = 10.*sin(deg2rad(28));
-
-Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*cos(deg2rad(87));
-Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*sin(deg2rad(87));
-Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(-3));
-
-Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
-Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
-Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
+% Vx1_I = 10.*cos(deg2rad(28));
+% Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
+% Vz1_I = 10.*sin(deg2rad(28));
+% 
+% Vx2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*cos(deg2rad(87));
+% Vy2_I = sqrt(mu/(Re+hf_f))*cos(deg2rad(-3))*sin(deg2rad(87));
+% Vz2_I = sqrt(mu/(Re+hf_f))*sin(deg2rad(-3));
+% 
+% Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
+% Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
+% Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
 
 
 x0(0*M+1:1*M) = Rx0_1;                          % Rx_1
 x0(1*M+1:2*M) = Ry0_1;                          % Ry_1
 x0(2*M+1:3*M) = Rz0_1;                          % Rz_1
-x0(3*M+1:4*M) = Vx_I(1:M);                          % Vx_1                                           
-x0(4*M+1:5*M) = Vy_I(1:M);                          % Vy_1
-x0(5*M+1:6*M) = Vz_I(1:M);                          % Vz_1    
+x0(3*M+1:4*M) = Vx0_1;                          % Vx_1                                           
+x0(4*M+1:5*M) = Vy0_1;                          % Vy_1
+x0(5*M+1:6*M) = Vz0_1;                          % Vz_1    
 x0(6*M+1:7*M) = linspace(m0,m0-mass1_f,M);                       % mass_1
 x0(7*M+1:8*M) = linspace(Thrust_max,mass1_f*g0*1.2,M);                % Thrust_x1                                
 x0(8*M+1:9*M) = uTx01;
@@ -117,9 +113,9 @@ x0(14*M+1:15*M) = q14;                                          % q14
 x0(15*M+1:16*M) = Rx0_2;                        % Rx_2
 x0(16*M+1:17*M) = Ry0_2;                        % Ry_2 
 x0(17*M+1:18*M) = Rz0_2;                        % Rz_2 
-x0(18*M+1:19*M) = Vx_I(M+1:2*M);                        % Vx_2 
-x0(19*M+1:20*M) = Vy_I(M+1:2*M);                        % Vy_2
-x0(20*M+1:21*M) = Vz_I(M+1:2*M);                        % Vz_2
+x0(18*M+1:19*M) = Vx0_2;                        % Vx_2 
+x0(19*M+1:20*M) = Vy0_2;                        % Vy_2
+x0(20*M+1:21*M) = Vz0_2;                        % Vz_2
 x0(21*M+1:22*M) = linspace(m0_2,mass2_f,M);                     % mass_2
 x0(22*M+1:23*M) = linspace(Thrust_max_2,0,M);              % Thrust_x2
 x0(23*M+1:24*M) = uTx02;
