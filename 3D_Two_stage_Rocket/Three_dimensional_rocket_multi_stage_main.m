@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                      % Number of collocation points
+M = 15;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -44,6 +44,7 @@ problem.Omega_y = Omega_y;
 problem.Omega_z = Omega_z;
 problem.rho0 = rho0;
 problem.g0 = g0;
+problem.D = D;
 
 % Two stage Rocket (Kistler K-1) parameters
 m0_1= 248950;                   % 1st stage total mass
@@ -120,16 +121,16 @@ lat_s = deg2rad(27);
 long_s = deg2rad(1);
 hf_s = 50000;
 Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = deg2rad(70);
-Azim_s = deg2rad(90);
+Elev_s = deg2rad(60);
+Azim_s = deg2rad(118);
 
 % Final State
 lat_f = deg2rad(-3);
 long_f = deg2rad(87);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
-Elev_f = deg2rad(40);
-Azim_f = deg2rad(90);
+Elev_f = deg2rad(30);
+Azim_f = deg2rad(118);
 gamma_f = deg2rad(0);
 inclin_f = deg2rad(28);
 
@@ -209,7 +210,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',50,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',2000,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')

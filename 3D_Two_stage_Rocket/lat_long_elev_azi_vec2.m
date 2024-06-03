@@ -9,9 +9,7 @@ Azim_s = problem.Azim_s;
 hf_s = problem.hf_s;
 Vf_s = problem.Vf_s;
 Re = problem.Re;
-Thrust_max = problem.Thrust_max;
-Thrust_max_2 = problem.Thrust_max_2;
-Thrust_max_3 = problem.Thrust_max_3;
+
 
 load alt_VS_inertial_lat.csv
 lat = alt_VS_inertial_lat(:,1);
@@ -19,31 +17,38 @@ long = alt_VS_inertial_lat(:,2);
 alt = alt_VS_inertial_lat(:,3)*1000;
 Altitude0_2 = linspace(hf_s,hf_f,M);
 Velocity0_2 = linspace(Vf_s,Vf_f,M);
-Thrust0_2 = linspace(Thrust_max_2,Thrust_max_3,M);
 Elev_2 = linspace(Elev_s,Elev_f,M);
 Azim_2 = linspace(Azim_s,Azim_f,M);
 latitude_2 = deg2rad(interp1(alt, lat, Altitude0_2, 'spline'));
 longitude_2 = deg2rad(interp1(alt, long, Altitude0_2, 'spline'));
 
-R2_B = (Altitude0_2+Re);
-Rx2_I = R2_B.*cos(latitude_2).*cos(longitude_2);
-Ry2_I = R2_B.*cos(latitude_2).*sin(longitude_2); 
-Rz2_I = R2_B.*sin(latitude_2);
+theta_2 = pi/2 - latitude_2;
+phi_2 = longitude_2;
+D = problem.D;
 
-R2_I = [Rx2_I;Ry2_I;Rz2_I];
+% Earth's rotational velocity in the inertial frame
+Omega_z = 2 * pi / (24 * 60 * 60);  % Sidereal Rotation Rate (rad/s)
+Omega_x = 0;
+Omega_y = 0;
+Omega_I = [Omega_x; Omega_y; Omega_z];
 
-R2_I_mag = sqrt(Rx2_I.^2+Ry2_I.^2+Rz2_I.^2);
+R2_B = (Altitude0_2 + Re);
+Rx2_I = R2_B .* sin(theta_2) .* cos(phi_2);
+Ry2_I = R2_B .* sin(theta_2) .* sin(phi_2);
+Rz2_I = R2_B .* cos(theta_2);
 
-Omega_z = 2*pi/(24*60*60);      % Sideral Rotation Rate (rad/s)
-Omega_x = 0; Omega_y = 0;
-Omega_I = [Omega_x;Omega_y;Omega_z];
+R2_I = [Rx2_I; Ry2_I; Rz2_I];
+R2_I_mag = sqrt(Rx2_I.^2 + Ry2_I.^2 + Rz2_I.^2);
 
-V2_B = Velocity0_2;
-Vx2_I = V2_B.*cos(latitude_2).*cos(longitude_2) +  (Omega_y*Rz2_I-Omega_z*Ry2_I);
-Vy2_I = V2_B.*cos(latitude_2).*sin(longitude_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I);
-Vz2_I = V2_B.*sin(latitude_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I);
+V2_r = D * R2_B';
+V2_theta = (D * theta_2') .* R2_B;
+V2_phi = (D * phi_2') .* sin(theta_2) .* R2_B;
 
-V2_I = [Vx2_I;Vy2_I;Vz2_I];
+Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2) + (Omega_y*Rz2_I-Omega_z*Ry2_I);
+Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I);
+Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I);
+
+V2_I = [Vx2_I; Vy2_I; Vz2_I];
 V2_I_mag = sqrt(Vx2_I.^2 + Vy2_I.^2 + Vz2_I.^2);
 
 latitude_2 = deg2rad(28);
