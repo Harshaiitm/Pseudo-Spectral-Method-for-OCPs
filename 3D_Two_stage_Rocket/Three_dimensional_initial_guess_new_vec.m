@@ -122,7 +122,7 @@ Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
 Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
 Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
 
-% sqrt(Vx_I.^2+Vy_I.^2+Vz_I.^2);
+sqrt(Vx_I.^2+Vy_I.^2+Vz_I.^2);
 
 x0(0*M+1:1*M) = Rx0_1;                          % Rx_1
 x0(1*M+1:2*M) = Ry0_1;                          % Ry_1
