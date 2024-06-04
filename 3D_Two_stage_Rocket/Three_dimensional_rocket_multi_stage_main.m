@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 15;                                      % Number of collocation points
+M = 10;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -44,6 +44,7 @@ problem.Omega_y = Omega_y;
 problem.Omega_z = Omega_z;
 problem.rho0 = rho0;
 problem.g0 = g0;
+problem.nodes = nodes;
 problem.D = D;
 
 % Two stage Rocket (Kistler K-1) parameters
@@ -210,7 +211,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',2000,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',20,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -286,8 +287,6 @@ long_2 = rad2deg(acos(Rx_2./(R_2.*cos(deg2rad(lat_2)))));
 
 h_1 = sqrt(Rx_1.^2 + Ry_1.^2 + Rz_1.^2)-Re;
 h_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2)-Re;
-
-
 
 % Calculate temperature based on altitude
 altitude = 0:500000;
@@ -415,12 +414,12 @@ g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 
 
 % Inertial Aerodynamic Coefficients
-alpha_1 = atan(Vbz1./Vbx1);
-alpha_2 = atan(Vbz2./Vbx2);
-beta_1 = atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2));
-beta_2 = atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2));
-phi_1 = atan(Vby1./Vbx1);
-phi_2 = atan(Vby2./Vbx2);
+alpha_1 = deg2rad(atan(Vbz1./Vbx1));
+alpha_2 = deg2rad(atan(Vbz2./Vbx2));
+beta_1 = deg2rad(atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2)));
+beta_2 = deg2rad(atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2)));
+phi_1 = deg2rad(atan(Vby1./Vbx1));
+phi_2 = deg2rad(atan(Vby2./Vbx2));
 
 % % Cbx1 = -Ca;
 % Cby1 = -Cn*sin(phi_1);

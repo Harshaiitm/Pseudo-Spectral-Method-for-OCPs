@@ -24,7 +24,9 @@ longitude_2 = deg2rad(interp1(alt, long, Altitude0_2, 'spline'));
 
 theta_2 = pi/2 - latitude_2;
 phi_2 = longitude_2;
+nodes = problem.nodes;
 D = problem.D;
+
 
 % Earth's rotational velocity in the inertial frame
 Omega_z = 2 * pi / (24 * 60 * 60);  % Sidereal Rotation Rate (rad/s)
@@ -40,15 +42,20 @@ Rz2_I = R2_B .* cos(theta_2);
 R2_I = [Rx2_I; Ry2_I; Rz2_I];
 R2_I_mag = sqrt(Rx2_I.^2 + Ry2_I.^2 + Rz2_I.^2);
 
-V2_r = D * R2_B';
-V2_theta = (D * theta_2') .* R2_B;
-V2_phi = (D * phi_2') .* sin(theta_2) .* R2_B;
+R2_B = ((R2_B(end)-R2_B(1))/2).*nodes+(R2_B(end)+R2_B(1))/2;
+theta_2 = ((theta_2(end)-theta_2(1))/2).*nodes+(theta_2(end)+theta_2(1))/2;
+phi_2 = ((phi_2(end)-phi_2(1))/2).*nodes+(phi_2(end)+phi_2(1))/2;
 
-Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2) + (Omega_y*Rz2_I-Omega_z*Ry2_I);
-Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I);
-Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I);
+% Velocity components in spherical coordinates
+V2_r = (2/(1650-137))*(D* R2_B);
+V2_theta = (2/(1650-137))*(D*theta_2).* R2_B;
+V2_phi = (2/(1650-137))*(D*phi_2).* sin(theta_2) .* R2_B;
 
-V2_I = [Vx2_I; Vy2_I; Vz2_I];
+Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2) + (Omega_y*Rz2_I-Omega_z*Ry2_I)';
+Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I)';
+Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I)';
+
+V2_I = [Vx2_I'; Vy2_I'; Vz2_I'];
 V2_I_mag = sqrt(Vx2_I.^2 + Vy2_I.^2 + Vz2_I.^2);
 
 latitude_2 = deg2rad(28);

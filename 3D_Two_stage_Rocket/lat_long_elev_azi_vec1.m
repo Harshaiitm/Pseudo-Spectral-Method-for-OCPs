@@ -9,6 +9,7 @@ Azim_s = problem.Azim_s;
 hf_s = problem.hf_s;
 Vf_s = problem.Vf_s;
 Re = problem.Re;
+nodes = problem.nodes;
 D = problem.D;
 
 
@@ -44,17 +45,22 @@ Omega_x = 0;
 Omega_y = 0;
 Omega_I = [Omega_x; Omega_y; Omega_z];
 
+R1_B = ((R1_B(end)-R1_B(1))/2).*nodes+(R1_B(end)+R1_B(1))/2;
+theta_1 = ((theta_1(end)-theta_1(1))/2).*nodes+(theta_1(end)+theta_1(1))/2;
+phi_1 = ((phi_1(end)-phi_1(1))/2).*nodes+(phi_1(end)+phi_1(1))/2;
+
 % Velocity components in spherical coordinates
-V1_r = D * R1_B';
-V1_theta = (D * theta_1') .* R1_B;
-V1_phi = (D * phi_1') .* sin(theta_1) .* R1_B;
+V1_r = (2/137)*(D* R1_B);
+V1_theta = (2/137)*(D*theta_1).* R1_B;
+V1_phi = (2/137)*(D*phi_1).* sin(theta_1) .* R1_B;
 
 % Transformation from spherical to Cartesian coordinates
-Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1) + (Omega_y*Rz1_I-Omega_z*Ry1_I);
-Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1) + (Omega_z*Rx1_I-Omega_x*Rz1_I);
-Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1) + (Omega_x*Ry1_I-Omega_y*Rx1_I);
+Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1) + (Omega_y*Rz1_I-Omega_z*Ry1_I)';
+Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1) + (Omega_z*Rx1_I-Omega_x*Rz1_I)';
+Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1) + (Omega_x*Ry1_I-Omega_y*Rx1_I)';
 
-V1_I = [Vx1_I; Vy1_I; Vz1_I];
+V1_I = [Vx1_I';Vy1_I'; Vz1_I'];
+
 V1_I_mag = sqrt(Vx1_I.^2 + Vy1_I.^2 + Vz1_I.^2);
 
 latitude_1 = deg2rad(28);

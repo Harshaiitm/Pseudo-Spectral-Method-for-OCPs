@@ -12,7 +12,6 @@ mu = problem.mu;
 mass2_f = problem.mass2_f;
 g0 = problem.g0;
 
-
 lat_i = problem.lat_i;
 long_i = problem.long_i;
 Elev_i = problem.Elev_i;
@@ -71,17 +70,17 @@ q22 = qn2(2,1:M);
 q23 = qn2(3,1:M);
 q24 = qn2(4,1:M);
 
-Omega_z = 2*pi/(24*60*60);
-t0 = 0;
-stage_time = 137;
-final_time = 1650;
-addpath('../PS_methods')                    % add the PS_method file directory
-N = M-1;                            % Order of the polynomial
-[nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
-  
-t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
-t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
-
+% Omega_z = 2*pi/(24*60*60);
+% t0 = 0;
+% stage_time = 137;
+% final_time = 1650;
+% addpath('../PS_methods')                    % add the PS_method file directory
+% N = M-1;                            % Order of the polynomial
+% [nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
+% 
+% t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
+% t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
+% 
 % Vx1_I = 10.*cos(deg2rad(28));
 % Vy1_I = Omega_z*(Re+hi)*cos(deg2rad(28)); 
 % Vz1_I = 10.*sin(deg2rad(28));
@@ -126,7 +125,7 @@ x0(27*M+1:28*M) = q22;                                          % q22
 x0(28*M+1:29*M) = q23;                                          % q23
 x0(29*M+1:30*M) = q24;                                          % q24
 x0(30*M+1) = 137;                                               % stage_time
-x0(30*M+2) = 1750;                                              % final_time
+x0(30*M+2) = 1680;                                              % final_time
 
 
 end
