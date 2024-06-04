@@ -43,14 +43,10 @@ R2_I = [Rx2_I; Ry2_I; Rz2_I];
 R2_I_mag = sqrt(Rx2_I.^2 + Ry2_I.^2 + Rz2_I.^2);
 % display(R2_I_mag);
 
-R2_B = ((R2_B(end)-R2_B(1))/2).*nodes+(R2_B(end)+R2_B(1))/2;
-theta_2 = ((theta_2(end)-theta_2(1))/2).*nodes+(theta_2(end)+theta_2(1))/2;
-phi_2 = ((phi_2(end)-phi_2(1))/2).*nodes+(phi_2(end)+phi_2(1))/2;
-
 % Velocity components in spherical coordinates
-V2_r = (2/(1650-137))*(D* R2_B);
-V2_theta = (2/(1650-137))*(D*theta_2).* R2_B;
-V2_phi = (2/(1650-137))*(D*phi_2).* sin(theta_2) .* R2_B;
+V2_r = 0;
+V2_theta = Vf_f;
+V2_phi = 0;
 
 Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2) + (Omega_y*Rz2_I-Omega_z*Ry2_I)';
 Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I)';

@@ -211,30 +211,26 @@ ceq(11*M+1:12*M,1) = D*Vy_2' - ((final_time-stage_time)/2)*((Thrust_y2 + A_y2)./
 ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./mass_2 + g_z2)';
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
 
-[R1_I,~,~] = lat_long_elev_azi_vec1(M,problem);
+[R1_I,V1_I,~] = lat_long_elev_azi_vec1(M,problem);
 Rx0_1 = R1_I(1,1:M);
 Ry0_1 = R1_I(2,1:M);
 Rz0_1 = R1_I(3,1:M);
- 
-Vx1_I = 10.*cos(deg2rad(28));
-Vy1_I = Omega_z*(Re+10)*cos(deg2rad(28)); 
-Vz1_I = 10.*sin(deg2rad(28));
- 
-% Vx1_I = V1_I(1,1:M);
-% Vy1_I = V1_I(2,1:M);
-% Vz1_I = V1_I(3,1:M);
+  
+Vx1_I = V1_I(1,1:M);
+Vy1_I = V1_I(2,1:M);
+Vz1_I = V1_I(3,1:M);
 
-% Velocity components in spherical coordinates
-theta_1 = (pi/2)-deg2rad(28);
-phi_1 = 0;
-V1_r = 10;
-V1_theta = 0;
-V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
-
-% Transformation from spherical to Cartesian coordinates
-Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
-Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
-Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
+% % Velocity components in spherical coordinates
+% theta_1 = (pi/2)-deg2rad(28);
+% phi_1 = 0;
+% V1_r = 10;
+% V1_theta = 0;
+% V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
+% 
+% % Transformation from spherical to Cartesian coordinates
+% Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
+% Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
+% Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
 
 % % Initial and final constraints
 ceq(14*M+1) = Rx_1(1) - Rx0_1(1);
