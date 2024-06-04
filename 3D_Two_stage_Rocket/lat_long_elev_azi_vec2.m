@@ -41,6 +41,7 @@ Rz2_I = R2_B .* cos(theta_2);
 
 R2_I = [Rx2_I; Ry2_I; Rz2_I];
 R2_I_mag = sqrt(Rx2_I.^2 + Ry2_I.^2 + Rz2_I.^2);
+% display(R2_I_mag);
 
 R2_B = ((R2_B(end)-R2_B(1))/2).*nodes+(R2_B(end)+R2_B(1))/2;
 theta_2 = ((theta_2(end)-theta_2(1))/2).*nodes+(theta_2(end)+theta_2(1))/2;
@@ -57,6 +58,7 @@ Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I
 
 V2_I = [Vx2_I'; Vy2_I'; Vz2_I'];
 V2_I_mag = sqrt(Vx2_I.^2 + Vy2_I.^2 + Vz2_I.^2);
+% disp(V2_I_mag);
 
 latitude_2 = deg2rad(28);
 longitude_2 = deg2rad(0);

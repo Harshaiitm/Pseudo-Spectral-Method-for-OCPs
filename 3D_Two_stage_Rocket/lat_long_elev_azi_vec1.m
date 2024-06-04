@@ -38,6 +38,7 @@ Rz1_I = R1_B .* cos(theta_1);
 R1_I = [Rx1_I; Ry1_I; Rz1_I];
 
 R1_I_mag = sqrt(Rx1_I.^2 + Ry1_I.^2 + Rz1_I.^2);
+% disp(R1_I_mag);
 
 % Earth's rotational velocity in the inertial frame
 Omega_z = 2 * pi / (24 * 60 * 60);  % Sidereal Rotation Rate (rad/s)
@@ -62,6 +63,7 @@ Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1) + (Omega_x*Ry1_I-Omega_y*
 V1_I = [Vx1_I';Vy1_I'; Vz1_I'];
 
 V1_I_mag = sqrt(Vx1_I.^2 + Vy1_I.^2 + Vz1_I.^2);
+% disp(V1_I_mag);
 
 latitude_1 = deg2rad(28);
 longitude_1 = deg2rad(0);
