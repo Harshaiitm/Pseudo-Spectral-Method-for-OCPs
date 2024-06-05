@@ -194,7 +194,7 @@ A_x2 = q_mag2.* Cx2 * A_ref;
 A_y2 = q_mag2.* Cy2 * A_ref;
 A_z2 = q_mag2.* Cz2 * A_ref;
 
-ceq = zeros(18*M,1);
+ceq = zeros(18*M+18,1);
 % system dynamics
 ceq(1:M,1) = D*Rx_1' - ((stage_time-t0)/2)*(Vx_1)';
 ceq(M+1:2*M,1) = D*Ry_1' - ((stage_time-t0)/2)*(Vy_1)';
@@ -212,13 +212,13 @@ ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
 
 [R1_I,V1_I,~] = lat_long_elev_azi_vec1(M,problem);
-Rx0_1 = R1_I(1,1:M);
-Ry0_1 = R1_I(2,1:M);
-Rz0_1 = R1_I(3,1:M);
+Rx0_1 = R1_I(1,1);
+Ry0_1 = R1_I(2,1);
+Rz0_1 = R1_I(3,1);
   
-Vx1_I = V1_I(1,1:M);
-Vy1_I = V1_I(2,1:M);
-Vz1_I = V1_I(3,1:M);
+Vx1_I = V1_I(1,1);
+Vy1_I = V1_I(2,1);
+Vz1_I = V1_I(3,1);
 
 % % Velocity components in spherical coordinates
 % theta_1 = (pi/2)-deg2rad(28);
@@ -280,16 +280,16 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-% c = [];
-c = zeros(6*M,1);
-
-c(1:M,1) = q_mag1 - q_max;
-c(M+1:2*M,1) = q_mag2 - q_max;
-
-c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-
-c(4*M+1) = stage_time - final_time;
+c = [];
+% c = zeros(4*M+1,1);
+% 
+% c(1:M,1) = q_mag1 - q_max;
+% c(M+1:2*M,1) = q_mag2 - q_max;
+% 
+% c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+% c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+% 
+% c(4*M+1) = stage_time - final_time;
 
 % % c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
 % % c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
