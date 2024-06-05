@@ -5,7 +5,7 @@ clc;clear all; close all;
 %--- options ---%
 % pseudospectral method
 PS_method = 'LGL';                          % either LGL or CGL
-M = 10;                                      % Number of collocation points
+M = 20;                                      % Number of collocation points
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -122,15 +122,15 @@ lat_s = deg2rad(27);
 long_s = deg2rad(1);
 hf_s = 50000;
 Vf_s = sqrt(mu/(Re+hf_s));
-Elev_s = deg2rad(60);
-Azim_s = deg2rad(118);
+Elev_s = deg2rad(90);
+Azim_s = deg2rad(90);
 
 % Final State
 lat_f = deg2rad(-3);
 long_f = deg2rad(87);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
-Elev_f = deg2rad(30);
+Elev_f = deg2rad(50);
 Azim_f = deg2rad(118);
 gamma_f = deg2rad(0);
 inclin_f = deg2rad(28);
@@ -211,7 +211,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',10,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',100,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
@@ -357,8 +357,8 @@ Mach_2 = Vrel_2./sqrt(Gamma*R*Static_Temp_2);
 
 % rho_1 = rho0.*(Static_Temp_1/Temp0).^(Gamma-1);
 % rho_2 = rho0.*(Static_Temp_2/Temp0).^(Gamma-1);
-rho_1 = rho0*exp(-(R_1-Re)./h_scale);
-rho_2 = rho0*exp(-(R_2-Re)./h_scale);
+rho_1 = rho0*exp(-(h_1)./h_scale);
+rho_2 = rho0*exp(-(h_2)./h_scale);
 
 % Attitude matrix for stage_1
 Q111 = q11.^2 - q12.^2 - q13.^2 + q14.^2;
@@ -414,12 +414,12 @@ g_z2 = (-mu*Rz_2)./(Rx_2.^2 + Ry_2.^2 + Rz_2.^2).^(3/2);
 
 
 % Inertial Aerodynamic Coefficients
-alpha_1 = deg2rad(atan(Vbz1./Vbx1));
-alpha_2 = deg2rad(atan(Vbz2./Vbx2));
-beta_1 = deg2rad(atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2)));
-beta_2 = deg2rad(atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2)));
-phi_1 = deg2rad(atan(Vby1./Vbx1));
-phi_2 = deg2rad(atan(Vby2./Vbx2));
+alpha_1 = atan(Vbz1./Vbx1);
+alpha_2 = atan(Vbz2./Vbx2);
+beta_1 = atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2));
+beta_2 = atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2));
+phi_1 = atan(Vby1./Vbx1);
+phi_2 = atan(Vby2./Vbx2);
 
 % % Cbx1 = -Ca;
 % Cby1 = -Cn*sin(phi_1);
@@ -448,13 +448,14 @@ A_x2 = q_mag2.* Cx2 * A_ref;
 A_y2 = q_mag2.* Cy2 * A_ref;
 A_z2 = q_mag2.* Cz2 * A_ref;
 
-Thrust_x1 = uTx1.*Thrust_1;
-Thrust_y1 = uTy1.*Thrust_1;
-Thrust_z1 = uTz1.*Thrust_1;
+% Inertial Thrust vector
+Thrust_x1 = Thrust_1.*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
+Thrust_y1 = Thrust_1.*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
+Thrust_z1 = Thrust_1.*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
-Thrust_x2 = uTx2.*Thrust_2;
-Thrust_y2 = uTy2.*Thrust_2;
-Thrust_z2 = uTz2.*Thrust_2;
+Thrust_x2 = Thrust_2.*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = Thrust_2.*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = Thrust_2.*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Senced acceleration calculation
 a_sen_x1 = (Thrust_x1 + A_x1)./mass_1;

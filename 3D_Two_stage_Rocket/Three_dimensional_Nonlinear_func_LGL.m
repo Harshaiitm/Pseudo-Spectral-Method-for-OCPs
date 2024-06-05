@@ -113,13 +113,13 @@ Q233 = -q21.^2 - q22.^2 + q23.^2 + q24.^2;
 Q2 = [Q211 Q212 Q213; Q221 Q222 Q223; Q231 Q232 Q233];
 
 % Inertial Thrust vector
-Thrust_x1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
-Thrust_y1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
-Thrust_z1 = linspace(Thrust_max,mass1_f*g0*1.2,M).*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
+Thrust_x1 = Thrust_1.*(Q111.*uTx1 + Q112.*uTy1 + Q113.*uTz1);
+Thrust_y1 = Thrust_1.*(Q121.*uTx1 + Q122.*uTy1 + Q123.*uTz1);
+Thrust_z1 = Thrust_1.*(Q131.*uTx1 + Q132.*uTy1 + Q133.*uTz1);
 
-Thrust_x2 = linspace(Thrust_max_2,0,M).*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
-Thrust_y2 = linspace(Thrust_max_2,0,M).*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
-Thrust_z2 = linspace(Thrust_max_2,0,M).*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
+Thrust_x2 = Thrust_2.*(Q211.*uTx2 + Q212.*uTy2 + Q213.*uTz2);
+Thrust_y2 = Thrust_2.*(Q221.*uTx2 + Q222.*uTy2 + Q223.*uTz2);
+Thrust_z2 = Thrust_2.*(Q231.*uTx2 + Q232.*uTy2 + Q233.*uTz2);
 
 % Gravity
 g_x1 = (-mu*Rx_1)./(Rx_1.^2 + Ry_1.^2 + Rz_1.^2).^(3/2);
@@ -144,8 +144,8 @@ h_1 = R_1-Re;
 R_2 = sqrt(Rx_2.^2 + Ry_2.^2 + Rz_2.^2);
 h_2 = R_2-Re;
 
-rho_1 = rho0*exp(-(R_1-Re)./h_scale);
-rho_2 = rho0*exp(-(R_2-Re)./h_scale);
+rho_1 = rho0*exp(-(h_1./h_scale));
+rho_2 = rho0*exp(-(h_2./h_scale));
 
 Vbx1 = Q111.*Vrel_x1 + Q121.*Vrel_y1 + Q131.*Vrel_z1;
 Vby1 = Q112.*Vrel_x1 + Q122.*Vrel_y1 + Q132.*Vrel_z1;
@@ -161,10 +161,10 @@ q_mag1 = 0.5* rho_1.* Vb_1.^2;
 q_mag2 = 0.5* rho_2.* Vb_2.^2;
 
 % Inertial Aerodynamic Coefficients
-alpha_1 = deg2rad(atan(Vbz1./Vbx1));
-alpha_2 = deg2rad(atan(Vbz2./Vbx2));
-beta_1 = deg2rad(atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2)));
-beta_2 = deg2rad(atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2)));
+alpha_1 = atan(Vbz1./Vbx1);
+alpha_2 = atan(Vbz2./Vbx2);
+beta_1 = atan(Vby1./sqrt(Vbx1.^2 + Vbz1.^2));
+beta_2 = atan(Vby2./sqrt(Vbx2.^2 + Vbz2.^2));
 phi_1 = atan(Vby1./Vbx1);
 phi_2 = atan(Vby2./Vbx2);
 
@@ -239,28 +239,33 @@ ceq(14*M+3) = Ry_1(1) - Ry0_1(1);
 ceq(14*M+4) = Vy_1(1) - Vy1_I(1);
 ceq(14*M+5) = Rz_1(1) - Rz0_1(1);
 ceq(14*M+6) = Vz_1(1) - Vz1_I(1);
-
+ceq(14*M+7) = mass_1(1) - mass1_i;
 
 % Knotting constraints
-ceq(14*M+7) = Rx_2(1) - Rx_1(end);
-ceq(14*M+8) = Ry_2(1) - Ry_1(end);
-ceq(14*M+9) = Rz_2(1) - Rz_1(end);
-ceq(15*M) = Vx_2(1) - Vx_1(end);
-ceq(15*M+1) = Vy_2(1) - Vy_1(end);
-ceq(15*M+2) = Vz_2(1) - Vz_1(end);
-ceq(15*M+3) = mass_1(1) - mass1_i;
-ceq(15*M+4) = mass_2(1) - mass2_i;
+ceq(14*M+8) = Rx_2(1) - Rx_1(end);
+ceq(14*M+9) = Ry_2(1) - Ry_1(end);
+ceq(14*M+10) = Rz_2(1) - Rz_1(end);
+ceq(14*M+11) = Vx_2(1) - Vx_1(end);
+ceq(14*M+12) = Vy_2(1) - Vy_1(end);
+ceq(14*M+13) = Vz_2(1) - Vz_1(end);
+ceq(14*M+14) = mass_2(1) - mass2_i;
 
-ceq(15*M+5) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
-ceq(15*M+6) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
-ceq(15*M+7) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
-ceq(15*M+8) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * cos(inclin_f));
+% add inequality constrains staging time and final time constraints
+
+
+ceq(14*M+15) = (Rx_2(end)^2 + Ry_2(end)^2 + Rz_2(end)^2) - ((Re + hf_f)^2);
+ceq(14*M+16) = (Vx_2(end)^2 + Vy_2(end)^2 + Vz_2(end)^2) - (Vf_f^2);
+ceq(14*M+17) = (Rx_2(end)*Vx_2(end) + Ry_2(end)*Vy_2(end) + Rz_2(end)*Vz_2(end)) - ((Re + hf_f) * Vf_f * sin(gamma_f));
+ceq(14*M+18) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f * cos(gamma_f) * cos(inclin_f));
 
 
 % Normalisation constraint for Quaternion elements 
-ceq(15*M+9:16*M+8) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
-ceq(16*M+9:17*M+8) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
+ceq(14*M+19:15*M+18) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
+ceq(15*M+19:16*M+18) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
+ceq(16*M+19:17*M+18) = (uTx1 + uTy1 + uTz1)-1;
+ceq(17*M+19:18*M+18) = (uTx2 + uTy2 + uTz2)-1;
 % find(isnan(ceq))
+
 
 % Senced acceleration calculation
 a_sen_x1 = (Thrust_x1 + A_x1)./mass_1;
@@ -276,7 +281,7 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Inequality_constraints
 % c = [];
-c = zeros(7*M,1);
+c = zeros(6*M,1);
 
 c(1:M,1) = q_mag1 - q_max;
 c(M+1:2*M,1) = q_mag2 - q_max;
@@ -284,17 +289,20 @@ c(M+1:2*M,1) = q_mag2 - q_max;
 c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
 c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
 
-c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
-c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
+c(4*M+1) = stage_time - final_time;
 
-%Mass change constraint
-for i = 1:(M-1)
-    c(6*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
-end
-for i = 1:(M-1)  
-    c(6*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
-end
-% % 
+% % c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
+% % c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
+% 
+% %Mass change constraint
+% for i = 1:(M-1)
+%     c(4*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
+% end
+% for i = 1:(M-1)  
+%     c(4*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+% end
+
+
 
 end
 
