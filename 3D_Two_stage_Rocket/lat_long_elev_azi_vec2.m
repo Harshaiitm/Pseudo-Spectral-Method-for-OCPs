@@ -45,7 +45,7 @@ R2_I_mag = sqrt(Rx2_I.^2 + Ry2_I.^2 + Rz2_I.^2);
 
 % Velocity components in spherical coordinates
 V2_r = 0;
-V2_theta = Vf_f;
+V2_theta = Velocity0_2;
 V2_phi = 0;
 
 Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2);

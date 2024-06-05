@@ -24,18 +24,18 @@ Azim_1 = linspace(Azim_i,Azim_s,M);
 latitude_1 = deg2rad(interp1(alt, lat, Altitude0_1, 'spline'));
 longitude_1 = deg2rad(interp1(alt, long, Altitude0_1, 'spline'));
 
-theta_1 = pi/2 - latitude_1';
-phi_1 = longitude_1';
+theta_1 = pi/2 - latitude_1;
+phi_1 = longitude_1;
 
 % Radial Distance from Earth's center
-R1_B = (Altitude0_1' + Re);
+R1_B = (Altitude0_1 + Re);
 
 % Cartesian Coordinates
 Rx1_I = R1_B .* sin(theta_1) .* cos(phi_1);
 Ry1_I = R1_B .* sin(theta_1) .* sin(phi_1);
 Rz1_I = R1_B .* cos(theta_1);
 
-R1_I = [Rx1_I'; Ry1_I'; Rz1_I'];
+R1_I = [Rx1_I; Ry1_I; Rz1_I];
 
 R1_I_mag = sqrt(Rx1_I.^2 + Ry1_I.^2 + Rz1_I.^2);
 % disp(R1_I_mag);
@@ -47,16 +47,16 @@ Omega_y = 0;
 Omega_I = [Omega_x; Omega_y; Omega_z];
 
 % Velocity components in spherical coordinates
-V1_r = 10;
+V1_r = Velocity0_1;
 V1_theta = 0;
 V1_phi = Omega_z*sin(theta_1)*(Re+hi);
 
 % Transformation from spherical to Cartesian coordinates
-Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1) + (Omega_y*Rz1_I-Omega_z*Ry1_I);
-Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1) + (Omega_z*Rx1_I-Omega_x*Rz1_I);
-Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1) + (Omega_x*Ry1_I-Omega_y*Rx1_I);
+Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
+Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
+Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
 
-V1_I = [Vx1_I' ;Vy1_I' ; Vz1_I'];
+V1_I = [Vx1_I;Vy1_I; Vz1_I];
 
 V1_I_mag = sqrt(Vx1_I.^2 + Vy1_I.^2 + Vz1_I.^2);
 % disp(V1_I_mag);
