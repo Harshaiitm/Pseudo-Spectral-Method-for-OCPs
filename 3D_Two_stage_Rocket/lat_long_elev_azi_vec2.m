@@ -48,11 +48,11 @@ V2_r = 0;
 V2_theta = Vf_f;
 V2_phi = 0;
 
-Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2) + (Omega_y*Rz2_I-Omega_z*Ry2_I)';
-Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2) + (Omega_z*Rx2_I-Omega_x*Rz2_I)';
-Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2) + (Omega_x*Ry2_I-Omega_y*Rx2_I)';
+Vx2_I = V2_r.*sin(theta_2).*cos(phi_2) + V2_theta.*cos(theta_2).*cos(phi_2) - V2_phi.*sin(phi_2);
+Vy2_I = V2_r.*sin(theta_2).*sin(phi_2) + V2_theta.*cos(theta_2).*sin(phi_2) + V2_phi.*cos(phi_2);
+Vz2_I = V2_r.*cos(theta_2)-V2_theta.*sin(theta_2);
 
-V2_I = [Vx2_I'; Vy2_I'; Vz2_I'];
+V2_I = [Vx2_I; Vy2_I; Vz2_I];
 V2_I_mag = sqrt(Vx2_I.^2 + Vy2_I.^2 + Vz2_I.^2);
 % disp(V2_I_mag);
 
