@@ -12,30 +12,36 @@ Re = problem.Re;
 nodes = problem.nodes;
 D = problem.D;
 
+t0 = 0;
+stage_time = 160;
 
-load alt_VS_inertial_lat.csv
-lat = alt_VS_inertial_lat(:,1);
-long = alt_VS_inertial_lat(:,2);
-alt = alt_VS_inertial_lat(:,3)*1000;
-Altitude0_1 = linspace(hi,hf_s,M);
-Velocity0_1 = linspace(Vi,Vf_s,M);
+load time_alt_lat_long.csv
+time = time_alt_lat_long(1:9,1);
+alt = time_alt_lat_long(1:9,2)*1000;
+lat = time_alt_lat_long(1:9,3);
+long = time_alt_lat_long(1:9,4);
+
+t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
+
+Altitude0_1 = interp1(time, alt, t_1, 'pchip');
+latitude_1 = deg2rad(interp1(alt, lat, Altitude0_1, 'pchip'));
+longitude_1 = deg2rad(interp1(alt, long, Altitude0_1, 'pchip'));
+
 Elev_1 = linspace(Elev_i,Elev_s,M);
 Azim_1 = linspace(Azim_i,Azim_s,M);
-latitude_1 = deg2rad(interp1(alt, lat, Altitude0_1, 'spline'));
-longitude_1 = deg2rad(interp1(alt, long, Altitude0_1, 'spline'));
 
 theta_1 = pi/2 - latitude_1;
 phi_1 = longitude_1;
 
 % Radial Distance from Earth's center
-R1_B = (Altitude0_1 + Re);
+R1_B = (Altitude0_1' + Re);
 
 % Cartesian Coordinates
-Rx1_I = R1_B .* sin(theta_1) .* cos(phi_1);
-Ry1_I = R1_B .* sin(theta_1) .* sin(phi_1);
-Rz1_I = R1_B .* cos(theta_1);
+Rx1_I = R1_B' .* sin(theta_1) .* cos(phi_1);
+Ry1_I = R1_B' .* sin(theta_1) .* sin(phi_1);
+Rz1_I = R1_B' .* cos(theta_1);
 
-R1_I = [Rx1_I; Ry1_I; Rz1_I];
+R1_I = [Rx1_I'; Ry1_I'; Rz1_I'];
 
 R1_I_mag = sqrt(Rx1_I.^2 + Ry1_I.^2 + Rz1_I.^2);
 % disp(R1_I_mag);
@@ -47,7 +53,7 @@ Omega_y = 0;
 Omega_I = [Omega_x; Omega_y; Omega_z];
 
 % Velocity components in spherical coordinates
-V1_r = Velocity0_1;
+V1_r =  (2/160)*(D*R1_B');
 V1_theta = 0;
 V1_phi = Omega_z*sin(theta_1)*(Re+hi);
 
@@ -56,7 +62,7 @@ Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_
 Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
 Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
 
-V1_I = [Vx1_I;Vy1_I; Vz1_I];
+V1_I = [Vx1_I';Vy1_I'; Vz1_I'];
 
 V1_I_mag = sqrt(Vx1_I.^2 + Vy1_I.^2 + Vz1_I.^2);
 % disp(V1_I_mag);

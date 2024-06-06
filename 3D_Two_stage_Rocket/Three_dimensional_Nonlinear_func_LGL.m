@@ -222,7 +222,7 @@ Vz1_I = V1_I(3,1);
 
 % % Velocity components in spherical coordinates
 % theta_1 = (pi/2)-deg2rad(28);
-% phi_1 = 0;
+% phi_1 = deg2rad(0);
 % V1_r = 10;
 % V1_theta = 0;
 % V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
@@ -262,8 +262,8 @@ ceq(14*M+18) = (Rx_2(end)*Vy_2(end) - Ry_2(end)*Vx_2(end)) - ((Re + hf_f) * Vf_f
 % Normalisation constraint for Quaternion elements 
 ceq(14*M+19:15*M+18) = (q11.^2 + q12.^2 + q13.^2 + q14.^2) - 1;
 ceq(15*M+19:16*M+18) = (q21.^2 + q22.^2 + q23.^2 + q24.^2) - 1; 
-ceq(16*M+19:17*M+18) = (uTx1 + uTy1 + uTz1)-1;
-ceq(17*M+19:18*M+18) = (uTx2 + uTy2 + uTz2)-1;
+ceq(16*M+19:17*M+18) = (uTx1.^2 + uTy1.^2 + uTz1.^2)-1;
+ceq(17*M+19:18*M+18) = (uTx2.^2 + uTy2.^2 + uTz2.^2)-1;
 % find(isnan(ceq))
 
 
@@ -280,16 +280,16 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 
 % Inequality_constraints
-c = [];
-% c = zeros(4*M+1,1);
-% 
-% c(1:M,1) = q_mag1 - q_max;
-% c(M+1:2*M,1) = q_mag2 - q_max;
-% 
-% c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
-% c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
-% 
-% c(4*M+1) = stage_time - final_time;
+% c = [];
+c = zeros(4*M+1,1);
+
+c(1:M,1) = q_mag1 - q_max;
+c(M+1:2*M,1) = q_mag2 - q_max;
+
+c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
+c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
+
+c(4*M+1) = stage_time - final_time;
 
 % % c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
 % % c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;

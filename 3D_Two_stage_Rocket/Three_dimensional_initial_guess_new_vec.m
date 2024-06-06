@@ -73,8 +73,8 @@ q24 = qn2(4,1:M);
 
 Omega_z = 2*pi/(24*60*60);
 t0 = 0;
-stage_time = 137;
-final_time = 1650;
+stage_time = 160;
+final_time = 1680;
 addpath('../PS_methods')                    % add the PS_method file directory
 N = M-1;                            % Order of the polynomial
 [nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
@@ -83,8 +83,8 @@ t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
 t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
 
 % Velocity components in spherical coordinates
-theta_1 = (pi/2)-deg2rad(28);
-phi_1 = 0;
+theta_1 = (pi/2)-lat_i;
+phi_1 = long_i;
 V1_r = 10;
 V1_theta = 0;
 V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
@@ -95,8 +95,8 @@ Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_
 Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
 
 
-theta_2 = (pi/2)-deg2rad(-3);
-phi_2 = deg2rad(87);
+theta_2 = (pi/2)-lat_f;
+phi_2 = long_f;
 V2_r = 0;
 V2_theta = Vf_f;
 V2_phi =  0;
@@ -106,18 +106,18 @@ Vx2_I = V2_r .* sin(theta_2) .* cos(phi_2) + V2_theta.* cos(theta_2) .* cos(phi_
 Vy2_I = V2_r .* sin(theta_2) .* sin(phi_2) + V2_theta.* cos(theta_2) .* sin(phi_2) + V2_phi.* cos(phi_2);
 Vz2_I = V2_r .* cos(theta_2) - V2_theta.* sin(theta_2);
 
-Vx_I = interp1([0;1650], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
-Vy_I = interp1([0;1650], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
-Vz_I = interp1([0;1650], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
+Vx_I = interp1([0;1680], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
+Vy_I = interp1([0;1680], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
+Vz_I = interp1([0;1680], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
 
 % sqrt(Vx_I.^2+Vy_I.^2+Vz_I.^2);
 
 x0(0*M+1:1*M) = Rx0_1;                          % Rx_1
 x0(1*M+1:2*M) = Ry0_1;                          % Ry_1
 x0(2*M+1:3*M) = Rz0_1;                          % Rz_1
-x0(3*M+1:4*M) = Vx_I(1:M);                          % Vx_1                                           
-x0(4*M+1:5*M) = Vy_I(1:M);                          % Vy_1
-x0(5*M+1:6*M) = Vz_I(1:M);                          % Vz_1    
+x0(3*M+1:4*M) = Vx0_1;                          % Vx_1                                           
+x0(4*M+1:5*M) = Vy0_1;                          % Vy_1
+x0(5*M+1:6*M) = Vz0_1;                          % Vz_1    
 x0(6*M+1:7*M) = linspace(m0,m0-mass1_f,M);                       % mass_1
 x0(7*M+1:8*M) = linspace(Thrust_max,mass1_f*g0*1.2,M);                % Thrust_x1                                
 x0(8*M+1:9*M) = uTx01;
@@ -130,9 +130,9 @@ x0(14*M+1:15*M) = q14;                                          % q14
 x0(15*M+1:16*M) = Rx0_2;                        % Rx_2
 x0(16*M+1:17*M) = Ry0_2;                        % Ry_2 
 x0(17*M+1:18*M) = Rz0_2;                        % Rz_2 
-x0(18*M+1:19*M) = Vx_I(M+1:2*M);                        % Vx_2 
-x0(19*M+1:20*M) = Vy_I(M+1:2*M);                        % Vy_2
-x0(20*M+1:21*M) = Vz_I(M+1:2*M);                        % Vz_2
+x0(18*M+1:19*M) = Vx0_2;                        % Vx_2 
+x0(19*M+1:20*M) = Vy0_2;                        % Vy_2
+x0(20*M+1:21*M) = Vz0_2;                        % Vz_2
 x0(21*M+1:22*M) = linspace(m0_2,mass2_f,M);                     % mass_2
 x0(22*M+1:23*M) = linspace(Thrust_max_2,0,M);              % Thrust_x2
 x0(23*M+1:24*M) = uTx02;
@@ -142,7 +142,7 @@ x0(26*M+1:27*M) = q21;                                          % q21
 x0(27*M+1:28*M) = q22;                                          % q22
 x0(28*M+1:29*M) = q23;                                          % q23
 x0(29*M+1:30*M) = q24;                                          % q24
-x0(30*M+1) = 137;                                               % stage_time
+x0(30*M+1) = 160;                                               % stage_time
 x0(30*M+2) = 1680;                                              % final_time
 
 

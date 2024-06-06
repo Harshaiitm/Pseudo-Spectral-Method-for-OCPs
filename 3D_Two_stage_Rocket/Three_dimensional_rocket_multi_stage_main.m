@@ -120,14 +120,14 @@ Azim_i = deg2rad(90);
 % Stage State
 lat_s = deg2rad(27);
 long_s = deg2rad(1);
-hf_s = 50000;
+hf_s = 40000;
 Vf_s = sqrt(mu/(Re+hf_s));
 Elev_s = deg2rad(90);
 Azim_s = deg2rad(90);
 
 % Final State
-lat_f = deg2rad(-3);
-long_f = deg2rad(87);
+lat_f = deg2rad(-4);
+long_f = deg2rad(95);
 hf_f = 400000;
 Vf_f = sqrt(mu/(Re+hf_f));
 Elev_f = deg2rad(50);
@@ -211,7 +211,7 @@ beq = [];
 
 tic;
 options =  optimoptions ('fmincon','Algorithm','sqp','Display','iter','OptimalityTolerance',...
-1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',100,'MaxFunctionEvaluations',...
+1e-10 , 'stepTolerance', 1e-6, 'ConstraintTolerance' ,1e-6, 'MaxIterations',10,'MaxFunctionEvaluations',...
 200000);
    
     if strcmp(PS_method,'LGL')
