@@ -32,8 +32,8 @@ phi_1 = longitude_1;
 R1_B = (Altitude0_1 + Re);
 
 % R1_B = ((R1_B(end)-R1_B(1))/2).*nodes+(R1_B(end)+R1_B(1))/2;
-theta_1 = ((theta_1(end)-theta_1(1))/2).*nodes+(theta_1(end)+theta_1(1))/2;
-phi_1 = ((phi_1(end)-phi_1(1))/2).*nodes+(phi_1(end)+phi_1(1))/2;
+% theta_1 = ((theta_1(end)-theta_1(1))/2).*nodes+(theta_1(end)+theta_1(1))/2;
+% phi_1 = ((phi_1(end)-phi_1(1))/2).*nodes+(phi_1(end)+phi_1(1))/2;
 
 % Cartesian Coordinates
 Rx1_I = R1_B .* sin(theta_1) .* cos(phi_1);

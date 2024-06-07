@@ -34,8 +34,8 @@ Omega_I = [Omega_x; Omega_y; Omega_z];
 R2_B = (Altitude0_2 + Re);
 
 % R2_B = ((R2_B(end)-R2_B(1))/2).*nodes+(R2_B(end)+R2_B(1))/2;
-theta_2 = ((theta_2(end)-theta_2(1))/2).*nodes+(theta_2(end)+theta_2(1))/2;
-phi_2 = ((phi_2(end)-phi_2(1))/2).*nodes+(phi_2(end)+phi_2(1))/2;
+% theta_2 = ((theta_2(end)-theta_2(1))/2).*nodes+(theta_2(end)+theta_2(1))/2;
+% phi_2 = ((phi_2(end)-phi_2(1))/2).*nodes+(phi_2(end)+phi_2(1))/2;
 
 
 Rx2_I = R2_B .* sin(theta_2) .* cos(phi_2);
