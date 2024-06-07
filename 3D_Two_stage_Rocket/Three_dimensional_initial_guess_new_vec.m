@@ -71,44 +71,44 @@ q22 = qn2(2,1:M);
 q23 = qn2(3,1:M);
 q24 = qn2(4,1:M);
 
-Omega_z = 2*pi/(24*60*60);
-t0 = 0;
-stage_time = 160;
-final_time = 1680;
-addpath('../PS_methods')                    % add the PS_method file directory
-N = M-1;                            % Order of the polynomial
-[nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
-
-t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
-t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
-
-% Velocity components in spherical coordinates
-theta_1 = (pi/2)-lat_i;
-phi_1 = long_i;
-V1_r = 10;
-V1_theta = 0;
-V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
-
-% Transformation from spherical to Cartesian coordinates
-Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
-Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
-Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
-
-
-theta_2 = (pi/2)-lat_f;
-phi_2 = long_f;
-V2_r = 0;
-V2_theta = Vf_f;
-V2_phi =  0;
-
-% Transformation from spherical to Cartesian coordinates
-Vx2_I = V2_r .* sin(theta_2) .* cos(phi_2) + V2_theta.* cos(theta_2) .* cos(phi_2) - V2_phi.* sin(phi_2);
-Vy2_I = V2_r .* sin(theta_2) .* sin(phi_2) + V2_theta.* cos(theta_2) .* sin(phi_2) + V2_phi.* cos(phi_2);
-Vz2_I = V2_r .* cos(theta_2) - V2_theta.* sin(theta_2);
-
-Vx_I = interp1([0;1680], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
-Vy_I = interp1([0;1680], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
-Vz_I = interp1([0;1680], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
+% Omega_z = 2*pi/(24*60*60);
+% t0 = 0;
+% stage_time = 160;
+% final_time = 1680;
+% addpath('../PS_methods')                    % add the PS_method file directory
+% N = M-1;                            % Order of the polynomial
+% [nodes,~] = LGL_nodes(N);     % calculate scaled node locations and weights
+% 
+% t_1 = ((stage_time-t0)/2).*nodes+(stage_time+t0)/2;
+% t_2 = ((final_time-stage_time)/2).*nodes+(final_time+stage_time)/2;
+% 
+% % Velocity components in spherical coordinates
+% theta_1 = (pi/2)-lat_i;
+% phi_1 = long_i;
+% V1_r = 10;
+% V1_theta = 0;
+% V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
+% 
+% % Transformation from spherical to Cartesian coordinates
+% Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
+% Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
+% Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
+% 
+% 
+% theta_2 = (pi/2)-lat_f;
+% phi_2 = long_f;
+% V2_r = 0;
+% V2_theta = Vf_f;
+% V2_phi =  0;
+% 
+% % Transformation from spherical to Cartesian coordinates
+% Vx2_I = V2_r .* sin(theta_2) .* cos(phi_2) + V2_theta.* cos(theta_2) .* cos(phi_2) - V2_phi.* sin(phi_2);
+% Vy2_I = V2_r .* sin(theta_2) .* sin(phi_2) + V2_theta.* cos(theta_2) .* sin(phi_2) + V2_phi.* cos(phi_2);
+% Vz2_I = V2_r .* cos(theta_2) - V2_theta.* sin(theta_2);
+% 
+% Vx_I = interp1([0;1680], [Vx1_I;Vx2_I], [t_1;t_2], 'pchip');
+% Vy_I = interp1([0;1680], [Vy1_I;Vy2_I], [t_1;t_2], 'pchip');
+% Vz_I = interp1([0;1680], [Vz1_I;Vz2_I], [t_1;t_2], 'pchip');
 
 % sqrt(Vx_I.^2+Vy_I.^2+Vz_I.^2);
 

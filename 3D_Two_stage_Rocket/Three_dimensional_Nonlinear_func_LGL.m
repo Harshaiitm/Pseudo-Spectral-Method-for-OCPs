@@ -211,34 +211,29 @@ ceq(11*M+1:12*M,1) = D*Vy_2' - ((final_time-stage_time)/2)*((Thrust_y2 + A_y2)./
 ceq(12*M+1:13*M,1) = D*Vz_2' - ((final_time-stage_time)/2)*((Thrust_z2 + A_z2)./mass_2 + g_z2)';
 ceq(13*M+1:14*M,1) = D*mass_2' + ((final_time-stage_time)/2)*((Thrust_2)./(g0.*Isp))';
 
-[R1_I,V1_I,~] = lat_long_elev_azi_vec1(M,problem);
-Rx0_1 = R1_I(1,1);
-Ry0_1 = R1_I(2,1);
-Rz0_1 = R1_I(3,1);
-  
-Vx1_I = V1_I(1,1);
-Vy1_I = V1_I(2,1);
-Vz1_I = V1_I(3,1);
+% position
+R1_B = (Re+10);
+theta_1 = (pi/2)-deg2rad(28);
+phi_1 = deg2rad(0);
 
-% % Velocity components in spherical coordinates
-% theta_1 = (pi/2)-deg2rad(28);
-% phi_1 = deg2rad(0);
-% V1_r = 10;
-% V1_theta = 0;
-% V1_phi =  Omega_z*sin(theta_1).*(Re+hi);
-% 
-% % Transformation from spherical to Cartesian coordinates
-% Vx1_I = V1_r .* sin(theta_1) .* cos(phi_1) + V1_theta.* cos(theta_1) .* cos(phi_1) - V1_phi.* sin(phi_1);
-% Vy1_I = V1_r .* sin(theta_1) .* sin(phi_1) + V1_theta.* cos(theta_1) .* sin(phi_1) + V1_phi.* cos(phi_1);
-% Vz1_I = V1_r .* cos(theta_1) - V1_theta.* sin(theta_1);
+% Cartesian Coordinates
+Rx1_I = R1_B .* sin(theta_1) .* cos(phi_1);
+Ry1_I = R1_B .* sin(theta_1) .* sin(phi_1);
+Rz1_I = R1_B .* cos(theta_1);
+
+% Velocity components
+Vx1_I = 10;
+Vy1_I = 0;
+Vz1_I = Omega_z*sin(theta_1).*(Re+hi);
+
 
 % % Initial and final constraints
-ceq(14*M+1) = Rx_1(1) - Rx0_1(1);
-ceq(14*M+2) = Vx_1(1) - Vx1_I(1);
-ceq(14*M+3) = Ry_1(1) - Ry0_1(1);
-ceq(14*M+4) = Vy_1(1) - Vy1_I(1);
-ceq(14*M+5) = Rz_1(1) - Rz0_1(1);
-ceq(14*M+6) = Vz_1(1) - Vz1_I(1);
+ceq(14*M+1) = Rx_1(1) - Rx1_I;
+ceq(14*M+2) = Vx_1(1) - Vx1_I;
+ceq(14*M+3) = Ry_1(1) - Ry1_I;
+ceq(14*M+4) = Vy_1(1) - Vy1_I;
+ceq(14*M+5) = Rz_1(1) - Rz1_I;
+ceq(14*M+6) = Vz_1(1) - Vz1_I;
 ceq(14*M+7) = mass_1(1) - mass1_i;
 
 % Knotting constraints
@@ -281,7 +276,7 @@ a_sen_mag2 = sqrt((a_sen_x2).^2 + (a_sen_y2).^2 + (a_sen_z2).^2);
 
 % Inequality_constraints
 % c = [];
-c = zeros(6*M+1,1);
+c = zeros(8*M+1,1);
 
 c(1:M,1) = q_mag1 - q_max;
 c(M+1:2*M,1) = q_mag2 - q_max;
@@ -289,18 +284,18 @@ c(M+1:2*M,1) = q_mag2 - q_max;
 c(2*M+1:3*M,1) = a_sen_mag1.^2 - a_sen_max^2;
 c(3*M+1:4*M,1) = a_sen_mag2.^2 - a_sen_max^2;
 
-% c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
-% c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
+c(4*M+1:5*M,1) = Thrust_1 - Thrust_max;
+c(5*M+1:6*M,1) = Thrust_2 - Thrust_max_2;
 
-c(4*M+1) = stage_time - final_time;
-% 
-% %Mass change constraint
-% for i = 1:(M-1)
-%     c(4*M+i) = (mass_1(i+1) - mass_1(i)) - 0;
-% end
-% for i = 1:(M-1)  
-%     c(4*M+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
-% end
+c(6*M+1) = stage_time - final_time;
+
+% Mass change constraint
+for i = 1:(M-1)
+    c(6*M+1+i) = (mass_1(i+1) - mass_1(i)) - 0;
+end
+for i = 1:(M-1)  
+    c(6*M+1+(M-1)+i) = (mass_2(i+1) - mass_2(i)) - 0;
+end
 
 
 
