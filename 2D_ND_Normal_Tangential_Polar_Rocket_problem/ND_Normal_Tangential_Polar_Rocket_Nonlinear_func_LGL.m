@@ -87,7 +87,7 @@ a_sen_mag = sqrt(a_sen_v.^2 + a_sen_gamma.^2);
 c = zeros(2*M,1);
 c(1:M,1) = (a_sen_mag.^2- a_sen_max.^2);
 c(M+1:2*M,1) = (q - q_max);
-
+% find(ceq~=0)
 
 end
 

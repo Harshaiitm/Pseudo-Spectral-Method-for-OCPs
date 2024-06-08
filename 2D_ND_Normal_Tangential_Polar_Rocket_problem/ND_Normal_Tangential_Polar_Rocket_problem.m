@@ -131,7 +131,7 @@ lb(3*M+1:4*M) = -pi/2;
 lb(4*M+1:5*M) = (m0-mp0)*n_mass;
 lb(5*M+1:6*M) = 0;
 lb(6*M+1:7*M) = -pi/2;
-lb(7*M+1) = 10*n_time;
+lb(7*M+1) = 0;
 
 ub(0*M+1:1*M) = (Re+hf)*n_length;
 ub(1*M+1:2*M) = pi/2;
@@ -237,8 +237,8 @@ ai1 = alt_vs_time(:,1);
 ai2 = alt_vs_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-% title("Altitude variation w.r.t time")
-% set(gca, 'FontSize', 20);
+title("Altitude variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off
 grid on
 
@@ -252,8 +252,8 @@ ai1 = inertial_velocity_vs_time(:,1);
 ai2 = inertial_velocity_vs_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-title("Velocity variation w.r.t time")
-% set(gca, 'FontSize', 40);
+title("Velocity variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
 figure(3)
@@ -267,8 +267,8 @@ ai1 = mass_VS_time(:,1);
 ai2 = mass_VS_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-% title("Vehicle mass variation w.r.t time")
-% set(gca, 'FontSize', 40);
+title("Vehicle mass variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off
 
 figure(4)
@@ -282,27 +282,12 @@ ai1 = thrust_VS_time(:,1);
 ai2 = thrust_VS_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-title("Thrust variation w.r.t time")
-% set(gca, 'FontSize', 40);
-hold off 
-
-figure(5)
-plot(z,gamma*180/pi,'g-',"LineWidth",2)
-xlabel('Flight path angle [degree]')
-ylabel('altiude')
-grid on
-hold on
-load flightpath_VS_time.csv
-ai1 = flightpath_VS_time(:,1);
-ai2 = flightpath_VS_time(:,2);
-plot(ai1,ai2,'r--','LineWidth',2)
-legend("PS Method","NPSOL");
-title("Flight path angle w.r.t time")
-% set(gca, 'FontSize', 40);
+title("Thrust variation w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
 figure(6)
-plot(theta*180/pi,altitude/1000,'g-',"LineWidth",2)
+plot(rad2deg(theta),altitude/1000,'g-',"LineWidth",2)
 xlabel('Downrange angle [degree]')
 ylabel('altiude')
 grid on
@@ -312,8 +297,8 @@ ai1 = alt_VS_downrange(:,1);
 ai2 = alt_VS_downrange(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-title("Downrange angle w.r.t altitude")
-% set(gca, 'FontSize', 40);
+title("Downrange angle w.r.t altitude",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
  
@@ -328,8 +313,8 @@ ai1 = dynamic_pressure_VS_time(:,1);
 ai2 = dynamic_pressure_VS_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-title("Dynamic Pressure w.r.t time")
-% set(gca, 'FontSize', 40);
+title("Dynamic Pressure w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
 figure(8)
@@ -344,7 +329,7 @@ ai1 = sensedacce_VS_time(:,1);
 ai2 = sensedacce_VS_time(:,2);
 plot(ai1,ai2,'r--','LineWidth',2)
 legend("PS Method","NPSOL");
-title("Sensed acceleration w.r.t time")
-% set(gca, 'FontSize', 40);
+title("Sensed acceleration w.r.t time",PS_method)
+set(gca, 'FontSize', 20);
 hold off 
 
