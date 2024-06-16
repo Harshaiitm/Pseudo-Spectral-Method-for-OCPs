@@ -9,8 +9,8 @@ clc; clear all; close all;
 %==============================================================================================%
 %--- options ---%
 % pseudospectral method
-PS_method = 'LGL';                           % either LGL or LG or LGR or CGL
-M = 10;                                     % Number of collocation points 
+PS_method = 'CGL';                           % either LGL or LG or LGR or CGL
+M = 9;                                     % Number of collocation points 
 addpath('../PS_methods')                    % add the PS_method file directory
 
     if  strcmp(PS_method,'LGL')
@@ -124,7 +124,7 @@ if strcmp(PS_method,'LG')
     xf = 5*sin(tf); 
     vf = 5*cos(tf);
 end
-
+vf = 5*cos(tf);
 
 % Lagrange interpolation
 collocation_points=t';
@@ -168,37 +168,37 @@ disp(['Elapsed time: ' num2str(elapsedTime) ' seconds']);
 
 
 figure(1)
-plot(z, position,'LineWidth', 1.5);
+plot(z, position,'LineWidth', 2.5);
 hold on
-plot(z, x1R,'LineWidth', 1.5);
+plot(z, x1R,'LineWidth', 2.5);
 xlabel('Time (s)');
 ylabel('Position (m)');
-title('Double Integrator Tracking Problem',PS_method);
-legend({'actual position','reference position'},Location="northeast");
-set(gca, 'FontSize', 20);
+% title('Double Integrator Tracking Problem',PS_method);
+% legend({'actual position','reference position'},Location="northeast");
+set(gca, 'FontSize', 40);
 grid on
 hold off
 
 figure(2)
-plot(z, velocity,'LineWidth', 1.5);
+plot(z, velocity,'LineWidth', 2.5);
 hold on
-plot(z, x2R,'LineWidth', 1.5);
+plot(z, x2R,'LineWidth', 2.5);
 xlabel('Time (s)');
 ylabel('Velocity (m/s)');
-title('Double Integrator Tracking Problem',PS_method);
-legend({'actual velocity','reference velocity'},Location="northeast");
-set(gca, 'FontSize', 20);
+% title('Double Integrator Tracking Problem',PS_method);
+% legend({'Actual','Reference'},Location="northeast");
+set(gca, 'FontSize', 40);
 grid on
 hold off
 
 figure(3)
-plot(z,acceleration,'LineWidth', 1.5);
+plot(z,acceleration,'LineWidth', 2.5);
 xlabel('Time (s)');
 ylabel('countrol variable (N)');
-legend({'control variable'},Location="northeast");
+% legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem',PS_method);
 grid on
-set(gca, 'FontSize', 20);
+set(gca, 'FontSize', 40);
 
 
 
