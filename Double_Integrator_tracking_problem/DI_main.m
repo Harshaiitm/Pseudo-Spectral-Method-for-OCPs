@@ -194,7 +194,7 @@ hold off
 figure(3)
 plot(z,acceleration,'LineWidth', 2.5);
 xlabel('Time (s)');
-ylabel('countrol variable (N)');
+ylabel('control variable (N)');
 % legend({'control variable'},Location="northeast");
 title('Double integrator tracking problem',PS_method);
 grid on
